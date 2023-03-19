@@ -29,11 +29,6 @@ Migrate to FrameHandler
 #include "Sensor.hpp"
 #include "Valve.hpp"
 
-enum class commandAuthority
-{
-
-};
-
 /*!
  * @brief
  * Receive commands from the Alara to update the GUI

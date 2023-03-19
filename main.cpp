@@ -24,6 +24,7 @@
 #include <QByteArrayList>
 
 // Class file includes
+#include "FrameHandler.hpp"
 #include "CanBus.hpp"
 #include "Sensor.hpp"
 #include "Valve.hpp"
@@ -77,16 +78,26 @@ int main(int argc, char *argv[])
     qInfo() << appDir.absolutePath();
 //////////////////////////////////////////////////////////////
     // Can Bus
-    QString errorString;
-    QList <CanBus*> devices;
-    QCanBusDevice *vcan0 = QCanBus::instance()->createDevice(
-        QStringLiteral("socketcan"), QStringLiteral("vcan0"), &errorString);
+    //QString errorString;
+    //QList <QCanBusDevice*> devices;
+    //QCanBusDevice *can0 = QCanBus::instance()->createDevice(
+    //    QStringLiteral("socketcan"), QStringLiteral("can0"), &errorString);
 
-    CanBus* can0 = qobject_cast<CanBus*>(vcan0);
+    FrameHandler *frameHandler = new FrameHandler(); // The CAN BUS pointer should be inside the FH runnable
+    frameHandler->connectCan();
+
+
+    //frameHandler->setAutoDelete(true);  //hmmmmmmmmmmmmmm might crash
+
+    //QObject::connect(can0, &QCanBusDevice::framesReceived, frameHandler, &FrameHandler::onFramesReceived);
+    //QObject::connect(can0, &QCanBusDevice::framesWritten, frameHandler, &FrameHandler::onFramesWritten);
+    //QObject::connect(can0, &QCanBusDevice::errorOccurred, frameHandler, &FrameHandler::onErrorOccurred);
+    //QObject::connect(can0, &QCanBusDevice::stateChanged, frameHandler, &FrameHandler::onStateChanged);
+
     //can0->setAutoDelete(true); // Why u crash on meeeeeeeee?
     //can0->setObjectName("Can Bus Device");
 
-    devices.append(can0);
+    //devices.append(can0);
 
     //can0->setConfigurationParameter(QCanBusDevice::ProtocolKey); // hmm?
 
@@ -94,31 +105,21 @@ int main(int argc, char *argv[])
     // Connect signals and slots
     foreach(Sensor* sensor, sensors) // iterating through QMap, value is assigned instead of the key
     {
-       QObject::connect(can0, &CanBus::sensorReceived, sensor, &Sensor::onSensorReceived);
+       QObject::connect(frameHandler, &FrameHandler::sensorReceived, sensor, &Sensor::onSensorReceived, Qt::QueuedConnection);
     }
-
     foreach(Valve* valve, valves) // iterating through QMap, value is assigned instead of the key
     {
-       QObject::connect(can0, &CanBus::valveReceived, valve, &Valve::onValveReceived);
+       QObject::connect(frameHandler, &FrameHandler::valveReceived, valve, &Valve::onValveReceived, Qt::QueuedConnection);
     }
 
+    QByteArray data = "0x111111";
+
+    // Also look into signals and slots for lambda functions.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // might need to connect via pressing a button
-    foreach(auto device, devices)
-    {
-        if (!device)
-        {
-            qDebug() << errorString;
-        }
-        else
-        {
-            device->connectDevice();
-            //device->setState(true); // Bus status is automatically managed by QCanBusDevice::CanBusStatus
-        }
-    }
-
+    //QCanBusDevice::UnconnectedState;
+    //QCanBusDevice::CanBusError::ConnectionError;
     QQmlApplicationEngine engine;
 
     engine.rootContext()->setContextProperty("appDir", appDir.absolutePath());
@@ -133,6 +134,7 @@ int main(int argc, char *argv[])
     // QObject* qmlObject {component.create()};
 
 
+
     const QUrl url(u"qrc:/BLT-GUI-Maker/main.qml"_qs);
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
@@ -143,6 +145,6 @@ int main(int argc, char *argv[])
 
     // Starting threads, where the application begins running:
 
-    pool->start(can0);
+    pool->start(frameHandler);
     return app.exec();
 }

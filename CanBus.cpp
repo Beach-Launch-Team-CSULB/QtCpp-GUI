@@ -1,6 +1,6 @@
 #include "CanBus.hpp"
 
-extern "C" QList<const QCanBusFrame> listOfErrorFrames_globalVar;
+extern QList<const QCanBusFrame> listOfErrorFrames_globalVar;
 
 CanBus::CanBus(QObject *parent)
     : QCanBusDevice{parent}
