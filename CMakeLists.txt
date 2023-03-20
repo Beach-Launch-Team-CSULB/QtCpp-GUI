@@ -9,10 +9,12 @@ find_package(Qt6 6.2 COMPONENTS Quick SerialBus REQUIRED)
 
 qt_add_executable(appBLT-GUI-Maker
     main.cpp
-    CanBus.hpp CanBus.cpp
+    FrameHandler.hpp FrameHandler.cpp
     Sensor.hpp Sensor.cpp SensorObjectDefinitions.hpp
     Valve.hpp Valve.cpp ValveObjectDefinitions.hpp
-    FrameHandler.hpp FrameHandler.cpp
+
+
+    QMLtestclass.hpp QMLtestclass.cpp
 )
 
 qt_add_qml_module(appBLT-GUI-Maker

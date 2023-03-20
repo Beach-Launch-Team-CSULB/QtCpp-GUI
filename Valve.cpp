@@ -2,7 +2,7 @@
 
 Valve::Valve(QObject *parent, QList<QVariant> args)
     : QObject{parent}, _name{args.at(0).toString()},
-      _ID{static_cast<quint16>(args.at(1).toInt())},
+      _ID{static_cast<quint32>(args.at(1).toInt())},
       _HP_channel{static_cast<quint16>(args.at(2).toInt())},
       _state{static_cast<quint16>(args.at(3).toInt())},
       _commandOff{static_cast<quint16>(args.at(4).toInt())},
@@ -13,9 +13,17 @@ Valve::Valve(QObject *parent, QList<QVariant> args)
 
 }
 
-void Valve::onValveReceived(quint32 ID, QByteArray data)
+void Valve::onValveReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data)
 {
     // check for valve ID before doing anything
+    const QString ID_B_bin {QString::number(ID_B,2)};
+    emit valveChanged();
+}
+
+
+QString Valve::name() const
+{
+    return _name;
 }
 
 

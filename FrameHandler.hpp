@@ -29,9 +29,31 @@ enum CommandAuthority
 {
     view = 0,
     test = 1,
-    override = 2,
-    absolutism = 3
+    firing = 2,
+    override = 3,
+    absolutism = 4
 };
+
+enum GuiVehicleState // if the vehicle state is in a certain state, only certain commands are allowed sent.
+{
+    debugMode = 0,
+    passivatedState = 1,
+    testState = 2,
+    abortState = 3,
+    ventState = 4,
+    Hi_Press_Press_Arm_State = 5,
+    Hi_Press_Pressurize_State = 6,
+    Tank_Press_Arm_State = 7,
+    Tank_Press_State = 8,
+    Fire_Arm_State = 9,
+    Fire_State = 10,
+    Off_Nominal_State = 11
+};
+
+
+// if command authority is ABSOLUTISM, all commands are allowed to be sent regardless of what's happening
+
+// lmao need to get on the Pi for this////////////////////////////
 
 /*!
  * @brief
@@ -48,42 +70,54 @@ private:
     // If so, then the main event loop will access this thread to read,
     // and this thread can modify stuff inside itself.
 
-    CommandAuthority commandMode {CommandAuthority::view};  // QML buttons should check this before constructing and sending out frames.
+    CommandAuthority _commandMode {CommandAuthority::view};  // QML buttons should check this before constructing and sending out frames.
                                                             // Set by the GUI, so this will communicate with the main thread
                                                             // -> Signal and Slots with Queued Connection to ensure thread safety
-    QList<QCanBusFrame> _dataFrameList;
-    QCanBusFrame _dataFrame{0,0}; // ID and Data are 0, to be set by methods
-    QCanBusFrame _remoteFrame{0,0};
+    GuiVehicleState _vehicleState {GuiVehicleState::debugMode}; // set by frames received in this thread,
+                                                               // read by the GUI in the main thread
 
-    QString _error{"No error"};
+    GuiVehicleState _noteStatusBang {_vehicleState};
+    GuiVehicleState _nodeStatusRenegadeEngine {_vehicleState};
+    GuiVehicleState _nodeStatusRenegadeProp {_vehicleState};
+
+
+    QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on
+    QList<QCanBusFrame> _remoteFrameList;   // store these frames here to view later on
+    QList<QCanBusFrame> _errorFrameList;    // store these frames here to view later on
+    QCanBusFrame _dataFrame{0,0}; // Maybe just create this inside of the onFramesReceived slot?
+
+    QString _busStatus;
+
     bool _loop {true};
-    bool _state {false};
 public:
     explicit FrameHandler(QObject *parent = nullptr);
+    ~FrameHandler();
+
 
     CommandAuthority getCommandMode() const;
-
+    GuiVehicleState getVehicleState() const;
 
 signals:
-    bool sensorReceived(quint32 ID, QByteArray data);
-    bool valveReceived(quint32 ID, QByteArray data);
-    bool stateReceived(quint32 ID, QByteArray data);
+    bool sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
+    bool valveReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
+    bool stateReceived(quint16 ID_A, QList<QByteArray> data);
     void remoteFrameConstructed(); // might not need
 
-public slots:
+public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
 
     bool connectCan();
     bool disconnectCan();
-    QString busStatus();
+    QString getBusStatus();
 
-    void onErrorOccurred();
+    void onErrorOccurred(QCanBusDevice::CanBusError error);
     void onFramesReceived(); // store a frame in the _dataFrame variable
-    void onFramesWritten();
+    void onFramesWritten(quint64 framesCount);
     void onStateChanged(QCanBusDevice::CanBusDeviceState state);
 
-    QCanBusFrame remoteFrameConstruct(QCanBusFrame::FrameId ID, const QByteArray& data); // pass into the writeFrame method.
-    void sendFrame(const QCanBusFrame frame) const;
+    void sendFrame(QCanBusFrame::FrameId ID, QString dataHexString); // invoked via a signal in QML
+
     void setCommandMode(CommandAuthority newCommandMode);
+    void setVehicleState(GuiVehicleState newVehicleState);
     // May need to connect QML items to the remoteFrameConstruct method...
 public:
     void run() override;

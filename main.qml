@@ -14,4 +14,10 @@ Window {
             QtQML.invokeMethod(other, bbb.text, a,b);
         }
     }
+
+    //Connections for connecting signals in C++ and Slots in
+    //{
+    //    target:
+    //    on<SignalName>
+    //}
 }

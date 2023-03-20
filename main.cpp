@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-
+//#include <QtQML>
 // file and directory includes
 #include <QFile>
 #include <QDir>
@@ -25,7 +25,6 @@
 
 // Class file includes
 #include "FrameHandler.hpp"
-#include "CanBus.hpp"
 #include "Sensor.hpp"
 #include "Valve.hpp"
 
@@ -49,27 +48,26 @@ QList<const QCanBusFrame> listOfErrorFrames_globalVar;
 int main(int argc, char *argv[])
 {
 
-
+    QGuiApplication app(argc, argv);
     // Setup
 ///////////////////////////////////////////////////////////////////////////////////////////////////
     QMap<QString,Sensor*> sensors;
     foreach(auto& sensorContructingParameter, sensorConstructingParameters) //sensor key List
-    {                                                                       //{"High Press 1"} {"High Press 2"} {"Fuel Tank 1"} {"Fuel Tank 2"}
-        sensors.insert(sensorContructingParameter.at(0).toString(),         //{"Lox Tank 1"} {"Lox Tank 2"} {"Fuel Dome Reg"} {"Lox Dome Reg"}
-                       new Sensor{nullptr, sensorContructingParameter});    //{"Fuel Prop Inlet"} {"Lox Prop Inlet"} {"Fuel Injector"}
-    }                                                                       //{"LC1"} {"LC2"} {"LC3"} {"Chamber 1"} {"Chamber 2"} {"MV Pneumatic}
-    sensors.value("High Press 1"); // kinda scuffed?
+    {                                                                       //{"High_Press 1"} {"High_Press 2"} {"Fuel_Tank 1"} {"Fuel_Tank 2"}
+        sensors.insert(sensorContructingParameter.at(0).toString(),         //{"Lox_Tank 1"} {"Lox_Tank 2"} {"Fuel_Dome_Reg"} {"Lox_Dome_Reg"}
+                       new Sensor{&app, sensorContructingParameter});    //{"Fuel_Prop_Inlet"} {"Lox_Prop_Inlet"} {"Fuel Injector"}
+    }                                                                       //{"LC1"} {"LC2"} {"LC3"} {"Chamber_1"} {"Chamber_2"} {"MV_Pneumatic}
+    //sensors.value("High Press 1"); // kinda scuffed?
 
     QMap<QString,Valve*> valves;
     foreach(auto& valveConstructingParameter, valveConstructingParameters)  // valve key list
     {                                                                       //{"HV"} {"HP"} {"LDR"} {"FDR"} {"LDV"}
         valves.insert(valveConstructingParameter.at(0).toString(),          // {"FDV"} {"LV"} {"FV"}
-                       new Valve{nullptr, valveConstructingParameter});      //{"LMV"} {"FMV"} {"IGN1"} {"IGN2"}
+                       new Valve{&app, valveConstructingParameter});      //{"LMV"} {"FMV"} {"IGN1"} {"IGN2"}
     }
 
     //valves.value("IGN1")->;
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-    QGuiApplication app(argc, argv);
     QDir appDir {QGuiApplication::applicationDirPath()};
     QThreadPool* pool {QThreadPool::globalInstance()};
     QThread::currentThread()->setObjectName("Main Event Thread");
@@ -77,27 +75,13 @@ int main(int argc, char *argv[])
 
     qInfo() << appDir.absolutePath();
 //////////////////////////////////////////////////////////////
-    // Can Bus
-    //QString errorString;
-    //QList <QCanBusDevice*> devices;
-    //QCanBusDevice *can0 = QCanBus::instance()->createDevice(
-    //    QStringLiteral("socketcan"), QStringLiteral("can0"), &errorString);
 
-    FrameHandler *frameHandler = new FrameHandler(); // The CAN BUS pointer should be inside the FH runnable
-    frameHandler->connectCan();
+    FrameHandler *frameHandler = new FrameHandler(&app);
+    //frameHandler->connectCan(); //Make a button for this
+    //frameHandler->disconnectCan(); // make a button for this
 
 
-    //frameHandler->setAutoDelete(true);  //hmmmmmmmmmmmmmm might crash
-
-    //QObject::connect(can0, &QCanBusDevice::framesReceived, frameHandler, &FrameHandler::onFramesReceived);
-    //QObject::connect(can0, &QCanBusDevice::framesWritten, frameHandler, &FrameHandler::onFramesWritten);
-    //QObject::connect(can0, &QCanBusDevice::errorOccurred, frameHandler, &FrameHandler::onErrorOccurred);
-    //QObject::connect(can0, &QCanBusDevice::stateChanged, frameHandler, &FrameHandler::onStateChanged);
-
-    //can0->setAutoDelete(true); // Why u crash on meeeeeeeee?
-    //can0->setObjectName("Can Bus Device");
-
-    //devices.append(can0);
+    frameHandler->setAutoDelete(true);  //hmmmmmmmmmmmmmm might crash
 
     //can0->setConfigurationParameter(QCanBusDevice::ProtocolKey); // hmm?
 
@@ -126,8 +110,21 @@ int main(int argc, char *argv[])
     //engine.rootContext()->setContextProperty("monitorWidth", 99999999999)
     //engine.rootContext()->setContextProperty("monitorHeight", 9999999999)
 
+    // Expose objects to the QML engine
+    foreach(auto sensor, sensors)
+    {
+        engine.rootContext()->setContextProperty(sensor->name(), sensor);
+    }
+    foreach(auto valve, valves)
+    {
+        engine.rootContext()->setContextProperty(valve->name(), valve);
+    }
+
+
+    // Register C++ objects to QML objects and vice versa. (expose c++ data to QML as a property)
     // also register actionable items in QML and use signals and slots to connect
-    // signals emitted by those items to the
+    // signals emitted by those QML items to the C++ objects.
+
     // QQmlComponent component(&engine, QUrl("qrc:/BLT-GUI-Maker/MyItem.qml));
 
     // Create an instance of the component
@@ -141,6 +138,9 @@ int main(int argc, char *argv[])
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
+
+    // How to load multiple windows
+    engine.load(url);
     engine.load(url);
 
     // Starting threads, where the application begins running:
