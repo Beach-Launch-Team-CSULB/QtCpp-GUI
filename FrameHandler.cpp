@@ -8,6 +8,7 @@ FrameHandler::FrameHandler(QObject *parent)
 
 FrameHandler::~FrameHandler()
 {
+    this->_loop = false;
     this->disconnectCan();
 }
 
@@ -107,6 +108,44 @@ QString FrameHandler::getBusStatus() // Create a QML item displaying color for e
 }
 
 
+bool FrameHandler::isOperational()
+{
+    if(!_can0 || _can0->hasBusStatus())
+        return false;
+
+    switch(_can0->busStatus())
+    {
+    case QCanBusDevice::CanBusStatus::Unknown: // Black
+        return false;
+    case QCanBusDevice::CanBusStatus::Good: // Green
+        return true;
+    case QCanBusDevice::CanBusStatus::Warning: // Yellow
+        return true;
+    case QCanBusDevice::CanBusStatus::Error: // Red
+        return false;
+    case QCanBusDevice::CanBusStatus::BusOff: // Blue
+        return false;
+    }
+    return false;
+}
+
+bool FrameHandler::isConnected()
+{
+    switch(_can0->state())
+    {
+    case QCanBusDevice::UnconnectedState:
+        return false;
+    case QCanBusDevice::ConnectingState:
+        return false;
+    case QCanBusDevice::ConnectedState:
+        return true;
+    case QCanBusDevice::ClosingState:
+        return false;
+    }
+    return false;
+}
+
+
 void FrameHandler::onErrorOccurred(QCanBusDevice::CanBusError error)
 {
 
@@ -123,18 +162,18 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
         // dissect data from the frames then update the GUI
 
         const QString frameIDBi {QString::number(_dataFrame.frameId(), 2)}; // grab the ID in the form of binary
-        const QString frameIDInt {QString::number(_dataFrame.frameId(), 10)}; // grab the ID in the form of int
-        const QString frameIDHex {QString::number(_dataFrame.frameId(), 16)}; // grab the ID in the form of hexadecimal
+        //const QString frameIDInt {QString::number(_dataFrame.frameId(), 10)}; // grab the ID in the form of int
+        //const QString frameIDHex {QString::number(_dataFrame.frameId(), 16)}; // grab the ID in the form of hexadecimal
 
         //QString ID_A_bin;
         //QString ID_B_bin;
-        quint32 ID_A;
-        quint32 ID_B;
+        quint16 ID_A = 0;
+        quint32 ID_B = 0;
         //get ID_A and ID_B
         if (_dataFrame.hasExtendedFrameFormat())
         {
-            //const QString ID_A_bin = frameIDBi.mid(18);
-            //const QString ID_B_bin = frameIDBi.mid(0,18);
+            //ID_A_bin = frameIDBi.mid(18);
+            //ID_B_bin = frameIDBi.mid(0,18);
             ID_A = frameIDBi.mid(18).toInt(nullptr, 2);
             ID_B = frameIDBi.mid(0,18).toInt(nullptr, 2);
         }
@@ -154,7 +193,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             return;
         }
         // constructing the bytes this way so that the program wouldn't crash
-        // so scuffed, might need to rework this
+        // so scuffed, might need to rework this. for loop might not be good
         for (int i {0}; i < payload.length(); i = i + 2)
         {
              QByteArray byte;
@@ -162,26 +201,6 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
              data.append(byte);
              qInfo() << i;
         }
-        // might need to check for ID first before doing this
-        // Using for loop is not recommended
-        //QByteArray byte1;
-        //byte1.append(payload.at(0)); byte1.append(payload.at(1));
-        //QByteArray byte2;
-        //byte2.append(payload.at(2)); byte2.append(payload.at(3));
-        //QByteArray byte3;
-        //byte3.append(payload.at(4)); byte3.append(payload.at(5));
-        //QByteArray byte4;
-        //byte4.append(payload.at(6)); byte4.append(payload.at(7));
-        //QByteArray byte5;
-        //byte5.append(payload.at(8)); byte5.append(payload.at(9));
-        //QByteArray byte6;
-        //byte6.append(payload.at(10)); byte6.append(payload.at(11));
-        //QByteArray byte7;
-        //byte7.append(payload.at(12)); byte7.append(payload.at(13));
-        //QByteArray byte8;
-        //byte8.append(payload.at(14)); byte8.append(payload.at(15));
-        //QList<QByteArray> data {byte1,byte2,byte3,byte4,byte5,byte6,byte7,byte8};
-
 
         // sensors
         if (ID_A >= 51 && ID_A <= 426) // find out the actual ID's of the devices and to an || operator
@@ -209,8 +228,6 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
 
         }
 
-
-
         //"NODE STATES"
         //"Engine Node 2"
         //"Prop Node 3"
@@ -228,7 +245,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             {
 
             }
-            emit valveReceived(ID_A, ID_B , data);
+            emit valveReceived(ID_A, ID_B, data);
         }
 
 
@@ -255,14 +272,14 @@ void FrameHandler::onStateChanged(QCanBusDevice::CanBusDeviceState state)
 }
 
 // Expose the object to QML so that QML can use this function
-void FrameHandler::sendFrame(quint32 ID, QString dataHexString) //QCanBusFrame::FrameId or quint32
-{
+void FrameHandler::sendFrame(quint32 ID, const char* dataHexString) //QCanBusFrame::FrameId or quint32
+{                                       //const char* vs QString
     if(!_can0) return;
     //dataHexString is passed from QML
-    QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())}; //ChatGPT gave me this line // need to test this
+    QByteArray data = QByteArrayLiteral(dataHexString);
+    //QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())}; //ChatGPT gave me this line // need to test this
     QCanBusFrame remoteFrame {ID, data};
     remoteFrame.setFrameType(QCanBusFrame::RemoteRequestFrame);
-
     remoteFrame.setBitrateSwitch(false);
     remoteFrame.setExtendedFrameFormat(false);
     remoteFrame.setFlexibleDataRateFormat(false);
@@ -300,6 +317,16 @@ void FrameHandler::setVehicleState(GuiVehicleState newVehicleState)
 // run
 void FrameHandler::run()
 {
-    qInfo() << "Hello?";
+    //if(this->connectCan()) return; connect via QML???
+    qDebug() << "Hello?";
+    while (this->_loop) // !! even if all windows are closed, the loop will still be running...
+    {
+        if (!_can0 || _can0->state() != QCanBusDevice::ConnectedState || !this->isOperational()) continue; // might be bad design
+
+        // might just disconnect the framesReceived and onFramesReceived cuz I don't know how it really works
+        // then just call the onFramesReceived function here...
+
+        //make an inline function slot that has only a break; statement and connect that to a signal in QML to break???
+    }
 }
 
