@@ -25,14 +25,14 @@
 #include "Sensor.hpp"
 #include "Valve.hpp"
 
-enum CommandAuthority
-{
-    view = 0,
-    test = 1,
-    firing = 2,
-    override = 3,
-    absolutism = 4
-};
+//enum CommandAuthority
+//{
+//    view = 0,
+//    test = 1,
+//    firing = 2,
+//    override = 3,
+//    absolutism = 4
+//};
 
 enum GuiVehicleState // if the vehicle state is in a certain state, only certain commands are allowed sent.
 {
@@ -41,19 +41,15 @@ enum GuiVehicleState // if the vehicle state is in a certain state, only certain
     testState = 2,
     abortState = 3,
     ventState = 4,
-    Hi_Press_Press_Arm_State = 5,
-    Hi_Press_Pressurize_State = 6,
-    Tank_Press_Arm_State = 7,
-    Tank_Press_State = 8,
-    Fire_Arm_State = 9,
-    Fire_State = 10,
-    Off_Nominal_State = 11
+    Off_Nominal_State = 5,
+    Hi_Press_Press_Arm_State = 6,
+    Hi_Press_Pressurize_State = 7,
+    Tank_Press_Arm_State = 8,
+    Tank_Press_State = 9,
+    Fire_Arm_State = 10,
+    Fire_State = 11,
+
 };
-
-
-// if command authority is ABSOLUTISM, all commands are allowed to be sent regardless of what's happening
-
-// lmao need to get on the Pi for this////////////////////////////
 
 /*!
  * @brief
@@ -69,10 +65,6 @@ private:
     // Should I store all objects like valves and sensors in this thread???
     // If so, then the main event loop will access this thread to read,
     // and this thread can modify stuff inside itself.
-
-    CommandAuthority _commandMode {CommandAuthority::view};  // QML buttons should check this before constructing and sending out frames.
-                                                            // Set by the GUI, so this will communicate with the main thread
-                                                            // -> Signal and Slots with Queued Connection to ensure thread safety
     GuiVehicleState _vehicleState {GuiVehicleState::debugMode}; // set by frames received in this thread,
                                                                // read by the GUI in the main thread
 
@@ -92,10 +84,9 @@ private:
 public:
     explicit FrameHandler(QObject *parent = nullptr);
     ~FrameHandler();
-
-
-    CommandAuthority getCommandMode() const;
     GuiVehicleState getVehicleState() const;
+
+    bool isOperational();
 
 signals:
     bool sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
@@ -114,9 +105,8 @@ public slots: // slots that handled signals from QML should return void or basic
     void onFramesWritten(quint64 framesCount);
     void onStateChanged(QCanBusDevice::CanBusDeviceState state);
 
-    void sendFrame(QCanBusFrame::FrameId ID, QString dataHexString); // invoked via a signal in QML
+    void sendFrame(QCanBusFrame::FrameId ID, const char* dataHexString); // invoked via a signal in QML
 
-    void setCommandMode(CommandAuthority newCommandMode);
     void setVehicleState(GuiVehicleState newVehicleState);
     // May need to connect QML items to the remoteFrameConstruct method...
 public:

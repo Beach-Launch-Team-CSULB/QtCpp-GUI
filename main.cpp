@@ -101,9 +101,6 @@ int main(int argc, char *argv[])
     // Also look into signals and slots for lambda functions.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //QCanBusDevice::UnconnectedState;
-    //QCanBusDevice::CanBusError::ConnectionError;
     QQmlApplicationEngine engine;
 
     engine.rootContext()->setContextProperty("appDir", appDir.absolutePath());

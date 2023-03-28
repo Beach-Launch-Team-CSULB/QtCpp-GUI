@@ -9,6 +9,7 @@ FrameHandler::FrameHandler(QObject *parent)
 FrameHandler::~FrameHandler()
 {
     this->disconnectCan();
+    this->_loop = false;
 }
 
 bool FrameHandler::connectCan() // need work
@@ -46,7 +47,7 @@ bool FrameHandler::connectCan() // need work
             return false;
             break;
         case QCanBusDevice::ConnectedState:
-            qDebug() << "The device is already";
+            qDebug() << "The device is already connected";
             return false;
             break;
         case QCanBusDevice::ClosingState:
@@ -87,7 +88,7 @@ bool FrameHandler::disconnectCan() // might need more work
 
 QString FrameHandler::getBusStatus() // Create a QML item displaying color for each state
 {
-    if(!_can0 || _can0->hasBusStatus())
+    if(!_can0 || !_can0->hasBusStatus())
         return "No CAN bus status available.";
 
     switch(_can0->busStatus())
@@ -106,6 +107,24 @@ QString FrameHandler::getBusStatus() // Create a QML item displaying color for e
     return "???";
 }
 
+bool FrameHandler::isOperational()
+{
+    if(!_can0 || !_can0->hasBusStatus())
+        return false;
+
+    switch(_can0->busStatus())
+    {
+    case QCanBusDevice::CanBusStatus::Unknown: // Black
+        return false;
+    case QCanBusDevice::CanBusStatus::Good: // Green
+    case QCanBusDevice::CanBusStatus::Warning: // Yellow
+        return true;
+    case QCanBusDevice::CanBusStatus::Error: // Red
+    case QCanBusDevice::CanBusStatus::BusOff: // Blue
+        return false;
+    }
+    return false;
+}
 
 void FrameHandler::onErrorOccurred(QCanBusDevice::CanBusError error)
 {
@@ -145,12 +164,12 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
 
         // perform surgery on frameID
         const QByteArray payload {_dataFrame.payload().toHex()};
-        QString payloadString;
+        QString payloadErrorString;
         QList<QByteArray> data;
         // perform surgery on data
         if (_dataFrame.frameType() == QCanBusFrame::InvalidFrame)
         {
-            payloadString = _can0->interpretErrorFrame(_dataFrame);
+            payloadErrorString = _can0->interpretErrorFrame(_dataFrame);
             return;
         }
         // constructing the bytes this way so that the program wouldn't crash
@@ -160,28 +179,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
              QByteArray byte;
              byte.append(payload.at(i)); byte.append(payload.at(i+1));
              data.append(byte);
-             qInfo() << i;
         }
-        // might need to check for ID first before doing this
-        // Using for loop is not recommended
-        //QByteArray byte1;
-        //byte1.append(payload.at(0)); byte1.append(payload.at(1));
-        //QByteArray byte2;
-        //byte2.append(payload.at(2)); byte2.append(payload.at(3));
-        //QByteArray byte3;
-        //byte3.append(payload.at(4)); byte3.append(payload.at(5));
-        //QByteArray byte4;
-        //byte4.append(payload.at(6)); byte4.append(payload.at(7));
-        //QByteArray byte5;
-        //byte5.append(payload.at(8)); byte5.append(payload.at(9));
-        //QByteArray byte6;
-        //byte6.append(payload.at(10)); byte6.append(payload.at(11));
-        //QByteArray byte7;
-        //byte7.append(payload.at(12)); byte7.append(payload.at(13));
-        //QByteArray byte8;
-        //byte8.append(payload.at(14)); byte8.append(payload.at(15));
-        //QList<QByteArray> data {byte1,byte2,byte3,byte4,byte5,byte6,byte7,byte8};
-
 
         // sensors
         if (ID_A >= 51 && ID_A <= 426) // find out the actual ID's of the devices and to an || operator
@@ -255,11 +253,12 @@ void FrameHandler::onStateChanged(QCanBusDevice::CanBusDeviceState state)
 }
 
 // Expose the object to QML so that QML can use this function
-void FrameHandler::sendFrame(quint32 ID, QString dataHexString) //QCanBusFrame::FrameId or quint32
+void FrameHandler::sendFrame(quint32 ID, const char* dataHexString) //QCanBusFrame::FrameId or quint32
 {
     if(!_can0) return;
     //dataHexString is passed from QML
-    QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())}; //ChatGPT gave me this line // need to test this
+    QByteArray data {QByteArrayLiteral(dataHexString)};
+    //QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())}; //ChatGPT gave me this line // need to test this
     QCanBusFrame remoteFrame {ID, data};
     remoteFrame.setFrameType(QCanBusFrame::RemoteRequestFrame);
 
@@ -277,16 +276,6 @@ void FrameHandler::sendFrame(quint32 ID, QString dataHexString) //QCanBusFrame::
 
 // Getters and Setters section
 
-CommandAuthority FrameHandler::getCommandMode() const
-{
-    return _commandMode;
-}
-
-void FrameHandler::setCommandMode(CommandAuthority newCommandMode)
-{
-    _commandMode = newCommandMode;
-}
-
 GuiVehicleState FrameHandler::getVehicleState() const
 {
     return _vehicleState;
@@ -301,5 +290,17 @@ void FrameHandler::setVehicleState(GuiVehicleState newVehicleState)
 void FrameHandler::run()
 {
     qInfo() << "Hello?";
+    this->connectCan();
+
+    while (_loop)
+    {
+        // CAN stuff
+        if (this->isOperational() && _can0->state() == QCanBusDevice::ConnectedState)
+        {
+
+        }
+
+        // GNC stuff
+    }
 }
 
