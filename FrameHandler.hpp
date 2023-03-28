@@ -21,6 +21,7 @@
 #include <QBitArray> // might need to combine with QList to have QBiteArrayList
 #include <QByteArray>
 #include <QByteArrayList>
+
 #include "Sensor.hpp"
 #include "Valve.hpp"
 
@@ -74,7 +75,7 @@ private:
                                                             // -> Signal and Slots with Queued Connection to ensure thread safety
     GuiVehicleState _vehicleState {GuiVehicleState::debugMode}; // set by frames received in this thread,
                                                                // read by the GUI in the main thread
-    GuiVehicleState _prevVehicleState {_vehicleState};
+
     GuiVehicleState _noteStatusBang {_vehicleState};
     GuiVehicleState _nodeStatusRenegadeEngine {_vehicleState};
     GuiVehicleState _nodeStatusRenegadeProp {_vehicleState};
@@ -96,20 +97,16 @@ public:
     CommandAuthority getCommandMode() const;
     GuiVehicleState getVehicleState() const;
 
-
-    bool connectCan();
-    bool disconnectCan();
-    bool isOperational();
-    bool isConnected();
-
 signals:
-    bool sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data); // test const QList<QByteArray>& data in the future to see if this would crash the programm
+    bool sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
     bool valveReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
     bool stateReceived(quint16 ID_A, QList<QByteArray> data);
     void remoteFrameConstructed(); // might not need
 
 public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
 
+    bool connectCan();
+    bool disconnectCan();
     QString getBusStatus();
 
     void onErrorOccurred(QCanBusDevice::CanBusError error);
@@ -117,8 +114,7 @@ public slots: // slots that handled signals from QML should return void or basic
     void onFramesWritten(quint64 framesCount);
     void onStateChanged(QCanBusDevice::CanBusDeviceState state);
 
-    //void sendFrame(QCanBusFrame::FrameId ID, QString dataHexString); // invoked via a signal in QML
-    void sendFrame(QCanBusFrame::FrameId ID, const char* dataHexString); // invoked via a signal in QML
+    void sendFrame(QCanBusFrame::FrameId ID, QString dataHexString); // invoked via a signal in QML
 
     void setCommandMode(CommandAuthority newCommandMode);
     void setVehicleState(GuiVehicleState newVehicleState);
