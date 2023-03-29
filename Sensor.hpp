@@ -32,6 +32,7 @@ class Sensor : public QObject
 public:
     explicit Sensor(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0});
     float value() const;
+    void setValue(float newValue);
     quint16 state() const;
 
     QString name() const;

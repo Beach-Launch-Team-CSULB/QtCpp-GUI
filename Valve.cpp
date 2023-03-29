@@ -35,4 +35,5 @@ bool Valve::state() const
 void Valve::setState(bool newState)
 {
     _state = newState;
+    emit stateChanged();
 }

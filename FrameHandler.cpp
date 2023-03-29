@@ -1,15 +1,38 @@
 #include "FrameHandler.hpp"
+#include "SensorObjectDefinitions.hpp"
+#include "ValveObjectDefinitions.hpp"
+
 
 FrameHandler::FrameHandler(QObject *parent)
     : QObject{parent}
 {
+    foreach(auto& sensorContructingParameter, sensorConstructingParameters) //sensor key List
+    {                                                                       //{"High_Press 1"} {"High_Press 2"} {"Fuel_Tank 1"} {"Fuel_Tank 2"}
+        _sensors.insert(sensorContructingParameter.at(0).toString(),        //{"Lox_Tank 1"} {"Lox_Tank 2"} {"Fuel_Dome_Reg"} {"Lox_Dome_Reg"}
+                       new Sensor{this, sensorContructingParameter});       //{"Fuel_Prop_Inlet"} {"Lox_Prop_Inlet"} {"Fuel Injector"}
+    }                                                                       //{"LC1"} {"LC2"} {"LC3"} {"Chamber_1"} {"Chamber_2"} {"MV_Pneumatic}
 
+    foreach(auto& valveConstructingParameter, valveConstructingParameters)  // valve key list
+    {                                                                       //{"HV"} {"HP"} {"LDR"} {"FDR"} {"LDV"}
+        _valves.insert(valveConstructingParameter.at(0).toString(),         // {"FDV"} {"LV"} {"FV"}
+                       new Valve{this, valveConstructingParameter});        //{"LMV"} {"FMV"} {"IGN1"} {"IGN2"}
+    }
+
+    //Connect signals and slots
+    foreach(Sensor* sensor, _sensors) // iterating through QMap, value is assigned instead of the key
+    {
+       QObject::connect(this, &FrameHandler::sensorReceived, sensor, &Sensor::onSensorReceived);
+    }
+    foreach(Valve* valve, _valves) // iterating through QMap, value is assigned instead of the key
+    {
+       QObject::connect(this, &FrameHandler::valveReceived, valve, &Valve::onValveReceived);
+    }
 }
 
 FrameHandler::~FrameHandler()
 {
-    this->disconnectCan();
     this->_loop = false;
+    this->disconnectCan();
 }
 
 bool FrameHandler::connectCan() // need work
@@ -22,6 +45,10 @@ bool FrameHandler::connectCan() // need work
         qDebug() << errorString;
         return false;
     }
+
+    // check if these will crash the program after _can0 is actually created later on
+    _can0->setConfigurationParameter(QCanBusDevice::BitRateKey, QVariant(500000));
+    _can0->setConfigurationParameter(QCanBusDevice::CanFdKey, QVariant(true)); // can FD is only truly enabled if both hardware and driver support CAN FD
 
     switch(_can0->state())
     {
@@ -131,72 +158,82 @@ void FrameHandler::onErrorOccurred(QCanBusDevice::CanBusError error)
 
 }
 
-// TODO FOR TOMORROW: THIS FUNCTION
+// TODO FOR TOMORROW: WORK ON VALVE STUFF, ID 546 & ID 547 & (maybe) ID 552
 void FrameHandler::onFramesReceived() // In the future, might need to write frames data to a file
 {
-    if(!_can0) return;
+    //if(!_can0) return;
 
     while (_can0->framesAvailable()) // while
     {
-        this->_dataFrame = _can0->readFrame(); // Should
+        QCanBusFrame dataFrame = _can0->readFrame();
         // dissect data from the frames then update the GUI
 
-        const QString frameIDBi {QString::number(_dataFrame.frameId(), 2)}; // grab the ID in the form of binary
-        const QString frameIDInt {QString::number(_dataFrame.frameId(), 10)}; // grab the ID in the form of int
-        const QString frameIDHex {QString::number(_dataFrame.frameId(), 16)}; // grab the ID in the form of hexadecimal
+        const QString frameIDBi {QString::number(dataFrame.frameId(), 2)}; // grab the ID in the form of binary
+        //const QString frameIDInt {QString::number(dataFrame.frameId(), 10)}; // grab the ID in the form of int
+        //const QString frameIDHex {QString::number(dataFrame.frameId(), 16)}; // grab the ID in the form of hexadecimal
 
-        //QString ID_A_bin;
-        //QString ID_B_bin;
-        quint32 ID_A;
+        // perform surgery on frameID
+        QString ID_A_bin;
+        QString ID_B_bin;
+        quint16 ID_A;
         quint32 ID_B;
-        //get ID_A and ID_B
-        if (_dataFrame.hasExtendedFrameFormat())
+        //get ID_A and/or ID_B
+        if (dataFrame.hasExtendedFrameFormat())
         {
-            //const QString ID_A_bin = frameIDBi.mid(18);
-            //const QString ID_B_bin = frameIDBi.mid(0,18);
+            ID_A_bin = frameIDBi.mid(18);
+            ID_B_bin = frameIDBi.mid(0,18);
             ID_A = frameIDBi.mid(18).toInt(nullptr, 2);
             ID_B = frameIDBi.mid(0,18).toInt(nullptr, 2);
         }
         else
         {
+            ID_A_bin = frameIDBi;
             ID_A = frameIDBi.toInt(nullptr,2);
         }
 
-        // perform surgery on frameID
-        const QByteArray payload {_dataFrame.payload().toHex()};
-        QString payloadErrorString;
+        const QByteArray payload {dataFrame.payload().toHex()}; // returns nibble by nibble. Two nibbles make a byte
         QList<QByteArray> data;
+
+        QString payloadErrorString;
         // perform surgery on data
-        if (_dataFrame.frameType() == QCanBusFrame::InvalidFrame)
+        if (dataFrame.frameType() == QCanBusFrame::InvalidFrame)
         {
-            payloadErrorString = _can0->interpretErrorFrame(_dataFrame);
+            payloadErrorString = _can0->interpretErrorFrame(dataFrame);
             return;
         }
         // constructing the bytes this way so that the program wouldn't crash
         // so scuffed, might need to rework this
-        for (int i {0}; i < payload.length(); i = i + 2)
-        {
-             QByteArray byte;
-             byte.append(payload.at(i)); byte.append(payload.at(i+1));
-             data.append(byte);
-        }
+        //if (!dataFrame.hasFlexibleDataRateFormat())
+        //{
+            for (int i {0}; i < payload.length(); i = i + 2)
+            {
+                 QByteArray byte;
+                 byte.append(payload.at(i)); byte.append(payload.at(i+1)); // put 2 nibbles together to make a byte
+                 data.append(byte);
+            }
+        //}
+        //else
+        //{
+
+        //}
 
         // sensors
         if (ID_A >= 51 && ID_A <= 426) // find out the actual ID's of the devices and to an || operator
         {
             emit sensorReceived(ID_A, ID_B, data);
+            return;
         }
 
         //Valve renegade Engine
         if (ID_A == 546)
         {
-
+            // perform surgery on frameID
         }
 
         // Valve renegade prop
         if (ID_A == 547)
         {
-
+            // perform surgery on frameID
         }
 
         //
@@ -209,27 +246,36 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
 
 
 
-        //"NODE STATES"
+        //"NODE STATE REPORT" "Bytes 1,2,3,4,5,6,7 are not used"
         //"Engine Node 2"
         //"Prop Node 3"
         if (ID_A > 510 && ID_A < 530)
         {
             if (ID_A == 514)
             {
-
+                //_nodeStatusRenegadeEngine = cursed.at(data.at(0).toInt(nullptr,16)); // byte zero should go from 0 to 12
+                setNodeStatusRenegadeEngine(cursed.at(data.at(0).toInt(nullptr,16)));
+                return;
             }
             if (ID_A == 515)
             {
-
+                //_nodeStatusRenegadeProp = cursed.at(data.at(0).toInt(nullptr,16));
+                setNodeStatusRenegadeProp(cursed.at(data.at(0).toInt(nullptr,16)));
+                return;
             }
             if (ID_A == 520)
             {
-
+                setNodeStatusBang(cursed.at(data.at(0).toInt(nullptr,16)));
+                return;
             }
-            emit valveReceived(ID_A, ID_B , data);
+            //emit valveReceived(ID_A, ID_B , data);
         }
 
-
+        if (ID_A == 1100)
+        {
+            setAutosequenceTime(dataFrame.payload().toFloat(nullptr)/1000000);
+            return;
+        }
 
         // states
         //if (frameID >= 2001 && frameID <= 3000)
@@ -255,17 +301,15 @@ void FrameHandler::onStateChanged(QCanBusDevice::CanBusDeviceState state)
 // Expose the object to QML so that QML can use this function
 void FrameHandler::sendFrame(quint32 ID, const char* dataHexString) //QCanBusFrame::FrameId or quint32
 {
-    if(!_can0) return;
+    if(!isOperational() || !(_can0->state() == QCanBusDevice::ConnectedState)) return;
     //dataHexString is passed from QML
     QByteArray data {QByteArrayLiteral(dataHexString)};
     //QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())}; //ChatGPT gave me this line // need to test this
     QCanBusFrame remoteFrame {ID, data};
     remoteFrame.setFrameType(QCanBusFrame::RemoteRequestFrame);
-
     remoteFrame.setBitrateSwitch(false);
     remoteFrame.setExtendedFrameFormat(false);
     remoteFrame.setFlexibleDataRateFormat(false);
-
 
     // for Virtual CAN Testing
     //remoteFrame.setErrorStateIndicator(false);
@@ -276,14 +320,58 @@ void FrameHandler::sendFrame(quint32 ID, const char* dataHexString) //QCanBusFra
 
 // Getters and Setters section
 
-GuiVehicleState FrameHandler::getVehicleState() const
+QMap<QString, Sensor *> FrameHandler::sensors() const
 {
-    return _vehicleState;
+    return _sensors;
 }
 
-void FrameHandler::setVehicleState(GuiVehicleState newVehicleState)
+QMap<QString, Valve *> FrameHandler::valves() const
 {
-    _vehicleState = newVehicleState;
+    return _valves;
+}
+
+float FrameHandler::autosequenceTime() const
+{
+    return _autosequenceTime;
+}
+
+void FrameHandler::setAutosequenceTime(float newAutosequenceTime)
+{
+    _autosequenceTime = newAutosequenceTime;
+    emit autosequenceTimeChanged();
+}
+
+FrameHandler::VehicleState FrameHandler::nodeStatusRenegadeEngine() const
+{
+    return _nodeStatusRenegadeEngine;
+}
+
+void FrameHandler::setNodeStatusRenegadeEngine(FrameHandler::VehicleState newNodeStatusRenegadeEngine)
+{
+    _nodeStatusRenegadeEngine = newNodeStatusRenegadeEngine;
+    emit nodeStatusRenegadeEngineChanged();
+}
+
+FrameHandler::VehicleState FrameHandler::nodeStatusRenegadeProp() const
+{
+    return _nodeStatusRenegadeProp;
+}
+
+void FrameHandler::setNodeStatusRenegadeProp(FrameHandler::VehicleState newNodeStatusRenegadeProp)
+{
+    _nodeStatusRenegadeProp = newNodeStatusRenegadeProp;
+    emit nodeStatusRenegadePropChanged();
+}
+
+FrameHandler::VehicleState FrameHandler::nodeStatusBang() const
+{
+    return _nodeStatusBang;
+}
+
+void FrameHandler::setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBang)
+{
+    _nodeStatusBang = newNodeStatusBang;
+    emit nodeStatusBangChanged();
 }
 
 // run
@@ -297,10 +385,14 @@ void FrameHandler::run()
         // CAN stuff
         if (this->isOperational() && _can0->state() == QCanBusDevice::ConnectedState)
         {
-
+            this->onFramesReceived(); // might need to disconnect the signal connected to this slot since I don't know quite how that works
         }
 
         // GNC stuff
+        if (true)
+        {
+
+        }
     }
 }
 
