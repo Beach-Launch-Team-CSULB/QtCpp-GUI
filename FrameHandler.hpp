@@ -29,7 +29,6 @@
 
 #include "Sensor.hpp"
 #include "Valve.hpp"
-#include "Controller.hpp"
 //enum class CommandAuthority
 //{
 //    view = 0,
@@ -99,6 +98,10 @@ private:
     Q_PROPERTY(VehicleState nodeStatusBang READ nodeStatusBang NOTIFY nodeStatusBangChanged)
     Q_PROPERTY(float autosequenceTime READ autosequenceTime NOTIFY autosequenceTimeChanged)
     //Q_PROPERTY(QStack<QVarLengthArray<quint32, 2>> throttlePoints READ throttlePoints NOTIFY throttlePoints)
+    Q_PROPERTY(float fuelMVTime READ fuelMVTime NOTIFY fuelMVTimeChanged)
+    Q_PROPERTY(float LOXMVTime READ LOXMVTime NOTIFY LOXMVTimeChanged)
+    Q_PROPERTY(float IGN1Time READ IGN1Time NOTIFY IGN1TimeChanged)
+    Q_PROPERTY(float IGN2Time READ IGN2Time NOTIFY IGN2TimeChanged)
     QML_ELEMENT
     QML_UNCREATABLE("C++ instantiation only")
 
@@ -126,9 +129,15 @@ private:
     QList<VehicleState> cursed {zero,one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve}; // :D
 
 
-    float _autosequenceTime {0.0f};
+    float _autosequenceTime {0.0f}; // this should be inside the controller class or something...
     QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
-    Controller controller;
+
+    // Controller stuff
+    float _fuelMVTime;
+    float _LOXMVTime;
+    float _IGN1Time;
+    float _IGN2Time;
+    quint16 _engineControllerID {5};
 
 
     QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on
@@ -160,6 +169,15 @@ public:
     FrameHandler::VehicleState nodeStatusBang() const;
     void setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBang);
 
+    float fuelMVTime();
+    void setFuelMVTime(float newFuelMVTime);
+    float LOXMVTime();
+    void setLOXMVTime(float newLOXMVTime);
+    float IGN1Time();
+    void setIGN1Time(float newIGN1Time);
+    float IGN2Time();
+    void setIGN2Time(float newIGN2Time);
+
 signals:
     bool sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
     bool valveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data);
@@ -170,6 +188,11 @@ signals:
     void nodeStatusRenegadePropChanged();
     void nodeStatusBangChanged();
     void autosequenceTimeChanged();
+
+    void fuelMVTimeChanged();
+    void LOXMVTimeChanged();
+    void IGN1TimeChanged();
+    void IGN2TimeChanged();
 
 public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
 
@@ -184,6 +207,8 @@ public slots: // slots that handled signals from QML should return void or basic
 
     Q_INVOKABLE void sendFrame(QCanBusFrame::FrameId ID, const char* dataHexString); // invoked via a signal in QML
     // May need to connect QML items to the remoteFrameConstruct method...
+
+
 public:
     void run() override;
 };
