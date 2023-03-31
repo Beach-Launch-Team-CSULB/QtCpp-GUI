@@ -25,6 +25,7 @@
 
 // Class file includes
 #include "FrameHandler.hpp"
+#include "GNC/GNCThread.hpp"
 
 #define WIN1000 // How do I set flags
 
@@ -51,12 +52,13 @@ int main(int argc, char *argv[])
     qInfo() << appDir.absolutePath();
 //////////////////////////////////////////////////////////////
 
-    FrameHandler *frameHandler = new FrameHandler(&app);
+    FrameHandler *frameHandler {new FrameHandler(&app)};
+    GNCThread *GNC {new GNCThread(&app)};
     frameHandler->setAutoDelete(true);  //hmmmmmmmmmmmmmm might crash
-
+    GNC->setAutoDelete(true);           // might crash
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Also look into signals and slots for lambda functions.
+    // Look into lambda functions for signals and slots.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
     QQmlApplicationEngine engine;
@@ -77,8 +79,6 @@ int main(int argc, char *argv[])
     // Create an instance of the component
     // QObject* qmlObject {component.create()};
 
-
-
     const QUrl url(u"qrc:/BLT-GUI-Maker/main.qml"_qs);
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
@@ -91,7 +91,8 @@ int main(int argc, char *argv[])
     engine.load(url);
 
     // Starting threads, where the application begins running:
-
     pool->start(frameHandler);
+    pool->start(GNC);
+    qInfo() << QThread::currentThread();
     return app.exec();
 }

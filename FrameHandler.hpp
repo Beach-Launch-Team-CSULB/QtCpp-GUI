@@ -17,16 +17,20 @@
 #include <QMutexLocker>   // might not need
 
 #include <QList>
-#include <QMap> // might not need
-#include <QQmlPropertyMap>
+#include <QMap>
+#include <QStack> // for throttle point
+#include <QVarLengthArray>
+#include <qqml.h>
+//#include <QQmlPropertyMap>
 #include <QBitArray> // might need to combine with QList to have QBiteArrayList
 #include <QByteArray>
 #include <QByteArrayList>
+#include <algorithm> // to reverse frame ID bits
 
 #include "Sensor.hpp"
 #include "Valve.hpp"
 
-//enum CommandAuthority
+//enum class CommandAuthority
 //{
 //    view = 0,
 //    test = 1,
@@ -88,23 +92,22 @@ public:
 
 private:
     Q_OBJECT
-    Q_PROPERTY(QMap<QString, Sensor*> sensors READ sensors)
-    Q_PROPERTY(QMap<QString, Valve*> valves READ valves)
+    Q_PROPERTY(QMap<QString, Sensor*> sensors READ sensors CONSTANT)    // try SIGNAL later on
+    Q_PROPERTY(QMap<QString, Valve*> valves READ valves CONSTANT)       // try SIGNAL later on
     Q_PROPERTY(VehicleState nodeStatusRenegadeEngine READ nodeStatusRenegadeEngine NOTIFY nodeStatusRenegadeEngineChanged)
     Q_PROPERTY(VehicleState nodeStatusRenegadeProp READ nodeStatusRenegadeProp NOTIFY nodeStatusRenegadePropChanged)
     Q_PROPERTY(VehicleState nodeStatusBang READ nodeStatusBang NOTIFY nodeStatusBangChanged)
     Q_PROPERTY(float autosequenceTime READ autosequenceTime NOTIFY autosequenceTimeChanged)
+    //Q_PROPERTY(QStack<QVarLengthArray<quint32, 2>> throttlePoints READ throttlePoints NOTIFY throttlePoints)
+    QML_ELEMENT
 
     QCanBusDevice* _can0 {nullptr}; // hmmmmmmmm
     QMap<QString, Sensor*> _sensors;
     QMap<QString, Valve*> _valves;
 
-    // Should I store all objects like valves and sensors in this thread???
-    // If so, then the main event loop will access this thread to read,
-    // and this thread can modify stuff inside itself.
-    VehicleState _nodeStatusRenegadeEngine {VehicleState::SETUP}; // ID A = 514 , use switch case
-    VehicleState _nodeStatusRenegadeProp {VehicleState::SETUP}; // ID A = 515, , use switch case
-    VehicleState _nodeStatusBang {VehicleState::SETUP}; // ID A = 520 , use switch case
+    VehicleState _nodeStatusRenegadeEngine {VehicleState::SETUP}; // ID A = 514
+    VehicleState _nodeStatusRenegadeProp {VehicleState::SETUP}; // ID A = 515
+    VehicleState _nodeStatusBang {VehicleState::SETUP}; // ID A = 520
 
     VehicleState zero {VehicleState::SETUP};
     VehicleState one {VehicleState::PASSIVE};
@@ -119,10 +122,23 @@ private:
     VehicleState ten {VehicleState::TANK_PRESS_PRESSURIZED};
     VehicleState eleven {VehicleState::FIRE_ARMED};
     VehicleState twelve {VehicleState::FIRE};
-
     QList<VehicleState> cursed {zero,one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve}; // :D
 
+    struct engineController
+    {
+
+    };
+    struct autosequence
+    {
+
+    };
+    struct nodeController
+    {
+
+    };
+
     float _autosequenceTime {0.0f};
+    QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
 
 
     QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on
@@ -156,14 +172,14 @@ public:
 
 signals:
     bool sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
-    bool valveReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
+    bool valveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data);
     bool stateReceived(quint16 ID_A, QList<QByteArray> data);
 
 
-    void autosequenceTimeChanged();
     void nodeStatusRenegadeEngineChanged();
     void nodeStatusRenegadePropChanged();
     void nodeStatusBangChanged();
+    void autosequenceTimeChanged();
 
 public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
 
@@ -176,7 +192,7 @@ public slots: // slots that handled signals from QML should return void or basic
     void onFramesWritten(quint64 framesCount);
     void onStateChanged(QCanBusDevice::CanBusDeviceState state);
 
-    void sendFrame(QCanBusFrame::FrameId ID, const char* dataHexString); // invoked via a signal in QML
+    Q_INVOKABLE void sendFrame(QCanBusFrame::FrameId ID, const char* dataHexString); // invoked via a signal in QML
     // May need to connect QML items to the remoteFrameConstruct method...
 public:
     void run() override;

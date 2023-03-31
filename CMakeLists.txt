@@ -12,6 +12,7 @@ qt_add_executable(appBLT-GUI-Maker
     FrameHandler.hpp FrameHandler.cpp
     Sensor.hpp Sensor.cpp SensorObjectDefinitions.hpp
     Valve.hpp Valve.cpp ValveObjectDefinitions.hpp
+    GNC/GNCThread.hpp GNC/GNCThread.cpp
 
 
     QMLtestclass.hpp QMLtestclass.cpp

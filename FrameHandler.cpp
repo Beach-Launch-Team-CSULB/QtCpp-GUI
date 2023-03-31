@@ -61,7 +61,7 @@ bool FrameHandler::connectCan() // need work
             else
             {
                 // connect signals and slots to the Can Bus here
-                QObject::connect(_can0, &QCanBusDevice::framesReceived, this, &FrameHandler::onFramesReceived,Qt::UniqueConnection);
+                //QObject::connect(_can0, &QCanBusDevice::framesReceived, this, &FrameHandler::onFramesReceived,Qt::UniqueConnection); enable this later on and see
                 QObject::connect(_can0, &QCanBusDevice::framesWritten, this, &FrameHandler::onFramesWritten,Qt::UniqueConnection);
                 QObject::connect(_can0, &QCanBusDevice::errorOccurred, this, &FrameHandler::onErrorOccurred,Qt::UniqueConnection);
                 QObject::connect(_can0, &QCanBusDevice::stateChanged, this, &FrameHandler::onStateChanged,Qt::UniqueConnection);
@@ -95,11 +95,10 @@ bool FrameHandler::disconnectCan() // might need more work
     switch (_can0->state())
     {
         case QCanBusDevice::UnconnectedState:
-            return false;
         case QCanBusDevice::ConnectingState:
             return false;
         case QCanBusDevice::ConnectedState:
-            QObject::disconnect(_can0, &QCanBusDevice::framesReceived, this, &FrameHandler::onFramesReceived);
+            //QObject::disconnect(_can0, &QCanBusDevice::framesReceived, this, &FrameHandler::onFramesReceived);
             QObject::disconnect(_can0, &QCanBusDevice::framesWritten, this, &FrameHandler::onFramesWritten);
             QObject::disconnect(_can0, &QCanBusDevice::errorOccurred, this, &FrameHandler::onErrorOccurred);
             QObject::disconnect(_can0, &QCanBusDevice::stateChanged, this, &FrameHandler::onStateChanged);
@@ -136,7 +135,7 @@ QString FrameHandler::getBusStatus() // Create a QML item displaying color for e
 
 bool FrameHandler::isOperational()
 {
-    if(!_can0 || !_can0->hasBusStatus())
+    if(!_can0 || !_can0->hasBusStatus() || !(_can0->state() == QCanBusDevice::ConnectedState))
         return false;
 
     switch(_can0->busStatus())
@@ -161,36 +160,46 @@ void FrameHandler::onErrorOccurred(QCanBusDevice::CanBusError error)
 // TODO FOR TOMORROW: WORK ON VALVE STUFF, ID 546 & ID 547 & (maybe) ID 552
 void FrameHandler::onFramesReceived() // In the future, might need to write frames data to a file
 {
-    //if(!_can0) return;
+    if(this->isOperational()) return;
 
-    while (_can0->framesAvailable()) // while
+    while (_can0->framesAvailable()) //
     {
         QCanBusFrame dataFrame = _can0->readFrame();
-        // dissect data from the frames then update the GUI
+        // dissect data from the frame then update the GUI
 
-        const QString frameIDBi {QString::number(dataFrame.frameId(), 2)}; // grab the ID in the form of binary
+        QString frameIDBi;
+        try
+        {
+            frameIDBi = {QString::number(dataFrame.frameId(), 2)}; // grab the ID in the form of binary
+        }
+        catch (...)
+        {
+            continue;
+        }
+
         //const QString frameIDInt {QString::number(dataFrame.frameId(), 10)}; // grab the ID in the form of int
         //const QString frameIDHex {QString::number(dataFrame.frameId(), 16)}; // grab the ID in the form of hexadecimal
 
         // perform surgery on frameID
+        // Get ID's A and B in both integer and binary forms
         QString ID_A_bin;
         QString ID_B_bin;
         quint16 ID_A;
         quint32 ID_B;
-        //get ID_A and/or ID_B
         if (dataFrame.hasExtendedFrameFormat())
         {
-            ID_A_bin = frameIDBi.mid(18);
-            ID_B_bin = frameIDBi.mid(0,18);
-            ID_A = frameIDBi.mid(18).toInt(nullptr, 2);
-            ID_B = frameIDBi.mid(0,18).toInt(nullptr, 2);
+            ID_A_bin = frameIDBi.sliced(18); // extract the last 11 bits
+            ID_B_bin = frameIDBi.sliced(0,18); // extract the first 18 bits
+            ID_A = ID_A_bin.toInt(nullptr, 2);
+            ID_B = ID_B_bin.toInt(nullptr, 2);
         }
-        else
+        else // No extended format -> no ID B
         {
             ID_A_bin = frameIDBi;
-            ID_A = frameIDBi.toInt(nullptr,2);
+            ID_A = ID_A_bin.toInt(nullptr,2);
         }
 
+        // Dissect payload:
         const QByteArray payload {dataFrame.payload().toHex()}; // returns nibble by nibble. Two nibbles make a byte
         QList<QByteArray> data;
 
@@ -223,59 +232,99 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             emit sensorReceived(ID_A, ID_B, data);
             return;
         }
-
         //Valve renegade Engine
         if (ID_A == 546)
         {
-            // perform surgery on frameID
-        }
+            QString HP1_bin {ID_B_bin.sliced(11,8)}; // According to the python gui
+            QString HP2_bin {ID_B_bin.sliced(3,8)}; // According to the python gui
 
+            std::reverse(HP1_bin.begin(), HP1_bin.end());
+            std::reverse(HP2_bin.begin(), HP2_bin.end());
+
+            quint16 HP1 = HP1_bin.toInt(nullptr, 2);
+            quint16 HP2 = HP2_bin.toInt(nullptr, 2);
+            emit valveReceived(HP1, HP2, data);
+            return;
+        }
         // Valve renegade prop
         if (ID_A == 547)
         {
             // perform surgery on frameID
+            QString HP1_bin {ID_B_bin.sliced(11,8)}; // According to the python gui
+            QString HP2_bin {ID_B_bin.sliced(3,8)}; // According to the python gui
+
+            std::reverse(HP1_bin.begin(), HP1_bin.end());
+            std::reverse(HP2_bin.begin(), HP2_bin.end());
+
+            quint16 HP1 = HP1_bin.toInt(nullptr, 2);
+            quint16 HP2 = HP2_bin.toInt(nullptr, 2);
+            emit valveReceived(HP1, HP2, data);
+            return;
         }
-
-        //
-
         // Valves
         if (ID_A == 552)
         {
-
+        // leave it blank here since it seems like it's not used
         }
-
-
-
         //"NODE STATE REPORT" "Bytes 1,2,3,4,5,6,7 are not used"
         //"Engine Node 2"
         //"Prop Node 3"
         if (ID_A > 510 && ID_A < 530)
         {
-            if (ID_A == 514)
-            {
-                //_nodeStatusRenegadeEngine = cursed.at(data.at(0).toInt(nullptr,16)); // byte zero should go from 0 to 12
-                setNodeStatusRenegadeEngine(cursed.at(data.at(0).toInt(nullptr,16)));
-                return;
+            try{
+                if (ID_A == 514)
+                {
+                    setNodeStatusRenegadeEngine(cursed.at(data.at(0).toInt(nullptr,16))); // byte zero carries a value from 0 to 12
+                    return;
+                }
+                if (ID_A == 515)
+                {
+                    setNodeStatusRenegadeProp(cursed.at(data.at(0).toInt(nullptr,16)));
+                    return;
+                }
+                if (ID_A == 520)
+                {
+                    setNodeStatusBang(cursed.at(data.at(0).toInt(nullptr,16)));
+                    return;
+                }
             }
-            if (ID_A == 515)
+            catch (...)
             {
-                //_nodeStatusRenegadeProp = cursed.at(data.at(0).toInt(nullptr,16));
-                setNodeStatusRenegadeProp(cursed.at(data.at(0).toInt(nullptr,16)));
-                return;
+                continue;
             }
-            if (ID_A == 520)
-            {
-                setNodeStatusBang(cursed.at(data.at(0).toInt(nullptr,16)));
-                return;
-            }
-            //emit valveReceived(ID_A, ID_B , data);
         }
-
         if (ID_A == 1100)
         {
             setAutosequenceTime(dataFrame.payload().toFloat(nullptr)/1000000);
             return;
         }
+
+        // switch to else if to get rid of uncessary returns
+        if (ID_A == 1506)
+        {   // Commenting this out because in the python gui, throttlePoints is initially a dict,
+            // but it's then set to a list when time is 0 ...
+
+            //quint32 time = (data.at(0) + data.at(1)).toInt(nullptr,16);
+            //quint32 throttlePoint = (data.at(2) + data.at(3)).toInt(nullptr,16);
+            //_throttlePoints.push(QVarLengthArray<quint32, 2>{time, throttlePoint});
+            //try
+            //{
+            //    time = (data.at(4) + data.at(5)).toInt(nullptr,16);
+            //    throttlePoint = (data.at(6) + data.at(7)).toInt(nullptr,16);
+            //    _throttlePoints.push(QVarLengthArray<quint32, 2>{time, throttlePoint});
+            //}
+            //catch (...)
+            //{
+            //    continue;
+            //}
+        }
+
+        if (data.length())
+        {
+
+        }
+
+
 
         // states
         //if (frameID >= 2001 && frameID <= 3000)
@@ -301,7 +350,7 @@ void FrameHandler::onStateChanged(QCanBusDevice::CanBusDeviceState state)
 // Expose the object to QML so that QML can use this function
 void FrameHandler::sendFrame(quint32 ID, const char* dataHexString) //QCanBusFrame::FrameId or quint32
 {
-    if(!isOperational() || !(_can0->state() == QCanBusDevice::ConnectedState)) return;
+    if(!this->isOperational()) return;
     //dataHexString is passed from QML
     QByteArray data {QByteArrayLiteral(dataHexString)};
     //QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())}; //ChatGPT gave me this line // need to test this
@@ -378,12 +427,14 @@ void FrameHandler::setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBan
 void FrameHandler::run()
 {
     qInfo() << "Hello?";
+    qInfo() << QThread::currentThread();
     this->connectCan();
+
 
     while (_loop)
     {
         // CAN stuff
-        if (this->isOperational() && _can0->state() == QCanBusDevice::ConnectedState)
+        if (this->isOperational())
         {
             this->onFramesReceived(); // might need to disconnect the signal connected to this slot since I don't know quite how that works
         }
