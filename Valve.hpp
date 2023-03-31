@@ -28,6 +28,7 @@ private:
     // Expose object's properties to QML
     Q_PROPERTY(Valve::ValveState _state READ state NOTIFY stateChanged)
     QML_ELEMENT
+    QML_UNCREATABLE("C++ instantiation only")
     QString _name;
     quint32 _ID;
     Valve::ValveState _state;

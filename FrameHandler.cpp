@@ -266,7 +266,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
         {
         // leave it blank here since it seems like it's not used
         }
-        //"NODE STATE REPORT" "Bytes 1,2,3,4,5,6,7 are not used"
+        //"NODE STATE REPORT" "Bytes 1,2,3,4,5,6,7 are not used according to the python gui"
         //"Engine Node 2"
         //"Prop Node 3"
         if (ID_A > 510 && ID_A < 530)
@@ -299,7 +299,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             return;
         }
 
-        // switch to else if to get rid of uncessary returns
+        // switch to else if to get rid of uncessary returns???
         if (ID_A == 1506)
         {   // Commenting this out because in the python gui, throttlePoints is initially a dict,
             // but it's then set to a list when time is 0 ...
@@ -321,7 +321,38 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
 
         if (data.length())
         {
+            quint16 controllerID = ((((ID_A+49)/100)*100)-1000)/100; //(((ID_A+49)/100)*100) = round ID_A to the nearest hundred. It works trust me :)
+            quint16 controllerIndex = ID_A % 100;
+            if (data.length() == 8)
+            {
+                if ((ID_A == 1502 || ID_A == 1504) && controllerID == controller.engineControllerID)
+                {
+                    switch (controllerIndex)
+                    {
+                    case 2:
+                        controller.setFuelMVTime((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
+                        controller.setLOXMVTime((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
+                        break;
+                    case 4:
+                        controller.setIGN1Time((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
+                        controller.setIGN2Time((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
+                        break;
+                    }
+                }
+                // tank controller hiPress, LOX, fuel
+                //else if
+                //{
+                //
+                //}
+                //else
+                //{
+                //
+                //}
+            }
+            else //Node controller ????
+            {
 
+            }
         }
 
 
@@ -430,19 +461,11 @@ void FrameHandler::run()
     qInfo() << QThread::currentThread();
     this->connectCan();
 
-
     while (_loop)
     {
-        // CAN stuff
         if (this->isOperational())
         {
             this->onFramesReceived(); // might need to disconnect the signal connected to this slot since I don't know quite how that works
-        }
-
-        // GNC stuff
-        if (true)
-        {
-
         }
     }
 }

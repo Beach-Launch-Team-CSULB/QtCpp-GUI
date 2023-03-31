@@ -25,7 +25,7 @@
 
 // Class file includes
 #include "FrameHandler.hpp"
-#include "GNC/GNCThread.hpp"
+#include "GNCThread.hpp"
 
 #define WIN1000 // How do I set flags
 

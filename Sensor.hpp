@@ -22,6 +22,7 @@ private:
     Q_PROPERTY(float value READ value NOTIFY valueChanged)
     Q_PROPERTY(Sensor::SensorState state READ state NOTIFY stateChanged)
     QML_ELEMENT
+    QML_UNCREATABLE("C++ instantiation only")
 
     SensorState _state; // for turning on or off. SET BY *RECEIVED* CAN FRAME
     QString _name;

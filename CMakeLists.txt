@@ -12,7 +12,8 @@ qt_add_executable(appBLT-GUI-Maker
     FrameHandler.hpp FrameHandler.cpp
     Sensor.hpp Sensor.cpp SensorObjectDefinitions.hpp
     Valve.hpp Valve.cpp ValveObjectDefinitions.hpp
-    GNC/GNCThread.hpp GNC/GNCThread.cpp
+    GNCThread.hpp GNCThread.cpp
+    Controller.hpp Controller.cpp
 
 
     QMLtestclass.hpp QMLtestclass.cpp
@@ -22,6 +23,15 @@ qt_add_qml_module(appBLT-GUI-Maker
     URI BLT-GUI-Maker
     VERSION 1.0
     QML_FILES main.qml 
+    SOURCES FrameHandler.hpp FrameHandler.cpp
+    Sensor.hpp Sensor.cpp SensorObjectDefinitions.hpp
+    Valve.hpp Valve.cpp ValveObjectDefinitions.hpp
+    GNCThread.hpp GNCThread.cpp
+    Controller.hpp Controller.cpp
+
+
+    QMLtestclass.hpp QMLtestclass.cpp
+
 )
 
 set_target_properties(appBLT-GUI-Maker PROPERTIES

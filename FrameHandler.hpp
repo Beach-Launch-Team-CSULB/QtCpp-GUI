@@ -29,7 +29,7 @@
 
 #include "Sensor.hpp"
 #include "Valve.hpp"
-
+#include "Controller.hpp"
 //enum class CommandAuthority
 //{
 //    view = 0,
@@ -100,6 +100,7 @@ private:
     Q_PROPERTY(float autosequenceTime READ autosequenceTime NOTIFY autosequenceTimeChanged)
     //Q_PROPERTY(QStack<QVarLengthArray<quint32, 2>> throttlePoints READ throttlePoints NOTIFY throttlePoints)
     QML_ELEMENT
+    QML_UNCREATABLE("C++ instantiation only")
 
     QCanBusDevice* _can0 {nullptr}; // hmmmmmmmm
     QMap<QString, Sensor*> _sensors;
@@ -124,21 +125,10 @@ private:
     VehicleState twelve {VehicleState::FIRE};
     QList<VehicleState> cursed {zero,one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve}; // :D
 
-    struct engineController
-    {
-
-    };
-    struct autosequence
-    {
-
-    };
-    struct nodeController
-    {
-
-    };
 
     float _autosequenceTime {0.0f};
     QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
+    Controller controller;
 
 
     QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on
