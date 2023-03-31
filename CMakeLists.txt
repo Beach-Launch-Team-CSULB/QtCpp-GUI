@@ -13,6 +13,7 @@ qt_add_executable(appBLT-GUI-Maker
     Sensor.hpp Sensor.cpp SensorObjectDefinitions.hpp
     Valve.hpp Valve.cpp ValveObjectDefinitions.hpp
     GNCThread.hpp GNCThread.cpp
+    Controller.hpp Controller.cpp
 
 
     QMLtestclass.hpp QMLtestclass.cpp
@@ -26,6 +27,7 @@ qt_add_qml_module(appBLT-GUI-Maker
     Sensor.hpp Sensor.cpp SensorObjectDefinitions.hpp
     Valve.hpp Valve.cpp ValveObjectDefinitions.hpp
     GNCThread.hpp GNCThread.cpp
+    Controller.hpp Controller.cpp
 
 
     QMLtestclass.hpp QMLtestclass.cpp

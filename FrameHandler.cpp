@@ -157,6 +157,7 @@ void FrameHandler::onErrorOccurred(QCanBusDevice::CanBusError error)
 
 }
 
+// TODO FOR TOMORROW: WORK ON VALVE STUFF, ID 546 & ID 547 & (maybe) ID 552
 void FrameHandler::onFramesReceived() // In the future, might need to write frames data to a file
 {
     if(this->isOperational()) return;
@@ -324,17 +325,17 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             quint16 controllerIndex = ID_A % 100;
             if (data.length() == 8)
             {
-                if ((ID_A == 1502 || ID_A == 1504) && controllerID == _engineControllerID)
+                if ((ID_A == 1502 || ID_A == 1504) && controllerID == controller.engineControllerID)
                 {
                     switch (controllerIndex)
                     {
                     case 2:
-                        setFuelMVTime((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
-                        setLOXMVTime((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
+                        controller.setFuelMVTime((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
+                        controller.setLOXMVTime((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
                         break;
                     case 4:
-                        setIGN1Time((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
-                        setIGN2Time((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
+                        controller.setIGN1Time((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
+                        controller.setIGN2Time((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
                         break;
                     }
                 }
@@ -353,6 +354,9 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
 
             }
         }
+
+
+
         // states
         //if (frameID >= 2001 && frameID <= 3000)
         //{
@@ -448,44 +452,6 @@ void FrameHandler::setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBan
 {
     _nodeStatusBang = newNodeStatusBang;
     emit nodeStatusBangChanged();
-}
-
-float FrameHandler::fuelMVTime()
-{
-    return _fuelMVTime;
-}
-
-void FrameHandler::setFuelMVTime(float newFuelMVTime)
-{
-    _fuelMVTime = newFuelMVTime;
-    emit fuelMVTimeChanged();
-}
-float FrameHandler::LOXMVTime()
-{
-    return _LOXMVTime;
-}
-void FrameHandler::setLOXMVTime(float newLOXMVTime)
-{
-    _LOXMVTime = newLOXMVTime;
-    emit LOXMVTimeChanged();
-}
-float FrameHandler::IGN1Time()
-{
-    return _IGN1Time;
-}
-void FrameHandler::setIGN1Time(float newIGN1Time)
-{
-    _IGN1Time = newIGN1Time;
-    emit IGN1TimeChanged();
-}
-float FrameHandler::IGN2Time()
-{
-    return _IGN2Time;
-}
-void FrameHandler::setIGN2Time(float newIGN2Time)
-{
-    _IGN2Time = newIGN2Time;
-    emit IGN2TimeChanged();
 }
 
 // run
