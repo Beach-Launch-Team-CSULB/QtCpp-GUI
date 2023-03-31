@@ -97,7 +97,9 @@ private:
     Q_PROPERTY(VehicleState nodeStatusRenegadeEngine READ nodeStatusRenegadeEngine NOTIFY nodeStatusRenegadeEngineChanged)
     Q_PROPERTY(VehicleState nodeStatusRenegadeProp READ nodeStatusRenegadeProp NOTIFY nodeStatusRenegadePropChanged)
     Q_PROPERTY(VehicleState nodeStatusBang READ nodeStatusBang NOTIFY nodeStatusBangChanged)
-    Q_PROPERTY(float autosequenceTime READ autosequenceTime NOTIFY autosequenceTimeChanged)
+    Q_PROPERTY(Controller* controller READ controller NOTIFY controllerChanged)
+
+
     //Q_PROPERTY(QStack<QVarLengthArray<quint32, 2>> throttlePoints READ throttlePoints NOTIFY throttlePoints)
     QML_ELEMENT
     QML_UNCREATABLE("C++ instantiation only")
@@ -125,10 +127,8 @@ private:
     VehicleState twelve {VehicleState::FIRE};
     QList<VehicleState> cursed {zero,one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve}; // :D
 
-
-    float _autosequenceTime {0.0f};
     QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
-    Controller controller;
+    Controller* _controller {new Controller(this)};
 
 
     QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on
@@ -150,15 +150,14 @@ public:
     QMap<QString, Sensor*> sensors() const;
     QMap<QString, Valve*> valves() const;
 
-    float autosequenceTime() const;
-    void setAutosequenceTime(float newAutosequenceTime);
-
     FrameHandler::VehicleState nodeStatusRenegadeEngine() const;
     void setNodeStatusRenegadeEngine(FrameHandler::VehicleState newNodeStatusRenegadeEngine);
     FrameHandler::VehicleState nodeStatusRenegadeProp() const;
     void setNodeStatusRenegadeProp(FrameHandler::VehicleState newNodeStatusRenegadeProp);
     FrameHandler::VehicleState nodeStatusBang() const;
     void setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBang);
+
+    Controller* controller() const;
 
 signals:
     bool sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
@@ -169,7 +168,8 @@ signals:
     void nodeStatusRenegadeEngineChanged();
     void nodeStatusRenegadePropChanged();
     void nodeStatusBangChanged();
-    void autosequenceTimeChanged();
+
+    void controllerChanged();
 
 public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
 

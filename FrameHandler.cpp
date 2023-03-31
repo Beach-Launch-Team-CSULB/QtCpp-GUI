@@ -295,7 +295,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
         }
         if (ID_A == 1100)
         {
-            setAutosequenceTime(dataFrame.payload().toFloat(nullptr)/1000000);
+            _controller->setAutosequenceTime(dataFrame.payload().toFloat(nullptr)/1000000);
             return;
         }
 
@@ -325,17 +325,17 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             quint16 controllerIndex = ID_A % 100;
             if (data.length() == 8)
             {
-                if ((ID_A == 1502 || ID_A == 1504) && controllerID == controller.engineControllerID)
+                if ((ID_A == 1502 || ID_A == 1504) && controllerID == _controller->engineControllerID)
                 {
                     switch (controllerIndex)
                     {
                     case 2:
-                        controller.setFuelMVTime((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
-                        controller.setLOXMVTime((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
+                        _controller->setFuelMVTime((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
+                        _controller->setLOXMVTime((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
                         break;
                     case 4:
-                        controller.setIGN1Time((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
-                        controller.setIGN2Time((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
+                        _controller->setIGN1Time((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
+                        _controller->setIGN2Time((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
                         break;
                     }
                 }
@@ -410,17 +410,6 @@ QMap<QString, Valve *> FrameHandler::valves() const
     return _valves;
 }
 
-float FrameHandler::autosequenceTime() const
-{
-    return _autosequenceTime;
-}
-
-void FrameHandler::setAutosequenceTime(float newAutosequenceTime)
-{
-    _autosequenceTime = newAutosequenceTime;
-    emit autosequenceTimeChanged();
-}
-
 FrameHandler::VehicleState FrameHandler::nodeStatusRenegadeEngine() const
 {
     return _nodeStatusRenegadeEngine;
@@ -452,6 +441,11 @@ void FrameHandler::setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBan
 {
     _nodeStatusBang = newNodeStatusBang;
     emit nodeStatusBangChanged();
+}
+
+Controller* FrameHandler::controller() const
+{
+    return _controller;
 }
 
 // run

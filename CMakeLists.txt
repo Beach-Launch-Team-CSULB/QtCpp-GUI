@@ -15,7 +15,6 @@ qt_add_executable(appBLT-GUI-Maker
     GNCThread.hpp GNCThread.cpp
     Controller.hpp Controller.cpp
 
-
     QMLtestclass.hpp QMLtestclass.cpp
 )
 
