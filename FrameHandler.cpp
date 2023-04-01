@@ -325,7 +325,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             quint16 controllerIndex = ID_A % 100;
             if (data.length() == 8)
             {
-                if ((ID_A == 1502 || ID_A == 1504) && controllerID == _controller->engineControllerID)
+                if ((ID_A == 1502 || ID_A == 1504) && controllerID == _controller->_engineControllerID)
                 {
                     switch (controllerIndex)
                     {
@@ -443,6 +443,28 @@ void FrameHandler::setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBan
     emit nodeStatusBangChanged();
 }
 
+FrameHandler::VehicleState FrameHandler::currState() const
+{
+    return _currState;
+}
+
+void FrameHandler::setCurrState(VehicleState newCurrState)
+{
+    _currState = newCurrState;
+    emit currStateChanged();
+}
+
+FrameHandler::VehicleState FrameHandler::prevState() const
+{
+    return _prevState;
+}
+
+void FrameHandler::prevState(VehicleState newPrevState)
+{
+    _prevState = newPrevState;
+    emit prevStateChanged();
+}
+
 Controller* FrameHandler::controller() const
 {
     return _controller;
@@ -453,6 +475,9 @@ void FrameHandler::run()
 {
     qInfo() << "Hello?";
     qInfo() << QThread::currentThread();
+    qInfo() << this->controller()->IGN1Time();
+    _controller->setIGN1Time(5.2f);
+    qInfo() << _controller->IGN1Time();
     this->connectCan();
 
     while (_loop)

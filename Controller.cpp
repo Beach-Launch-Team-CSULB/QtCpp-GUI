@@ -6,6 +6,48 @@ Controller::Controller(QObject *parent)
 
 }
 
+quint16 Controller::nodeControllerID()
+{
+    return _nodeControllerID;
+}
+
+quint16 Controller::autosequenceID()
+{
+    return _autosequenceID;
+}
+
+float Controller::autosequenceTime() const
+{
+    return _autosequenceTime;
+}
+
+void Controller::setAutosequenceTime(float newAutosequenceTime)
+{
+    _autosequenceTime = newAutosequenceTime;
+    emit autosequenceTimeChanged();
+}
+
+quint16 Controller::hiPressID()
+{
+    return _hiPressID;
+}
+
+quint16 Controller::LOXID()
+{
+    return _LOXID;
+}
+
+quint16 Controller::fuelID()
+{
+    return _fuelID;
+}
+
+quint16 Controller::engineControllerID()
+{
+    return _engineControllerID;
+}
+
+
 float Controller::fuelMVTime()
 {
     return _fuelMVTime;
@@ -44,13 +86,3 @@ void Controller::setIGN2Time(float newIGN2Time)
     emit IGN2TimeChanged();
 }
 
-float Controller::autosequenceTime() const
-{
-    return _autosequenceTime;
-}
-
-void Controller::setAutosequenceTime(float newAutosequenceTime)
-{
-    _autosequenceTime = newAutosequenceTime;
-    emit autosequenceTimeChanged();
-}

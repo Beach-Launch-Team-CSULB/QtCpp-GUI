@@ -92,11 +92,13 @@ public:
 
 private:
     Q_OBJECT
-    Q_PROPERTY(QMap<QString, Sensor*> sensors READ sensors CONSTANT)    // try SIGNAL later on
-    Q_PROPERTY(QMap<QString, Valve*> valves READ valves CONSTANT)       // try SIGNAL later on
+    Q_PROPERTY(QMap<QString,Sensor*> sensors READ sensors CONSTANT)    // try SIGNAL later on
+    Q_PROPERTY(QMap<QString,Valve*> valves READ valves CONSTANT)       // try SIGNAL later on
     Q_PROPERTY(VehicleState nodeStatusRenegadeEngine READ nodeStatusRenegadeEngine NOTIFY nodeStatusRenegadeEngineChanged)
     Q_PROPERTY(VehicleState nodeStatusRenegadeProp READ nodeStatusRenegadeProp NOTIFY nodeStatusRenegadePropChanged)
     Q_PROPERTY(VehicleState nodeStatusBang READ nodeStatusBang NOTIFY nodeStatusBangChanged)
+    Q_PROPERTY(VehicleState currState READ currState NOTIFY currStateChanged)
+    Q_PROPERTY(VehicleState prevState READ prevState NOTIFY prevStateChanged)
     Q_PROPERTY(Controller* controller READ controller NOTIFY controllerChanged)
 
 
@@ -130,6 +132,9 @@ private:
     QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
     Controller* _controller {new Controller(this)};
 
+    VehicleState _currState {VehicleState::PASSIVE};
+    VehicleState _prevState;
+
 
     QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on
     QList<QCanBusFrame> _remoteFrameList;   // store these frames here to view later on
@@ -150,6 +155,7 @@ public:
     QMap<QString, Sensor*> sensors() const;
     QMap<QString, Valve*> valves() const;
 
+
     FrameHandler::VehicleState nodeStatusRenegadeEngine() const;
     void setNodeStatusRenegadeEngine(FrameHandler::VehicleState newNodeStatusRenegadeEngine);
     FrameHandler::VehicleState nodeStatusRenegadeProp() const;
@@ -157,6 +163,10 @@ public:
     FrameHandler::VehicleState nodeStatusBang() const;
     void setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBang);
 
+    FrameHandler::VehicleState currState() const;
+    void setCurrState(FrameHandler::VehicleState newCurrState);
+    FrameHandler::VehicleState prevState() const;
+    void prevState(FrameHandler::VehicleState newPrevState);
     Controller* controller() const;
 
 signals:
@@ -164,7 +174,8 @@ signals:
     bool valveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data);
     bool stateReceived(quint16 ID_A, QList<QByteArray> data);
 
-
+    void currStateChanged();
+    void prevStateChanged();
     void nodeStatusRenegadeEngineChanged();
     void nodeStatusRenegadePropChanged();
     void nodeStatusBangChanged();

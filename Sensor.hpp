@@ -21,6 +21,7 @@ private:
     // Expose object's properties to QML
     Q_PROPERTY(float value READ value NOTIFY valueChanged)
     Q_PROPERTY(Sensor::SensorState state READ state NOTIFY stateChanged)
+    Q_PROPERTY(quint16 rawSensorID READ rawSensorID CONSTANT)
     QML_ELEMENT
     QML_UNCREATABLE("C++ instantiation only")
 
@@ -29,9 +30,6 @@ private:
     quint16 _sensorID;
     quint16 _rawSensorID;
     quint16 _convertedSensorID;
-
-
-
     float _value = {0.0f}; // SET BY *RECEIVED* CAN FRAME
 public:
     explicit Sensor(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0});
@@ -40,6 +38,8 @@ public:
     Sensor::SensorState state() const;
     void setState(Sensor::SensorState newState);
     QString name() const;
+
+    quint16 rawSensorID();
 
 signals:
     void valueChanged(); // emit in main the thread for QML to handle, where it reads the sensor's value

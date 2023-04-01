@@ -27,10 +27,13 @@ private:
     Q_OBJECT
     // Expose object's properties to QML
     Q_PROPERTY(Valve::ValveState _state READ state NOTIFY stateChanged)
+    Q_PROPERTY(quint16 ID READ ID CONSTANT)
+    Q_PROPERTY(quint16 commandOff READ commandOff CONSTANT)
+    Q_PROPERTY(quint16 commandOn READ commandOn CONSTANT)
     QML_ELEMENT
     QML_UNCREATABLE("C++ instantiation only")
     QString _name;
-    quint32 _ID;
+    quint16 _ID;
     Valve::ValveState _state;
     quint16 _HP_channel;
 
@@ -53,6 +56,9 @@ public:
     void setState(Valve::ValveState newState);
 
     QString name() const;
+    quint16 ID();
+    quint16 commandOff();
+    quint16 commandOn();
 
 signals:
     void stateChanged();    // for QML to handle

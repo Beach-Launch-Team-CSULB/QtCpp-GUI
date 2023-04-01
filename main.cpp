@@ -41,6 +41,9 @@
 int main(int argc, char *argv[])
 {
 
+    quint16 DANGERZONE {300};
+    quint16 NODEID {8};
+    quint16 VERIFICATIONID {166};
     QGuiApplication app(argc, argv);
     // Setup
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +71,12 @@ int main(int argc, char *argv[])
     //engine.rootContext()->setContextProperty("monitorHeight", 9999999999)
 
     // Expose objects to the QML engine
+    engine.rootContext()->setContextProperty("DANGERZONE", DANGERZONE);
+    engine.rootContext()->setContextProperty("NODEID", NODEID);
+    engine.rootContext()->setContextProperty("VERIFICATIONID", VERIFICATIONID);
+
     engine.rootContext()->setContextProperty("headquarter", frameHandler);
+    engine.rootContext()->setContextProperty("GNC", GNC);
 
     // Register C++ objects to QML objects and vice versa. (expose c++ data to QML as a property)
     // also register actionable items in QML and use signals and slots to connect
