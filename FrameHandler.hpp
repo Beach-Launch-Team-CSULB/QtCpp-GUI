@@ -92,27 +92,27 @@ public:
 
 private:
     Q_OBJECT
-    Q_PROPERTY(QMap<QString,Sensor*> sensors READ sensors CONSTANT)    // try SIGNAL later on
-    Q_PROPERTY(QMap<QString,Valve*> valves READ valves CONSTANT)       // try SIGNAL later on
+    Q_PROPERTY(QMap<QString,Sensor*> sensors READ sensors CONSTANT)    // Consider using QQmlPropertyMap with values being QVariant if things get a bit wacky
+    Q_PROPERTY(QMap<QString,Valve*> valves READ valves CONSTANT)       // Consider using QQmlPropertyMap with values being QVariant if things get a bit wacky
     Q_PROPERTY(VehicleState nodeStatusRenegadeEngine READ nodeStatusRenegadeEngine NOTIFY nodeStatusRenegadeEngineChanged)
     Q_PROPERTY(VehicleState nodeStatusRenegadeProp READ nodeStatusRenegadeProp NOTIFY nodeStatusRenegadePropChanged)
     Q_PROPERTY(VehicleState nodeStatusBang READ nodeStatusBang NOTIFY nodeStatusBangChanged)
     Q_PROPERTY(VehicleState currState READ currState NOTIFY currStateChanged)
     Q_PROPERTY(VehicleState prevState READ prevState NOTIFY prevStateChanged)
-    Q_PROPERTY(Controller* controller READ controller NOTIFY controllerChanged)
+    Q_PROPERTY(Controller* controller READ controller CONSTANT)//NOTIFY controllerChanged)
 
 
     //Q_PROPERTY(QStack<QVarLengthArray<quint32, 2>> throttlePoints READ throttlePoints NOTIFY throttlePoints)
     QML_ELEMENT
     QML_UNCREATABLE("C++ instantiation only")
 
-    QCanBusDevice* _can0 {nullptr}; // hmmmmmmmm
-    QMap<QString, Sensor*> _sensors;
-    QMap<QString, Valve*> _valves;
+    QCanBusDevice* _can0 {nullptr};
+    QMap<QString, Sensor*> _sensors;    // Consider using QQmlPropertyMap with values being QVariant if things get a bit wacky
+    QMap<QString, Valve*> _valves;      // Consider using QQmlPropertyMap with values being QVariant if things get a bit wacky
 
     VehicleState _nodeStatusRenegadeEngine {VehicleState::SETUP}; // ID A = 514
     VehicleState _nodeStatusRenegadeProp {VehicleState::SETUP}; // ID A = 515
-    VehicleState _nodeStatusBang {VehicleState::SETUP}; // ID A = 520
+    VehicleState _nodeStatusBang {VehicleState::SETUP}; // ID A = 520, also dan said there is no ID A = 520
 
     VehicleState zero {VehicleState::SETUP};
     VehicleState one {VehicleState::PASSIVE};
@@ -142,9 +142,6 @@ private:
     //QCanBusFrame _dataFrame{0,0}; // Maybe just create this inside of the onFramesReceived slot?
 
     QString _busStatus;
-
-
-    bool _loop {true};
 public:
     explicit FrameHandler(QObject *parent = nullptr);
     ~FrameHandler();    
@@ -193,7 +190,7 @@ public slots: // slots that handled signals from QML should return void or basic
     void onFramesWritten(quint64 framesCount);
     void onStateChanged(QCanBusDevice::CanBusDeviceState state);
 
-    Q_INVOKABLE void sendFrame(QCanBusFrame::FrameId ID, const char* dataHexString); // invoked via a signal in QML
+    Q_INVOKABLE void sendFrame(QCanBusFrame::FrameId ID, QString dataHexString); // invoked via a signal in QML
     // May need to connect QML items to the remoteFrameConstruct method...
 public:
     void run() override;

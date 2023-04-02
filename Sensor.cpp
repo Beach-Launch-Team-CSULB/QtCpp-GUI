@@ -17,7 +17,7 @@ void Sensor::onSensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data
         setValue(static_cast<float>((data.at(0)+ data.at(1)).toInt(nullptr, 16))/10);
         return;
     }
-    else if (data.length() >= 5)
+    if (data.length() >= 5)
     {
         if (_convertedSensorID == data.at(2).toInt(nullptr, 16))
         {
@@ -26,7 +26,7 @@ void Sensor::onSensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data
         }
 
     }
-    else if (data.length() >= 8)
+    if (data.length() >= 8)
     {
         if (_convertedSensorID == data.at(2).toInt(nullptr, 16))
         {

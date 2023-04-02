@@ -5,7 +5,6 @@
 #include <qqml.h>
 struct Controller : public QObject
 {
-public:
     Q_OBJECT
     Q_PROPERTY(quint16 nodeControllerID READ nodeControllerID CONSTANT)
 
@@ -25,6 +24,7 @@ public:
     Q_PROPERTY(float IGN2Time READ IGN2Time NOTIFY IGN2TimeChanged)
 
     QML_ELEMENT
+    QML_UNCREATABLE("C++ instantiation only")
 public:
     quint16 _nodeControllerID {0};
 

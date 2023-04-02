@@ -14,6 +14,7 @@ qt_add_executable(appBLT-GUI-Maker
     Valve.hpp Valve.cpp ValveObjectDefinitions.hpp
     GNCThread.hpp GNCThread.cpp
     Controller.hpp Controller.cpp
+    CommandState.hpp
 
     QMLtestclass.hpp QMLtestclass.cpp
 )
@@ -27,6 +28,7 @@ qt_add_qml_module(appBLT-GUI-Maker
     Valve.hpp Valve.cpp ValveObjectDefinitions.hpp
     GNCThread.hpp GNCThread.cpp
     Controller.hpp Controller.cpp
+    CommandState.hpp
 
 
     QMLtestclass.hpp QMLtestclass.cpp

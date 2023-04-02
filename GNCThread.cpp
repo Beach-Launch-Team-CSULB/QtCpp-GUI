@@ -19,4 +19,9 @@ void GNCThread::run()
     qInfo() << "GNC SAID HELLO";
     qInfo() << "Rounded: " << (RoundTo100(1502)-1000)/100;
     qInfo() << "Modulus:"  << 1504 % 100;
+
+    while (true)
+    {
+
+    }
 }

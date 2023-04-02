@@ -6,6 +6,7 @@
 FrameHandler::FrameHandler(QObject *parent)
     : QObject{parent}
 {
+    qDebug() << "Enter FrameHandler constructor"; // Note: because of threading, this might not be an accurate way of finding out where the program crashes
     foreach(auto& sensorContructingParameter, sensorConstructingParameters) //sensor key List
     {                                                                       //{"High_Press 1"} {"High_Press 2"} {"Fuel_Tank 1"} {"Fuel_Tank 2"}
         _sensors.insert(sensorContructingParameter.at(0).toString(),        //{"Lox_Tank 1"} {"Lox_Tank 2"} {"Fuel_Dome_Reg"} {"Lox_Dome_Reg"}
@@ -31,12 +32,13 @@ FrameHandler::FrameHandler(QObject *parent)
 
 FrameHandler::~FrameHandler()
 {
-    this->_loop = false;
+    qDebug() << "Enter FrameHandler destructor";
     this->disconnectCan();
 }
 
 bool FrameHandler::connectCan() // need work
 {
+    qDebug() << "Enter FrameHandler::connectCan() function";
     QString errorString;
     _can0 = QCanBus::instance()->createDevice(QStringLiteral("socketcan"), QStringLiteral("can0"), &errorString);
 
@@ -87,6 +89,7 @@ bool FrameHandler::connectCan() // need work
 
 bool FrameHandler::disconnectCan() // might need more work
 {
+    qDebug() << "Enter FrameHandler::disconnectCan() function";
     if(!_can0)
     {
         qDebug() << "No can device to be disconnected";
@@ -114,6 +117,7 @@ bool FrameHandler::disconnectCan() // might need more work
 
 QString FrameHandler::getBusStatus() // Create a QML item displaying color for each state
 {
+    qDebug() << "Enter FrameHandler::getBusStatus() function";
     if(!_can0 || !_can0->hasBusStatus())
         return "No CAN bus status available.";
 
@@ -135,6 +139,7 @@ QString FrameHandler::getBusStatus() // Create a QML item displaying color for e
 
 bool FrameHandler::isOperational()
 {
+    qDebug() << "Enter FrameHandler::isOperational() function";
     if(!_can0 || !_can0->hasBusStatus() || !(_can0->state() == QCanBusDevice::ConnectedState))
         return false;
 
@@ -154,12 +159,13 @@ bool FrameHandler::isOperational()
 
 void FrameHandler::onErrorOccurred(QCanBusDevice::CanBusError error)
 {
-
+    qDebug() << "Enter FrameHandler::onErrorOccured() function";
 }
 
 // TODO FOR TOMORROW: WORK ON VALVE STUFF, ID 546 & ID 547 & (maybe) ID 552
 void FrameHandler::onFramesReceived() // In the future, might need to write frames data to a file
 {
+    qDebug() << "Enter FrameHandler::onFramesReceived() function";
     if(this->isOperational()) return;
 
     while (_can0->framesAvailable()) //
@@ -202,7 +208,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
         // Dissect payload:
         const QByteArray payload {dataFrame.payload().toHex()}; // returns nibble by nibble. Two nibbles make a byte
         QList<QByteArray> data;
-
+        //QStack<QByteArray> data;
         QString payloadErrorString;
         // perform surgery on data
         if (dataFrame.frameType() == QCanBusFrame::InvalidFrame)
@@ -265,6 +271,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
         if (ID_A == 552)
         {
         // leave it blank here since it seems like it's not used
+            return;
         }
         //"NODE STATE REPORT" "Bytes 1,2,3,4,5,6,7 are not used according to the python gui"
         //"Engine Node 2"
@@ -275,16 +282,18 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
                 if (ID_A == 514)
                 {
                     setNodeStatusRenegadeEngine(cursed.at(data.at(0).toInt(nullptr,16))); // byte zero carries a value from 0 to 12
+                    // catch the remaining bytes in the future
                     return;
                 }
                 if (ID_A == 515)
                 {
                     setNodeStatusRenegadeProp(cursed.at(data.at(0).toInt(nullptr,16)));
+                    // catch the remaining bytes in the future
                     return;
                 }
-                if (ID_A == 520)
+                if (ID_A == 520) // also Dan said there is no ID_A == 520
                 {
-                    setNodeStatusBang(cursed.at(data.at(0).toInt(nullptr,16)));
+                    //setNodeStatusBang(cursed.at(data.at(0).toInt(nullptr,16)));
                     return;
                 }
             }
@@ -295,14 +304,14 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
         }
         if (ID_A == 1100)
         {
-            _controller->setAutosequenceTime(dataFrame.payload().toFloat(nullptr)/1000000);
+            _controller->setAutosequenceTime(dataFrame.payload().toFloat(nullptr)/1000000); // may need to convert this to int then cast it to float
             return;
         }
 
         // switch to else if to get rid of uncessary returns???
         if (ID_A == 1506)
         {   // Commenting this out because in the python gui, throttlePoints is initially a dict,
-            // but it's then set to a list when time is 0 ...
+            // but it's then set to a list when time is 0 ... seems like not used yet
 
             //quint32 time = (data.at(0) + data.at(1)).toInt(nullptr,16);
             //quint32 throttlePoint = (data.at(2) + data.at(3)).toInt(nullptr,16);
@@ -370,21 +379,23 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
 
 void FrameHandler::onFramesWritten(quint64 framesCount)
 {
-
+    qDebug() << "Enter FrameHandler::onFramesWritten() function";
 }
 
 void FrameHandler::onStateChanged(QCanBusDevice::CanBusDeviceState state)
 {
-
+    qDebug() << "Enter FrameHandler::onStateChanged() function";
 }
 
 // Expose the object to QML so that QML can use this function
-void FrameHandler::sendFrame(quint32 ID, const char* dataHexString) //QCanBusFrame::FrameId or quint32
+void FrameHandler::sendFrame(quint32 ID, QString dataHexString) //QCanBusFrame::FrameId or quint32
 {
+    // in QML, just concantenate all the strings to form a byte array represented as string and pass it in as an argument.
+    qDebug() << "Enter FrameHandler::sendFrame() function";
     if(!this->isOperational()) return;
     //dataHexString is passed from QML
-    QByteArray data {QByteArrayLiteral(dataHexString)};
-    //QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())}; //ChatGPT gave me this line // need to test this
+    //QByteArray data {QByteArrayLiteral(dataHexString)};
+    QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())};
     QCanBusFrame remoteFrame {ID, data};
     remoteFrame.setFrameType(QCanBusFrame::RemoteRequestFrame);
     remoteFrame.setBitrateSwitch(false);
@@ -473,6 +484,7 @@ Controller* FrameHandler::controller() const
 // run
 void FrameHandler::run()
 {
+    qDebug() << "Enter FrameHandler::run() function";
     qInfo() << "Hello?";
     qInfo() << QThread::currentThread();
     qInfo() << this->controller()->IGN1Time();
@@ -480,12 +492,14 @@ void FrameHandler::run()
     qInfo() << _controller->IGN1Time();
     this->connectCan();
 
-    while (_loop)
-    {
-        if (this->isOperational())
-        {
-            this->onFramesReceived(); // might need to disconnect the signal connected to this slot since I don't know quite how that works
-        }
-    }
+    //while (true) //
+    //{
+    //    if (this->isOperational())
+    //    {
+    //        this->onFramesReceived(); // might need to disconnect the signal connected to this slot since I don't know quite how that works
+    //    }
+    //}
 }
-
+// * When the function run
+// so if _loop is false, this FrameHandler object/thread is guarenteed to be destroyed
+// -> never set _loop to false???
