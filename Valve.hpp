@@ -40,10 +40,10 @@ private:
     quint16 _commandOff;
     quint16 _commandOn;
 
-    ValveState zero {ValveState::CLOSED};
-    ValveState one {ValveState::OPEN};
-    ValveState two {ValveState::FIRE_COMMANDED};
-    QList<ValveState> cursed {zero,one,two};
+
+    QList<ValveState> _valveStates {ValveState::CLOSED,
+                                    ValveState::OPEN,
+                                    ValveState::FIRE_COMMANDED};
 
     // susge
     quint16 _something_to_do_with_text_styling;

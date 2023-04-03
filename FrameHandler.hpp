@@ -114,20 +114,64 @@ private:
     VehicleState _nodeStatusRenegadeProp {VehicleState::SETUP}; // ID A = 515
     VehicleState _nodeStatusBang {VehicleState::SETUP}; // ID A = 520, also dan said there is no ID A = 520
 
-    VehicleState zero {VehicleState::SETUP};
-    VehicleState one {VehicleState::PASSIVE};
-    VehicleState two {VehicleState::STANDBY};
-    VehicleState three {VehicleState::TEST};
-    VehicleState four {VehicleState::ABORT};
-    VehicleState five {VehicleState::VENT};
-    VehicleState six {VehicleState::OFF_NOMINAL};
-    VehicleState seven {VehicleState::HI_PRESS_ARM};
-    VehicleState eight {VehicleState::HI_PRESS_PRESSURIZED};
-    VehicleState nine {VehicleState::TANK_PRESS_ARM};
-    VehicleState ten {VehicleState::TANK_PRESS_PRESSURIZED};
-    VehicleState eleven {VehicleState::FIRE_ARMED};
-    VehicleState twelve {VehicleState::FIRE};
-    QList<VehicleState> cursed {zero,one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve}; // :D
+    //VehicleState zero {VehicleState::SETUP};
+    //VehicleState one {VehicleState::PASSIVE};
+    //VehicleState two {VehicleState::STANDBY};
+    //VehicleState three {VehicleState::TEST};
+    //VehicleState four {VehicleState::ABORT};
+    //VehicleState five {VehicleState::VENT};
+    //VehicleState six {VehicleState::OFF_NOMINAL};
+    //VehicleState seven {VehicleState::HI_PRESS_ARM};
+    //VehicleState eight {VehicleState::HI_PRESS_PRESSURIZED};
+    //VehicleState nine {VehicleState::TANK_PRESS_ARM};
+    //VehicleState ten {VehicleState::TANK_PRESS_PRESSURIZED};
+    //VehicleState eleven {VehicleState::FIRE_ARMED};
+    //VehicleState twelve {VehicleState::FIRE};
+    const QList<VehicleState> _vehicleStates {VehicleState::SETUP,
+                                VehicleState::PASSIVE,
+                                VehicleState::STANDBY,
+                                VehicleState::TEST,
+                                VehicleState::ABORT,
+                                VehicleState::VENT,
+                                VehicleState::OFF_NOMINAL,
+                                VehicleState::HI_PRESS_ARM,
+                                VehicleState::HI_PRESS_PRESSURIZED,
+                                VehicleState::TANK_PRESS_ARM,
+                                VehicleState::TANK_PRESS_PRESSURIZED,
+                                VehicleState::FIRE_ARMED,
+                                VehicleState::FIRE}; // :D
+
+    const QList<MissionState> _missionStates {MissionState::PASSIVE,
+                                             MissionState::STANDBY,
+                                             MissionState::STATIC_TEST_ARMED,
+                                             MissionState::STATIC_TEST_ACTIVE,
+                                             MissionState::POST_TEST,
+                                             MissionState::PRELAUNCH,
+                                             MissionState::ASCENT_RAIL,
+                                             MissionState::ASCENT_FREE_THRUST,
+                                             MissionState::ASCENT_FREE_COAST,
+                                             MissionState::DESCENT_FREE,
+                                             MissionState::DESCENT_PILOT,
+                                             MissionState::DESCENT_DROGUE,
+                                             MissionState::DESCENT_MAIN,
+                                             MissionState::LANDED};
+
+
+
+    //PASSIVE,                // 0
+    //STANDBY,                // 1
+    //STATIC_TEST_ARMED,        // 2
+    //STATIC_TEST_ACTIVE,       // 3
+    //POST_TEST,               // 4
+    //PRELAUNCH,              // 5
+    //ASCENT_RAIL,             // 6
+    //ASCENT_FREE_THRUST,       // 7
+    //ASCENT_FREE_COAST,        // 8
+    //DESCENT_FREE,            // 9
+    //DESCENT_PILOT,           // 10
+    //DESCENT_DROGUE,          // 11
+    //DESCENT_MAIN,            // 12
+    //LANDED,
 
     QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
     Controller* _controller {new Controller(this)};

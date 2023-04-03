@@ -281,19 +281,19 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             try{
                 if (ID_A == 514)
                 {
-                    setNodeStatusRenegadeEngine(cursed.at(data.at(0).toInt(nullptr,16))); // byte zero carries a value from 0 to 12
-                    // catch the remaining bytes in the future
+                    setNodeStatusRenegadeEngine(_vehicleStates.at(data.at(0).toInt(nullptr,16))); // byte zero carries a value from 0 to 12
+                    // catch the remaining bytes in the future. Don't wanna catch all of rest since I don't know many bytes there actually are
                     return;
                 }
                 if (ID_A == 515)
                 {
-                    setNodeStatusRenegadeProp(cursed.at(data.at(0).toInt(nullptr,16)));
-                    // catch the remaining bytes in the future
+                    setNodeStatusRenegadeProp(_vehicleStates.at(data.at(0).toInt(nullptr,16)));
+                    // catch the remaining bytes in the future. Don't wanna catch all of rest since I don't know many bytes there actually are
                     return;
                 }
                 if (ID_A == 520) // also Dan said there is no ID_A == 520
                 {
-                    //setNodeStatusBang(cursed.at(data.at(0).toInt(nullptr,16)));
+                    //setNodeStatusBang(_vehicleStates.at(data.at(0).toInt(nullptr,16)));
                     return;
                 }
             }

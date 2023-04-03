@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 // do qmlregistertypes for QML_ELEMENT
+// scrollbars
 Window {
     width: 640
     height: 480

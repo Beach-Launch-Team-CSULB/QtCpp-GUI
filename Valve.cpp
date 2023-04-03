@@ -17,72 +17,74 @@ void Valve::onValveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data)
     switch(_valveNode)
     {
     case Valve::ValveNode::ENGINE_NODE:
-        switch (_HP_channel) // only HP's 1,2,3,4,5,7,8 are used.
-        {
-        case 1:
-            setState(cursed.at(HP1)); // HP values are 0,1,2, corresponding to the closed, open, firecommanded states
+        switch (_HP_channel)    // only HP's 1,2,3,4,5,7,8 are used.
+        {                       // HP values are 0,1,2, corresponding to the closed, open, firecommanded states
+        case 1:     // HP
+            setState(_valveStates.at(HP1));
             return;
-        case 2:
-            setState(cursed.at(HP2));
+        case 2:     // HPV
+            setState(_valveStates.at(HP2));
             return;
-        case 3:
-            setState(cursed.at(data.at(0).toInt(nullptr, 16)));
+        case 3:     // FMV
+            setState(_valveStates.at(data.at(0).toInt(nullptr, 16)));
             return;
-        case 4:
-            setState(cursed.at(data.at(1).toInt(nullptr, 16)));
+        case 4:     // LMV
+            setState(_valveStates.at(data.at(1).toInt(nullptr, 16)));
             return;
-        case 5:
-            setState(cursed.at(data.at(2).toInt(nullptr, 16)));
+        case 5:     // IGN1
+            setState(_valveStates.at(data.at(2).toInt(nullptr, 16)));
             return;
-        case 6: // not used
-            setState(cursed.at(data.at(3).toInt(nullptr, 16)));
+        case 6:     // not used
+            setState(_valveStates.at(data.at(3).toInt(nullptr, 16)));
             return;
-        case 7:
-            setState(cursed.at(data.at(4).toInt(nullptr, 16)));
+        case 7:     // IGN2
+            setState(_valveStates.at(data.at(4).toInt(nullptr, 16)));
             return;
-        case 8:
-            setState(cursed.at(data.at(5).toInt(nullptr, 16)));
+        case 8:     // not used
+            setState(_valveStates.at(data.at(5).toInt(nullptr, 16)));
             return;
-        case 9: // not used
-            setState(cursed.at(data.at(6).toInt(nullptr, 16)));
+        case 9:     // not used
+            setState(_valveStates.at(data.at(6).toInt(nullptr, 16)));
             return;
-        case 10: // not used
-            setState(cursed.at(data.at(7).toInt(nullptr, 16)));
+        case 10:    // not used
+            setState(_valveStates.at(data.at(7).toInt(nullptr, 16)));
             return;
         }
         break;
     case Valve::ValveNode::PROP_NODE:
         switch (_HP_channel)
         {
-        case 1:
-            setState(cursed.at(HP1));
+        case 1: // Pretty sure this is just LV
+            if (HP1 == 1) setState(_valveStates.at(0)); // Might need to make a setReverseState function.
+            else if (HP1 == 0) setState(_valveStates.at(1));
             return;
-        case 2:
-            setState(cursed.at(HP2));
+            // Test and see if LV already receives the reverted state from the python gui
+        case 2:     // not used
+            setState(_valveStates.at(HP2));
             return;
-        case 3:
-            setState(cursed.at(data.at(0).toInt(nullptr, 16)));
+        case 3:     // LDR
+            setState(_valveStates.at(data.at(0).toInt(nullptr, 16)));
             return;
-        case 4:
-            setState(cursed.at(data.at(1).toInt(nullptr, 16)));
+        case 4:     // LDV
+            setState(_valveStates.at(data.at(1).toInt(nullptr, 16)));
             return;
-        case 5:
-            setState(cursed.at(data.at(2).toInt(nullptr, 16)));
+        case 5:     // FV
+            setState(_valveStates.at(data.at(2).toInt(nullptr, 16)));
             return;
-        case 6: // not used
-            setState(cursed.at(data.at(3).toInt(nullptr, 16)));
+        case 6:     // not used
+            setState(_valveStates.at(data.at(3).toInt(nullptr, 16)));
             return;
-        case 7:
-            setState(cursed.at(data.at(4).toInt(nullptr, 16)));
+        case 7:     // FDR
+            setState(_valveStates.at(data.at(4).toInt(nullptr, 16)));
             return;
-        case 8:
-            setState(cursed.at(data.at(5).toInt(nullptr, 16)));
+        case 8:     // FDV
+            setState(_valveStates.at(data.at(5).toInt(nullptr, 16)));
             return;
-        case 9: // not used
-            setState(cursed.at(data.at(6).toInt(nullptr, 16)));
+        case 9:     // not used
+            setState(_valveStates.at(data.at(6).toInt(nullptr, 16)));
             return;
-        case 10: // not used
-            setState(cursed.at(data.at(7).toInt(nullptr, 16)));
+        case 10:    // not used
+            setState(_valveStates.at(data.at(7).toInt(nullptr, 16)));
             return;
         }
         break;
@@ -90,34 +92,34 @@ void Valve::onValveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data)
         switch (_HP_channel)
         {
         case 1:
-            setState(cursed.at(HP1));
+            setState(_valveStates.at(HP1));
             return;
         case 2:
-            setState(cursed.at(HP2));
+            setState(_valveStates.at(HP2));
             return;
         case 3:
-            setState(cursed.at(data.at(0).toInt(nullptr, 16)));
+            setState(_valveStates.at(data.at(0).toInt(nullptr, 16)));
             return;
         case 4:
-            setState(cursed.at(data.at(1).toInt(nullptr, 16)));
+            setState(_valveStates.at(data.at(1).toInt(nullptr, 16)));
             return;
         case 5:
-            setState(cursed.at(data.at(2).toInt(nullptr, 16)));
+            setState(_valveStates.at(data.at(2).toInt(nullptr, 16)));
             return;
         case 6: // not used
-            setState(cursed.at(data.at(3).toInt(nullptr, 16)));
+            setState(_valveStates.at(data.at(3).toInt(nullptr, 16)));
             return;
         case 7:
-            setState(cursed.at(data.at(4).toInt(nullptr, 16)));
+            setState(_valveStates.at(data.at(4).toInt(nullptr, 16)));
             return;
         case 8:
-            setState(cursed.at(data.at(5).toInt(nullptr, 16)));
+            setState(_valveStates.at(data.at(5).toInt(nullptr, 16)));
             return;
         case 9: // not used
-            setState(cursed.at(data.at(6).toInt(nullptr, 16)));
+            setState(_valveStates.at(data.at(6).toInt(nullptr, 16)));
             return;
         case 10: // not used
-            setState(cursed.at(data.at(7).toInt(nullptr, 16)));
+            setState(_valveStates.at(data.at(7).toInt(nullptr, 16)));
             return;
         }
         break;
