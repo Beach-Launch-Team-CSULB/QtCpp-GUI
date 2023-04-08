@@ -4,25 +4,38 @@
 #include <QObject>
 #include <QList>
 #include <QVariant>
+#include "Node.hpp"
 #include <qqml.h>
 class Valve : public QObject
 {
 public:
     enum class ValveState
     {
-        CLOSED = 0,
-        OPEN = 1,
-        FIRE_COMMANDED = 2
+        CLOSED =                0,
+        OPEN =                  1,
+        FIRE_COMMANDED =        2,
+        OPEN_COMMANDED =        3,
+        CLOSE_COMMANDED =       4,
+        OPEN_PROCESS =          5,
+        CLOSE_PROCESS =         6,
+        BANG_OPEN_COMMANDED =   7,
+        BANG_CLOSE_COMMANDED =  8,
+        BANG_OPEN_PROCESS =     9,
+        BANG_CLOSE_PROCESS  =   10,
+        BANGING_OPEN =          11,
+        BANGING_CLOSED =        12,
+        NULL_RETURN =           13,
+        VALVE_STATE_SIZE =      14,
     };
     Q_ENUM(ValveState)
 
-    enum class ValveNode
-    {
-        ENGINE_NODE = 2,
-        PROP_NODE = 3,
-        PASA_NODE = 8
-    };
-    Q_ENUM(ValveNode)
+    //enum class ValveNode
+    //{
+    //    ENGINE_NODE = 2,
+    //    PROP_NODE = 3,
+    //    PASA_NODE = 8
+    //};
+    //Q_ENUM(ValveNode)
 private:
     Q_OBJECT
     // Expose object's properties to QML
@@ -47,7 +60,7 @@ private:
 
     // susge
     quint16 _something_to_do_with_text_styling;
-    Valve::ValveNode _valveNode;
+    Node::NodeID _valveNode;
 
 public:
     explicit Valve(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0,0,0,0,0});

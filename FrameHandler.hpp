@@ -90,6 +90,12 @@ public:
     };
     Q_ENUM(MissionState)
 
+    enum class NodeSyncStatus // Should only issue warning if nodes are not in sync or something
+    {
+        NOT_IN_SYNC = 0,
+        IN_SYNC     = 1
+    };
+
 private:
     Q_OBJECT
     Q_PROPERTY(QMap<QString,Sensor*> sensors READ sensors CONSTANT)    // Consider using QQmlPropertyMap with values being QVariant if things get a bit wacky
@@ -97,8 +103,8 @@ private:
     Q_PROPERTY(VehicleState nodeStatusRenegadeEngine READ nodeStatusRenegadeEngine NOTIFY nodeStatusRenegadeEngineChanged)
     Q_PROPERTY(VehicleState nodeStatusRenegadeProp READ nodeStatusRenegadeProp NOTIFY nodeStatusRenegadePropChanged)
     Q_PROPERTY(VehicleState nodeStatusBang READ nodeStatusBang NOTIFY nodeStatusBangChanged)
-    Q_PROPERTY(VehicleState currState READ currState NOTIFY currStateChanged)
-    Q_PROPERTY(VehicleState prevState READ prevState NOTIFY prevStateChanged)
+    Q_PROPERTY(VehicleState currGUIState READ currGUIState NOTIFY currGUIStateChanged)
+    Q_PROPERTY(VehicleState prevGUIState READ prevGUIState NOTIFY prevGUIStateChanged)
     Q_PROPERTY(Controller* controller READ controller CONSTANT)//NOTIFY controllerChanged)
 
 
@@ -110,36 +116,26 @@ private:
     QMap<QString, Sensor*> _sensors;    // Consider using QQmlPropertyMap with values being QVariant if things get a bit wacky
     QMap<QString, Valve*> _valves;      // Consider using QQmlPropertyMap with values being QVariant if things get a bit wacky
 
-    VehicleState _nodeStatusRenegadeEngine {VehicleState::SETUP}; // ID A = 514
-    VehicleState _nodeStatusRenegadeProp {VehicleState::SETUP}; // ID A = 515
+    VehicleState _nodeStatusRenegadeEngine {VehicleState::SETUP}; // ID A = 514     I think these should be used for the frontend logic
+    VehicleState _nodeStatusRenegadeProp {VehicleState::SETUP}; // ID A = 515       I think these should be used for the frontend logic
     VehicleState _nodeStatusBang {VehicleState::SETUP}; // ID A = 520, also dan said there is no ID A = 520
 
-    //VehicleState zero {VehicleState::SETUP};
-    //VehicleState one {VehicleState::PASSIVE};
-    //VehicleState two {VehicleState::STANDBY};
-    //VehicleState three {VehicleState::TEST};
-    //VehicleState four {VehicleState::ABORT};
-    //VehicleState five {VehicleState::VENT};
-    //VehicleState six {VehicleState::OFF_NOMINAL};
-    //VehicleState seven {VehicleState::HI_PRESS_ARM};
-    //VehicleState eight {VehicleState::HI_PRESS_PRESSURIZED};
-    //VehicleState nine {VehicleState::TANK_PRESS_ARM};
-    //VehicleState ten {VehicleState::TANK_PRESS_PRESSURIZED};
-    //VehicleState eleven {VehicleState::FIRE_ARMED};
-    //VehicleState twelve {VehicleState::FIRE};
-    const QList<VehicleState> _vehicleStates {VehicleState::SETUP,
-                                VehicleState::PASSIVE,
-                                VehicleState::STANDBY,
-                                VehicleState::TEST,
-                                VehicleState::ABORT,
-                                VehicleState::VENT,
-                                VehicleState::OFF_NOMINAL,
-                                VehicleState::HI_PRESS_ARM,
-                                VehicleState::HI_PRESS_PRESSURIZED,
-                                VehicleState::TANK_PRESS_ARM,
-                                VehicleState::TANK_PRESS_PRESSURIZED,
-                                VehicleState::FIRE_ARMED,
-                                VehicleState::FIRE}; // :D
+    // Implement this............. Every time other node updates, the setter for this must be called to check if all nodes are in the same state
+    NodeSyncStatus _nodeSyncStatus; // updates every time a node changed and checks if all nodes are in the same state
+
+    const QList<VehicleState> _vehicleStates {  VehicleState::SETUP,
+                                                VehicleState::PASSIVE,
+                                                VehicleState::STANDBY,
+                                                VehicleState::TEST,
+                                                VehicleState::ABORT,
+                                                VehicleState::VENT,
+                                                VehicleState::OFF_NOMINAL,
+                                                VehicleState::HI_PRESS_ARM,
+                                                VehicleState::HI_PRESS_PRESSURIZED,
+                                                VehicleState::TANK_PRESS_ARM,
+                                                VehicleState::TANK_PRESS_PRESSURIZED,
+                                                VehicleState::FIRE_ARMED,
+                                                VehicleState::FIRE}; // :D
 
     const QList<MissionState> _missionStates {MissionState::PASSIVE,
                                              MissionState::STANDBY,
@@ -176,8 +172,9 @@ private:
     QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
     Controller* _controller {new Controller(this)};
 
-    VehicleState _currState {VehicleState::PASSIVE};
-    VehicleState _prevState;
+    VehicleState _currGUIState {VehicleState::PASSIVE};
+    VehicleState _prevGUIState;
+
 
 
     QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on
@@ -204,19 +201,20 @@ public:
     FrameHandler::VehicleState nodeStatusBang() const;
     void setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBang);
 
-    FrameHandler::VehicleState currState() const;
-    void setCurrState(FrameHandler::VehicleState newCurrState);
-    FrameHandler::VehicleState prevState() const;
-    void prevState(FrameHandler::VehicleState newPrevState);
+    FrameHandler::VehicleState currGUIState() const;
+    void setcurrGUIState(FrameHandler::VehicleState newCurrGUIState);
+    FrameHandler::VehicleState prevGUIState() const;
+    void prevGUIState(FrameHandler::VehicleState newPrevGUIState);
     Controller* controller() const;
 
+    void nodeSynchronization(); // don't wanna make bool for other scenarios
 signals:
     bool sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
     bool valveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data);
     bool stateReceived(quint16 ID_A, QList<QByteArray> data);
 
-    void currStateChanged();
-    void prevStateChanged();
+    void currGUIStateChanged();
+    void prevGUIStateChanged();
     void nodeStatusRenegadeEngineChanged();
     void nodeStatusRenegadePropChanged();
     void nodeStatusBangChanged();
@@ -224,6 +222,7 @@ signals:
     void controllerChanged();
 
 public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
+
 
     bool connectCan();
     bool disconnectCan();

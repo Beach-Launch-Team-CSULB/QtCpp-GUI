@@ -28,6 +28,12 @@ FrameHandler::FrameHandler(QObject *parent)
     {
        QObject::connect(this, &FrameHandler::valveReceived, valve, &Valve::onValveReceived);
     }
+
+    QThread::currentThread()->setObjectName("Frame Handler thread");
+    qInfo() << QThread::currentThread();
+    qInfo() << QThread::currentThread();
+    qInfo() << QThread::currentThread();
+    qInfo() << QThread::currentThread();
 }
 
 FrameHandler::~FrameHandler()
@@ -98,8 +104,9 @@ bool FrameHandler::disconnectCan() // might need more work
     switch (_can0->state())
     {
         case QCanBusDevice::UnconnectedState:
-        case QCanBusDevice::ConnectingState:
             return false;
+        case QCanBusDevice::ConnectingState:
+            //return false;
         case QCanBusDevice::ConnectedState:
             //QObject::disconnect(_can0, &QCanBusDevice::framesReceived, this, &FrameHandler::onFramesReceived);
             QObject::disconnect(_can0, &QCanBusDevice::framesWritten, this, &FrameHandler::onFramesWritten);
@@ -238,7 +245,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             emit sensorReceived(ID_A, ID_B, data);
             return;
         }
-        //Valve renegade Engine
+        //Valve renegade engine
         if (ID_A == 546)
         {
             QString HP1_bin {ID_B_bin.sliced(11,8)}; // According to the python gui
@@ -454,26 +461,26 @@ void FrameHandler::setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBan
     emit nodeStatusBangChanged();
 }
 
-FrameHandler::VehicleState FrameHandler::currState() const
+FrameHandler::VehicleState FrameHandler::currGUIState() const
 {
-    return _currState;
+    return _currGUIState;
 }
 
-void FrameHandler::setCurrState(VehicleState newCurrState)
+void FrameHandler::setcurrGUIState(VehicleState newcurrGUIState)
 {
-    _currState = newCurrState;
-    emit currStateChanged();
+    _currGUIState = newcurrGUIState;
+    emit currGUIStateChanged();
 }
 
-FrameHandler::VehicleState FrameHandler::prevState() const
+FrameHandler::VehicleState FrameHandler::prevGUIState() const
 {
-    return _prevState;
+    return _prevGUIState;
 }
 
-void FrameHandler::prevState(VehicleState newPrevState)
+void FrameHandler::prevGUIState(VehicleState newPrevGUIState)
 {
-    _prevState = newPrevState;
-    emit prevStateChanged();
+    _prevGUIState = newPrevGUIState;
+    emit prevGUIStateChanged();
 }
 
 Controller* FrameHandler::controller() const
@@ -481,10 +488,25 @@ Controller* FrameHandler::controller() const
     return _controller;
 }
 
+void FrameHandler::nodeSynchronization()
+{
+    if (_nodeStatusRenegadeEngine == _nodeStatusRenegadeProp)
+    {
+        _nodeSyncStatus = NodeSyncStatus::IN_SYNC;
+    }
+    // need to expand
+}
+
 // run
 void FrameHandler::run()
 {
     qDebug() << "Enter FrameHandler::run() function";
+    qInfo() << QThread::currentThread(); // Looks like it's a different thread when it's thread pooled
+    qInfo() << QThread::currentThread();
+    qInfo() << QThread::currentThread();
+    qInfo() << QThread::currentThread();
+    qInfo() << QThread::currentThread();
+    qInfo() << QThread::currentThread();
     qInfo() << "Hello?";
     qInfo() << QThread::currentThread();
     qInfo() << this->controller()->IGN1Time();

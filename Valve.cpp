@@ -16,42 +16,22 @@ void Valve::onValveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data)
     // check for valve ID before doing anything.
     switch(_valveNode)
     {
-    case Valve::ValveNode::ENGINE_NODE:
+    case Node::NodeID::ENGINE_NODE:
         switch (_HP_channel)    // only HP's 1,2,3,4,5,7,8 are used.
         {                       // HP values are 0,1,2, corresponding to the closed, open, firecommanded states
-        case 1:     // HP
-            setState(_valveStates.at(HP1));
-            return;
-        case 2:     // HPV
-            setState(_valveStates.at(HP2));
-            return;
-        case 3:     // FMV
-            setState(_valveStates.at(data.at(0).toInt(nullptr, 16)));
-            return;
-        case 4:     // LMV
-            setState(_valveStates.at(data.at(1).toInt(nullptr, 16)));
-            return;
-        case 5:     // IGN1
-            setState(_valveStates.at(data.at(2).toInt(nullptr, 16)));
-            return;
-        case 6:     // not used
-            setState(_valveStates.at(data.at(3).toInt(nullptr, 16)));
-            return;
-        case 7:     // IGN2
-            setState(_valveStates.at(data.at(4).toInt(nullptr, 16)));
-            return;
-        case 8:     // not used
-            setState(_valveStates.at(data.at(5).toInt(nullptr, 16)));
-            return;
-        case 9:     // not used
-            setState(_valveStates.at(data.at(6).toInt(nullptr, 16)));
-            return;
-        case 10:    // not used
-            setState(_valveStates.at(data.at(7).toInt(nullptr, 16)));
-            return;
+        case 1:     setState(_valveStates.at(HP1)); return; // HP
+        case 2:     setState(_valveStates.at(HP2)); return;// HPV
+        case 3:     setState(_valveStates.at(data.at(0).toInt(nullptr, 16)));return;    // FMV
+        case 4:     setState(_valveStates.at(data.at(1).toInt(nullptr, 16)));return;    // LMV
+        case 5:     setState(_valveStates.at(data.at(2).toInt(nullptr, 16)));return;    // IGN1
+        case 6:     setState(_valveStates.at(data.at(3).toInt(nullptr, 16)));return;    // not used
+        case 7:     setState(_valveStates.at(data.at(4).toInt(nullptr, 16)));return;    // IGN2
+        case 8:     setState(_valveStates.at(data.at(5).toInt(nullptr, 16)));return;    // not used
+        case 9:     setState(_valveStates.at(data.at(6).toInt(nullptr, 16)));return;    // not used
+        case 10:    setState(_valveStates.at(data.at(7).toInt(nullptr, 16)));return;    // not used
         }
         break;
-    case Valve::ValveNode::PROP_NODE:
+    case Node::NodeID::PROP_NODE:
         switch (_HP_channel)
         {
         case 1: // Pretty sure this is just LV
@@ -88,7 +68,7 @@ void Valve::onValveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data)
             return;
         }
         break;
-    case Valve::ValveNode::PASA_NODE:
+    case Node::NodeID::PASA_NODE:
         switch (_HP_channel)
         {
         case 1:

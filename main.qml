@@ -2,6 +2,9 @@ import QtQuick
 import QtQuick.Controls
 // do qmlregistertypes for QML_ELEMENT
 // scrollbars
+
+// things need for button logic: commandStates/currGUIState, valves' states,
+
 Window {
     width: 640
     height: 480
