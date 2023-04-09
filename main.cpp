@@ -110,7 +110,9 @@ int main(int argc, char *argv[])
     // Create an instance of the component
     // QObject* qmlObject {component.create()};
 
-    const QUrl url(u"qrc:/BLT-GUI-Maker/main.qml"_qs);
+    //const QUrl url(u"qrc:/BLT-GUI-Maker/main.qml"_qs);
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    const QUrl url(u"file:///C:/CodeStuff/Beach Launch Team/BLT-GUI-Maker/main.qml"_qs);
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)

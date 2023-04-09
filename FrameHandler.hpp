@@ -106,6 +106,7 @@ private:
     Q_PROPERTY(VehicleState currGUIState READ currGUIState NOTIFY currGUIStateChanged)
     Q_PROPERTY(VehicleState prevGUIState READ prevGUIState NOTIFY prevGUIStateChanged)
     Q_PROPERTY(Controller* controller READ controller CONSTANT)//NOTIFY controllerChanged)
+    Q_PROPERTY(QString busStatus READ busStatus NOTIFY busStatusChanged)
 
 
     //Q_PROPERTY(QStack<QVarLengthArray<quint32, 2>> throttlePoints READ throttlePoints NOTIFY throttlePoints)
@@ -152,23 +153,6 @@ private:
                                              MissionState::DESCENT_MAIN,
                                              MissionState::LANDED};
 
-
-
-    //PASSIVE,                // 0
-    //STANDBY,                // 1
-    //STATIC_TEST_ARMED,        // 2
-    //STATIC_TEST_ACTIVE,       // 3
-    //POST_TEST,               // 4
-    //PRELAUNCH,              // 5
-    //ASCENT_RAIL,             // 6
-    //ASCENT_FREE_THRUST,       // 7
-    //ASCENT_FREE_COAST,        // 8
-    //DESCENT_FREE,            // 9
-    //DESCENT_PILOT,           // 10
-    //DESCENT_DROGUE,          // 11
-    //DESCENT_MAIN,            // 12
-    //LANDED,
-
     QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
     Controller* _controller {new Controller(this)};
 
@@ -207,6 +191,9 @@ public:
     void prevGUIState(FrameHandler::VehicleState newPrevGUIState);
     Controller* controller() const;
 
+    QString busStatus() const;
+    void getBusStatus();
+
     void nodeSynchronization(); // don't wanna make bool for other scenarios
 signals:
     bool sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
@@ -221,12 +208,14 @@ signals:
 
     void controllerChanged();
 
+    void busStatusChanged();
+
 public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
 
 
     bool connectCan();
     bool disconnectCan();
-    QString getBusStatus();
+
 
     void onErrorOccurred(QCanBusDevice::CanBusError error);
     void onFramesReceived(); // store a frame in the _dataFrame variable

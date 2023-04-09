@@ -18,6 +18,7 @@ class GNCThread : public QObject, public QRunnable
 public:
 
     explicit GNCThread(QObject *parent = nullptr);
+    ~GNCThread();
 
 signals:
 

@@ -122,26 +122,41 @@ bool FrameHandler::disconnectCan() // might need more work
     return false;
 }
 
-QString FrameHandler::getBusStatus() // Create a QML item displaying color for each state
+void FrameHandler::getBusStatus() // Create a QML item displaying color for each state
 {
     qDebug() << "Enter FrameHandler::getBusStatus() function";
     if(!_can0 || !_can0->hasBusStatus())
-        return "No CAN bus status available.";
-
+    {
+        _busStatus = "No CAN bus status available.";
+        emit busStatusChanged();
+        return;
+    }
     switch(_can0->busStatus())
     {
     case QCanBusDevice::CanBusStatus::Unknown: // Black
-        return "Can Bus Status: Unknown (Not supported by CAN pluggin)";
+         _busStatus = "Can Bus Status: Unknown (Not supported by CAN pluggin)";
+        emit busStatusChanged();
+         return;
     case QCanBusDevice::CanBusStatus::Good: // Green
-        return "Can Bus Status: Fully operational";
+        _busStatus = "Can Bus Status: Fully operational";
+        emit busStatusChanged();
+        return;
     case QCanBusDevice::CanBusStatus::Warning: // Yellow
-        return "Can Bus Status: Warning";
+        _busStatus = "Can Bus Status: Warning";
+        emit busStatusChanged();
+        return;
     case QCanBusDevice::CanBusStatus::Error: // Red
-        return "Can Bus Status: Error";
+        _busStatus = "Can Bus Status: Error";
+        emit busStatusChanged();
+        return;
     case QCanBusDevice::CanBusStatus::BusOff: // Blue
-        return "Can Bus Status: Bus disconnected";
+        _busStatus = "Can Bus Status: Bus disconnected";
+        emit busStatusChanged();
+        return;
     }
-    return "???";
+    _busStatus = "???";
+    emit busStatusChanged();
+    return;
 }
 
 bool FrameHandler::isOperational()
@@ -448,6 +463,7 @@ void FrameHandler::setNodeStatusRenegadeProp(FrameHandler::VehicleState newNodeS
 {
     _nodeStatusRenegadeProp = newNodeStatusRenegadeProp;
     emit nodeStatusRenegadePropChanged();
+    nodeSynchronization();
 }
 
 FrameHandler::VehicleState FrameHandler::nodeStatusBang() const
@@ -459,6 +475,7 @@ void FrameHandler::setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBan
 {
     _nodeStatusBang = newNodeStatusBang;
     emit nodeStatusBangChanged();
+    nodeSynchronization();
 }
 
 FrameHandler::VehicleState FrameHandler::currGUIState() const
@@ -494,7 +511,16 @@ void FrameHandler::nodeSynchronization()
     {
         _nodeSyncStatus = NodeSyncStatus::IN_SYNC;
     }
+    else if (_nodeStatusRenegadeEngine != _nodeStatusRenegadeProp)
+    {
+        _nodeSyncStatus = NodeSyncStatus::NOT_IN_SYNC;
+    }
     // need to expand
+}
+
+QString FrameHandler::busStatus() const
+{
+    return _busStatus;
 }
 
 // run
@@ -519,6 +545,7 @@ void FrameHandler::run()
     //    if (this->isOperational())
     //    {
     //        this->onFramesReceived(); // might need to disconnect the signal connected to this slot since I don't know quite how that works
+    //        //this->getBusStatus();  // this updates the string notifying the status of the can bus. might need to rework this
     //    }
     //}
 }

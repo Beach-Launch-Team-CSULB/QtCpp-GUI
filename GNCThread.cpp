@@ -3,6 +3,11 @@
 GNCThread::GNCThread(QObject *parent)
     : QObject{parent}
 {
+    qDebug() << "Enter GNCThread constructor";
+}
+
+GNCThread::~GNCThread()
+{
 
 }
 
