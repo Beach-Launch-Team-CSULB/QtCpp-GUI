@@ -3,6 +3,7 @@ import QtQuick.Controls
 // do qmlregistertypes for QML_ELEMENT
 // scrollbars
 
+import FrameHandlerEnums 1.0
 // things need for button logic: commandStates/currGUIState, valves' states,
 
 Window {
@@ -16,8 +17,12 @@ Window {
         onClicked:
         {
             console.log(bbb.text);
-            QtQML.invokeMethod(other, bbb.text, a,b);
+            //frameHandler.connectCan();
+            GNC.print();
+            console.log(GNC === null)
+            console.log(GNC === undefined)
         }
+
     }
 
     //Connections for connecting signals in C++ and Slots in

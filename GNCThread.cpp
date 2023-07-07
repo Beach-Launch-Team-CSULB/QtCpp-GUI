@@ -11,6 +11,11 @@ GNCThread::~GNCThread()
 
 }
 
+void GNCThread::print()
+{
+    qInfo() << "print this";
+}
+
 quint16 RoundTo100 (quint16 number)
 {
     return ((number+49)/100)*100;
