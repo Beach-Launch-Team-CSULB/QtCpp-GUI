@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     // Setup
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-    QDir appDir {QGuiApplication::applicationDirPath()}; // path of the executable. use this as a relative path to load resources
+    QDir appDir {QGuiApplication::applicationDirPath()};
     QThreadPool* pool {QThreadPool::globalInstance()};
     QThread::currentThread()->setObjectName("Main Event Thread");
     pool->setMaxThreadCount(pool->maxThreadCount());
@@ -101,8 +101,6 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("frameHandler", frameHandler);
     engine.rootContext()->setContextProperty("GNC", GNC);
 
-    //qmlRegisterUncreatableType<FrameHandler>("FrameHandlerEnums", 1,0, "FrameHandler", "Enum only"); // register enum(s) in the FrameHandler class
-
     // Register C++ objects to QML objects and vice versa. (expose c++ data to QML as a property)
     // also register actionable items in QML and use signals and slots to connect
     // signals emitted by those QML items to the C++ objects.
@@ -114,8 +112,7 @@ int main(int argc, char *argv[])
 
     //const QUrl url(u"qrc:/BLT-GUI-Maker/main.qml"_qs);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    const QUrl url(u"file:///C:/CodeStuff/Beach Launch Team/BLT-GUI-Maker/main.qml"_qs);// /Yo change it to your main.qml's path on your computer
-                                                                                        // and preappend the "file:///" in front of the path.
+    const QUrl url(u"file:///C:/CodeStuff/Beach Launch Team/BLT-GUI-Maker/main.qml"_qs);
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
@@ -124,7 +121,7 @@ int main(int argc, char *argv[])
 
     // How to load multiple windows
     engine.load(url);
-    engine.load(url); // do another QObject::connect like above?
+    engine.load(url);
 
     // Starting threads, where the application begins running:
     pool->start(frameHandler);

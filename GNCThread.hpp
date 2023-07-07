@@ -22,10 +22,7 @@ public:
 
 signals:
 
-public slots:
-    void print();
 public:
-
     void run() override;
 };
 

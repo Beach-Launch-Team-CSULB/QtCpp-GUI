@@ -64,14 +64,13 @@ public:
     quint16 fuelID();
 
     quint16 engineControllerID();
-    float fuelMVTime() const;
-    float LOXMVTime() const;
-    float IGN1Time() const;
-    float IGN2Time() const;
-
+    float fuelMVTime();
     void setFuelMVTime(float newFuelMVTime);
+    float LOXMVTime();
     void setLOXMVTime(float newLOXMVTime);
+    float IGN1Time();
     void setIGN1Time(float newIGN1Time);
+    float IGN2Time();
     void setIGN2Time(float newIGN2Time);
 
 

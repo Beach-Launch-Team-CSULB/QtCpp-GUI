@@ -67,7 +67,7 @@ void Sensor::setState(Sensor::SensorState newState)
     emit stateChanged();
 }
 
-quint16 Sensor::rawSensorID() const
+quint16 Sensor::rawSensorID()
 {
     return _rawSensorID;
 }
