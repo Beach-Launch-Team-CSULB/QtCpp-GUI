@@ -30,7 +30,11 @@
 
 #define WIN1000 // How do I set flags
 
-#include <Windows.h>
+#ifdef WIN1000
+    #include <windows.h>
+#elif
+    #include <X11/Xlib.h> // on raspberry pi
+#endif
 
 //make a function to create can bus objects instead????
 // another function to connect?
@@ -96,8 +100,6 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("frameHandler", frameHandler);
     engine.rootContext()->setContextProperty("GNC", GNC);
-
-    qmlRegisterUncreatableType<FrameHandler>("FrameHandlerEnums", 1,0, "FrameHandler", "C++ instantantiation only");
 
     // Register C++ objects to QML objects and vice versa. (expose c++ data to QML as a property)
     // also register actionable items in QML and use signals and slots to connect
