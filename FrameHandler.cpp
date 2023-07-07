@@ -42,11 +42,13 @@ FrameHandler::~FrameHandler()
     this->disconnectCan();
 }
 
+
 bool FrameHandler::connectCan() // need work
 {
     qDebug() << "Enter FrameHandler::connectCan() function";
     QString errorString;
     _can0 = QCanBus::instance()->createDevice(QStringLiteral("socketcan"), QStringLiteral("can0"), &errorString);
+    // GO TO THE GITHUB QTSERIALBUS TO BUILD A PLUGGIN
 
     if(!_can0)
     {
@@ -193,199 +195,227 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
     while (_can0->framesAvailable()) //
     {
         QCanBusFrame dataFrame = _can0->readFrame();
+
         // dissect data from the frame then update the GUI
-
-        QString frameIDBi;
-        try
+        // CAN 2.0
+        if (!dataFrame.hasExtendedFrameFormat())
         {
-            frameIDBi = {QString::number(dataFrame.frameId(), 2)}; // grab the ID in the form of binary
-        }
-        catch (...)
-        {
-            continue;
-        }
-
-        //const QString frameIDInt {QString::number(dataFrame.frameId(), 10)}; // grab the ID in the form of int
-        //const QString frameIDHex {QString::number(dataFrame.frameId(), 16)}; // grab the ID in the form of hexadecimal
-
-        // perform surgery on frameID
-        // Get ID's A and B in both integer and binary forms
-        QString ID_A_bin;
-        QString ID_B_bin;
-        quint16 ID_A;
-        quint32 ID_B;
-        if (dataFrame.hasExtendedFrameFormat())
-        {
-            ID_A_bin = frameIDBi.sliced(18); // extract the last 11 bits
-            ID_B_bin = frameIDBi.sliced(0,18); // extract the first 18 bits
-            ID_A = ID_A_bin.toInt(nullptr, 2);
-            ID_B = ID_B_bin.toInt(nullptr, 2);
-        }
-        else // No extended format -> no ID B
-        {
-            ID_A_bin = frameIDBi;
-            ID_A = ID_A_bin.toInt(nullptr,2);
-        }
-
-        // Dissect payload:
-        const QByteArray payload {dataFrame.payload().toHex()}; // returns nibble by nibble. Two nibbles make a byte
-        QList<QByteArray> data;
-        //QStack<QByteArray> data;
-        QString payloadErrorString;
-        // perform surgery on data
-        if (dataFrame.frameType() == QCanBusFrame::InvalidFrame)
-        {
-            payloadErrorString = _can0->interpretErrorFrame(dataFrame);
-            return;
-        }
-        // constructing the bytes this way so that the program wouldn't crash
-        // so scuffed, might need to rework this
-        //if (!dataFrame.hasFlexibleDataRateFormat())
-        //{
-            for (int i {0}; i < payload.length(); i = i + 2)
+            QString frameIDBi;
+            try
             {
-                 QByteArray byte;
-                 byte.append(payload.at(i)); byte.append(payload.at(i+1)); // put 2 nibbles together to make a byte
-                 data.append(byte);
-            }
-        //}
-        //else
-        //{
-
-        //}
-
-        // sensors
-        if (ID_A >= 51 && ID_A <= 426) // find out the actual ID's of the devices and to an || operator
-        {
-            emit sensorReceived(ID_A, ID_B, data);
-            return;
-        }
-        //Valve renegade engine
-        if (ID_A == 546)
-        {
-            QString HP1_bin {ID_B_bin.sliced(11,8)}; // According to the python gui
-            QString HP2_bin {ID_B_bin.sliced(3,8)}; // According to the python gui
-
-            std::reverse(HP1_bin.begin(), HP1_bin.end());
-            std::reverse(HP2_bin.begin(), HP2_bin.end());
-
-            quint16 HP1 = HP1_bin.toInt(nullptr, 2);
-            quint16 HP2 = HP2_bin.toInt(nullptr, 2);
-            emit valveReceived(HP1, HP2, data);
-            return;
-        }
-        // Valve renegade prop
-        if (ID_A == 547)
-        {
-            // perform surgery on frameID
-            QString HP1_bin {ID_B_bin.sliced(11,8)}; // According to the python gui
-            QString HP2_bin {ID_B_bin.sliced(3,8)}; // According to the python gui
-
-            std::reverse(HP1_bin.begin(), HP1_bin.end());
-            std::reverse(HP2_bin.begin(), HP2_bin.end());
-
-            quint16 HP1 = HP1_bin.toInt(nullptr, 2);
-            quint16 HP2 = HP2_bin.toInt(nullptr, 2);
-            emit valveReceived(HP1, HP2, data);
-            return;
-        }
-        // Valves
-        if (ID_A == 552)
-        {
-        // leave it blank here since it seems like it's not used
-            return;
-        }
-        //"NODE STATE REPORT" "Bytes 1,2,3,4,5,6,7 are not used according to the python gui"
-        //"Engine Node 2"
-        //"Prop Node 3"
-        if (ID_A > 510 && ID_A < 530)
-        {
-            try{
-                if (ID_A == 514)
-                {
-                    setNodeStatusRenegadeEngine(_vehicleStates.at(data.at(0).toInt(nullptr,16))); // byte zero carries a value from 0 to 12
-                    // catch the remaining bytes in the future. Don't wanna catch all of rest since I don't know many bytes there actually are
-                    return;
-                }
-                if (ID_A == 515)
-                {
-                    setNodeStatusRenegadeProp(_vehicleStates.at(data.at(0).toInt(nullptr,16)));
-                    // catch the remaining bytes in the future. Don't wanna catch all of rest since I don't know many bytes there actually are
-                    return;
-                }
-                if (ID_A == 520) // also Dan said there is no ID_A == 520
-                {
-                    //setNodeStatusBang(_vehicleStates.at(data.at(0).toInt(nullptr,16)));
-                    return;
-                }
+                frameIDBi = {QString::number(dataFrame.frameId(), 2)}; // grab the ID in the form of binary
             }
             catch (...)
             {
                 continue;
             }
-        }
-        if (ID_A == 1100)
-        {
-            _controller->setAutosequenceTime(dataFrame.payload().toFloat(nullptr)/1000000); // may need to convert this to int then cast it to float
-            return;
-        }
 
-        // switch to else if to get rid of uncessary returns???
-        if (ID_A == 1506)
-        {   // Commenting this out because in the python gui, throttlePoints is initially a dict,
-            // but it's then set to a list when time is 0 ... seems like not used yet
+            //const QString frameIDInt {QString::number(dataFrame.frameId(), 10)}; // grab the ID in the form of int
+            //const QString frameIDHex {QString::number(dataFrame.frameId(), 16)}; // grab the ID in the form of hexadecimal
 
-            //quint32 time = (data.at(0) + data.at(1)).toInt(nullptr,16);
-            //quint32 throttlePoint = (data.at(2) + data.at(3)).toInt(nullptr,16);
-            //_throttlePoints.push(QVarLengthArray<quint32, 2>{time, throttlePoint});
-            //try
-            //{
-            //    time = (data.at(4) + data.at(5)).toInt(nullptr,16);
-            //    throttlePoint = (data.at(6) + data.at(7)).toInt(nullptr,16);
-            //    _throttlePoints.push(QVarLengthArray<quint32, 2>{time, throttlePoint});
-            //}
-            //catch (...)
-            //{
-            //    continue;
-            //}
-        }
-
-        if (data.length())
-        {
-            quint16 controllerID = ((((ID_A+49)/100)*100)-1000)/100; //(((ID_A+49)/100)*100) = round ID_A to the nearest hundred. It works trust me :)
-            quint16 controllerIndex = ID_A % 100;
-            if (data.length() == 8)
+            // perform surgery on frameID
+            // Get ID's A and B in both integer and binary forms
+            QString ID_A_bin;
+            QString ID_B_bin;
+            quint16 ID_A;
+            quint32 ID_B;
+            if (dataFrame.hasExtendedFrameFormat())
             {
-                if ((ID_A == 1502 || ID_A == 1504) && controllerID == _controller->_engineControllerID)
+                ID_A_bin = frameIDBi.sliced(18); // extract the last 11 bits
+                ID_B_bin = frameIDBi.sliced(0,18); // extract the first 18 bits
+                ID_A = ID_A_bin.toInt(nullptr, 2);
+                ID_B = ID_B_bin.toInt(nullptr, 2);
+            }
+            else // No extended format -> no ID B
+            {
+                ID_A_bin = frameIDBi;
+                ID_A = ID_A_bin.toInt(nullptr,2);
+            }
+
+            // Dissect payload:
+            // !!!this needs to be reworked. QByteArray is presented like a string, where each character represents a byte
+            const QByteArray payload {dataFrame.payload().toHex(0)}; // returns nibble by nibble. Join two nibbles to make a byte
+            QList<QByteArray> data;
+            //QStack<QByteArray> data;
+            QString payloadErrorString;
+            // perform surgery on data
+            if (dataFrame.frameType() == QCanBusFrame::InvalidFrame)
+            {
+                payloadErrorString = _can0->interpretErrorFrame(dataFrame);
+                return;
+            }
+            // constructing the bytes this way so that the program wouldn't crash
+            // so scuffed, might need to rework this
+            //if (!dataFrame.hasFlexibleDataRateFormat())
+            //{
+
+                for (int i {0}; i < payload.length(); i = i + 2) //
                 {
-                    switch (controllerIndex)
+                     QByteArray byte;
+                     byte.append(payload.at(i)); byte.append(payload.at(i+1)); // put 2 nibbles together to make a byte
+
+                     data.append(byte); // QByteArray doesn't seem too intuitive to work with so this is the way
+                                        // it has to be :"(
+                }
+
+                // !! when concatenate byte, do the reverse like byte1 + byte0 ///////
+
+            /*
+            // handle byte order and join nibbles to make bytes
+            for (qsizetype i {payload.length()}; i > 0; i = i - 2) //
+                {
+                    QByteArray byte;
+                    byte.append(payload.at(i)); byte.append(payload.at(i-1)); // put 2 nibbles together to make a byte
+                    data.append(byte);  // QByteArray doesn't seem too intuitive to work with so this is the way
+                                        // it has to be :"(
+                }
+            */
+            //}
+            //else
+            //{
+
+            //}
+
+            // might scrap everything below and move to CAN FD!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+            // sensors
+            if (ID_A >= 51 && ID_A <= 426) // find out the actual ID's of the devices and to an || operator
+            {
+                emit sensorReceived(ID_A, ID_B, data);
+                return;
+            }
+            //Valve renegade engine
+            if (ID_A == 546)
+            {
+                QString HP1_bin {ID_B_bin.sliced(11,8)}; // According to the python gui
+                QString HP2_bin {ID_B_bin.sliced(3,8)}; // According to the python gui
+
+                std::reverse(HP1_bin.begin(), HP1_bin.end());
+                std::reverse(HP2_bin.begin(), HP2_bin.end());
+
+                quint16 HP1 = HP1_bin.toInt(nullptr, 2);
+                quint16 HP2 = HP2_bin.toInt(nullptr, 2);
+                emit valveReceived(HP1, HP2, data);
+                return;
+            }
+            // Valve renegade prop
+            if (ID_A == 547)
+            {
+                // perform surgery on frameID
+                QString HP1_bin {ID_B_bin.sliced(11,8)}; // According to the python gui
+                QString HP2_bin {ID_B_bin.sliced(3,8)}; // According to the python gui
+
+                std::reverse(HP1_bin.begin(), HP1_bin.end());
+                std::reverse(HP2_bin.begin(), HP2_bin.end());
+
+                quint16 HP1 = HP1_bin.toInt(nullptr, 2);
+                quint16 HP2 = HP2_bin.toInt(nullptr, 2);
+                emit valveReceived(HP1, HP2, data);
+                return;
+            }
+            // Valves
+            if (ID_A == 552)
+            {
+            // leave it blank here since it seems like it's not used
+                return;
+            }
+            //"NODE STATE REPORT" "Bytes 1,2,3,4,5,6,7 are not used according to the python gui"
+            //"Engine Node 2"
+            //"Prop Node 3"
+            if (ID_A > 510 && ID_A < 530)
+            {
+                try{
+                    if (ID_A == 514)
                     {
-                    case 2:
-                        _controller->setFuelMVTime((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
-                        _controller->setLOXMVTime((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
-                        break;
-                    case 4:
-                        _controller->setIGN1Time((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
-                        _controller->setIGN2Time((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
-                        break;
+                        setNodeStatusRenegadeEngine(_vehicleStates.at(data.at(0).toInt(nullptr,16))); // byte zero carries a value from 0 to 12
+                        // catch the remaining bytes in the future. Don't wanna catch all of rest since I don't know many bytes there actually are
+                        return;
+                    }
+                    if (ID_A == 515)
+                    {
+                        setNodeStatusRenegadeProp(_vehicleStates.at(data.at(0).toInt(nullptr,16)));
+                        // catch the remaining bytes in the future. Don't wanna catch all of rest since I don't know many bytes there actually are
+                        return;
+                    }
+                    if (ID_A == 520) // also Dan said there is no ID_A == 520
+                    {
+                        //setNodeStatusBang(_vehicleStates.at(data.at(0).toInt(nullptr,16)));
+                        return;
                     }
                 }
-                // tank controller hiPress, LOX, fuel
-                //else if
+                catch (...)
+                {
+                    continue;
+                }
+            }
+            if (ID_A == 1100)
+            {
+                _controller->setAutosequenceTime(dataFrame.payload().toFloat(nullptr)/1000000); // this wouldn't work. need to access each byte using the .at() function
+                                                                                                // then squash those bits together
+                return;
+            }
+
+            // switch to else if to get rid of uncessary returns???
+            if (ID_A == 1506)
+            {   // Commenting this out because in the python gui, throttlePoints is initially a dict,
+                // but it's then set to a list when time is 0 ... seems like not used yet
+
+                //quint32 time = (data.at(0) + data.at(1)).toInt(nullptr,16);
+                //quint32 throttlePoint = (data.at(2) + data.at(3)).toInt(nullptr,16);
+                //_throttlePoints.push(QVarLengthArray<quint32, 2>{time, throttlePoint});
+                //try
                 //{
-                //
+                //    time = (data.at(4) + data.at(5)).toInt(nullptr,16);
+                //    throttlePoint = (data.at(6) + data.at(7)).toInt(nullptr,16);
+                //    _throttlePoints.push(QVarLengthArray<quint32, 2>{time, throttlePoint});
                 //}
-                //else
+                //catch (...)
                 //{
-                //
+                //    continue;
                 //}
             }
-            else //Node controller ????
-            {
 
+            if (data.length())
+            {
+                quint16 controllerID = ((((ID_A+49)/100)*100)-1000)/100; //(((ID_A+49)/100)*100) = round ID_A to the nearest hundred. It works trust me :)
+                quint16 controllerIndex = ID_A % 100;
+                if (data.length() == 8)
+                {
+                    if ((ID_A == 1502 || ID_A == 1504) && controllerID == _controller->_engineControllerID)
+                    {
+                        switch (controllerIndex)
+                        {
+                        case 2:
+                            _controller->setFuelMVTime((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
+                            _controller->setLOXMVTime((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
+                            break;
+                        case 4:
+                            _controller->setIGN1Time((data.at(0) + data.at(1) + data.at(2) + data.at(3)).toInt(nullptr,16));
+                            _controller->setIGN2Time((data.at(4) + data.at(5) + data.at(6) + data.at(7)).toInt(nullptr,16));
+                            break;
+                        }
+                    }
+                    // tank controller hiPress, LOX, fuel
+                    //else if
+                    //{
+                    //
+                    //}
+                    //else
+                    //{
+                    //
+                    //}
+                }
+                else //Node controller ????
+                {
+
+                }
             }
         }
+        // CANFD
+        else
+        {
 
+        }
 
 
         // states

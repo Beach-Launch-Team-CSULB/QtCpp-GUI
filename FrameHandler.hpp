@@ -30,6 +30,9 @@
 #include "Sensor.hpp"
 #include "Valve.hpp"
 #include "Controller.hpp"
+// thread interaction??
+#include "GNCThread.hpp"
+
 //enum class CommandAuthority
 //{
 //    view = 0,
@@ -68,7 +71,7 @@ public:
             FIRE,                   // 12
 
     };
-    Q_ENUM(VehicleState)
+    Q_ENUMS(VehicleState)
 
     enum class MissionState
     {
@@ -173,33 +176,34 @@ public:
 
 
     bool isOperational();
+    void nodeSynchronization(); // don't wanna make bool for other scenarios
 
     QMap<QString, Sensor*> sensors() const;
     QMap<QString, Valve*> valves() const;
-
-
     FrameHandler::VehicleState nodeStatusRenegadeEngine() const;
-    void setNodeStatusRenegadeEngine(FrameHandler::VehicleState newNodeStatusRenegadeEngine);
     FrameHandler::VehicleState nodeStatusRenegadeProp() const;
-    void setNodeStatusRenegadeProp(FrameHandler::VehicleState newNodeStatusRenegadeProp);
     FrameHandler::VehicleState nodeStatusBang() const;
-    void setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBang);
-
     FrameHandler::VehicleState currGUIState() const;
-    void setcurrGUIState(FrameHandler::VehicleState newCurrGUIState);
     FrameHandler::VehicleState prevGUIState() const;
-    void prevGUIState(FrameHandler::VehicleState newPrevGUIState);
     Controller* controller() const;
-
     QString busStatus() const;
+
+
+
+    void setNodeStatusRenegadeEngine(FrameHandler::VehicleState newNodeStatusRenegadeEngine);
+    void setNodeStatusRenegadeProp(FrameHandler::VehicleState newNodeStatusRenegadeProp);
+    void setNodeStatusBang(FrameHandler::VehicleState newNodeStatusBang);
+    void setcurrGUIState(FrameHandler::VehicleState newCurrGUIState);
+    void prevGUIState(FrameHandler::VehicleState newPrevGUIState);
     void getBusStatus();
 
-    void nodeSynchronization(); // don't wanna make bool for other scenarios
 signals:
     bool sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
+    //bool sensorReceived(); // canFD
     bool valveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data);
+    //bool valveReceived(); // canFD
     bool stateReceived(quint16 ID_A, QList<QByteArray> data);
-
+    //bool StateReceived(); // canFD
     void currGUIStateChanged();
     void prevGUIStateChanged();
     void nodeStatusRenegadeEngineChanged();
@@ -211,8 +215,6 @@ signals:
     void busStatusChanged();
 
 public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
-
-
     bool connectCan();
     bool disconnectCan();
 

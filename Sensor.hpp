@@ -55,13 +55,15 @@ private:
     float _value = {0.0f}; // SET BY *RECEIVED* CAN FRAME. log to a file maybe???
 public:
     explicit Sensor(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0});
-    float value() const;
-    void setValue(float newValue);
-    Sensor::SensorState state() const;
-    void setState(Sensor::SensorState newState);
-    QString name() const;
 
-    quint16 rawSensorID();
+    float value() const;
+    Sensor::SensorState state() const;
+    QString name() const;
+    quint16 rawSensorID() const;
+
+    void setState(Sensor::SensorState newState);
+    void setValue(float newValue);
+
 
 signals:
     void valueChanged(); // emit in main the thread for QML to handle, where it reads the sensor's value

@@ -48,7 +48,7 @@ quint16 Controller::engineControllerID()
 }
 
 
-float Controller::fuelMVTime()
+float Controller::fuelMVTime() const
 {
     return _fuelMVTime;
 }
@@ -58,7 +58,7 @@ void Controller::setFuelMVTime(float newFuelMVTime)
     _fuelMVTime = newFuelMVTime;
     emit fuelMVTimeChanged();
 }
-float Controller::LOXMVTime()
+float Controller::LOXMVTime() const
 {
     return _LOXMVTime;
 }
@@ -67,7 +67,7 @@ void Controller::setLOXMVTime(float newLOXMVTime)
     _LOXMVTime = newLOXMVTime;
     emit LOXMVTimeChanged();
 }
-float Controller::IGN1Time()
+float Controller::IGN1Time() const
 {
     return _IGN1Time;
 }
@@ -76,7 +76,7 @@ void Controller::setIGN1Time(float newIGN1Time)
     _IGN1Time = newIGN1Time;
     emit IGN1TimeChanged();
 }
-float Controller::IGN2Time()
+float Controller::IGN2Time() const
 {
     return _IGN2Time;
 }
