@@ -8,7 +8,11 @@ GNCThread::GNCThread(QObject *parent)
 
 GNCThread::~GNCThread()
 {
-
+    qDebug() << "Enter GNCThread deconstructor";
+}
+void GNCThread::print()
+{
+    qInfo() << "print from GNCThread";
 }
 
 quint16 RoundTo100 (quint16 number)

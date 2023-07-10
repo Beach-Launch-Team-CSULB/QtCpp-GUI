@@ -22,8 +22,13 @@ public:
 
 signals:
 
+public slots:
+    void print();
 public:
+
     void run() override;
 };
+
+Q_DECLARE_METATYPE(GNCThread)
 
 #endif // GNCTHREAD_HPP

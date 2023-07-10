@@ -29,6 +29,19 @@ public:
     };
     Q_ENUM(ValveState)
 
+    enum class PyroState
+    {
+        OFF =               0,
+        ON =                1,
+        FIRE_COMMANDED =    2,
+        ON_COMMANDED =      3,
+        OFF_COMMANDED =     4,
+        FIRED =             5,
+        NULL_RETURN =       6,
+        PYRO_STATE_SIZE =   7,
+    };
+    Q_ENUM(PyroState)
+
     //enum class ValveNode
     //{
     //    ENGINE_NODE = 2,
@@ -62,6 +75,9 @@ private:
     quint16 _something_to_do_with_text_styling;
     Node::NodeID _valveNode;
 
+    // Pyro
+    PyroState _pyroState; //
+
 public:
     explicit Valve(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0,0,0,0,0});
 
@@ -76,7 +92,10 @@ public:
 signals:
     void stateChanged();    // for QML to handle
 public slots:
-    void onValveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data);
+    void onValveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data); // This is wrong, need to fix
+    void onValveReceivedFD(const QList<QByteArray>& data);
 };
+
+Q_DECLARE_METATYPE(Valve)
 
 #endif // VALVE_HPP

@@ -101,6 +101,20 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("frameHandler", frameHandler);
     engine.rootContext()->setContextProperty("GNC", GNC);
 
+    //engine.rootContext()->setContextProperty("frameHandlerSensors", frameHandler->sensors());
+    //qInfo() << frameHandler->sensors().value("High_Press_1"); qInfo() << " HHHHHHHHHHHHHHHHHH";
+
+    qRegisterMetaType<FrameHandler>();
+    qRegisterMetaType<Sensor>();
+    qRegisterMetaType<Valve>();
+
+    // Also expose sensors and valves with setContextProperty too using the foreach loop
+
+    qmlRegisterUncreatableType<FrameHandler>("FrameHandlerEnums", 1, 0, "FrameHandlerEnums", "C++ instantiation only");
+    qmlRegisterUncreatableType<Sensor>("SensorEnums", 1, 0, "SensorEnums", "C++ instantiation only");
+    qmlRegisterUncreatableType<Valve>("ValveEnums", 1, 0, "ValveEnums", "C++ instantiation only");
+    qmlRegisterUncreatableType<Node>("NodeIDEnums", 1, 0, "NodeIDEnums", "C++ instantiation only");
+
     // Register C++ objects to QML objects and vice versa. (expose c++ data to QML as a property)
     // also register actionable items in QML and use signals and slots to connect
     // signals emitted by those QML items to the C++ objects.

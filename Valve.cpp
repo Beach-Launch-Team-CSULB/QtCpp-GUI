@@ -69,6 +69,11 @@ void Valve::onValveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data)
 
 }
 
+void Valve::onValveReceivedFD(const QList<QByteArray>& data)
+{
+
+}
+
 QString Valve::name() const
 {
     return _name;

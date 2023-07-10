@@ -11,12 +11,15 @@ qt_add_executable(appBLT-GUI-Maker
     main.cpp
     FrameHandler.hpp FrameHandler.cpp
     Sensor.hpp Sensor.cpp SensorObjectDefinitions.hpp
+    HPSensor.hpp HPSensor.cpp HPSensorObjectDefinitions.hpp
+    LoadCellSensor.hpp LoadCellSensor.cpp LoadCellSensorObjectDefinitions.hpp
     Valve.hpp Valve.cpp ValveObjectDefinitions.hpp
+    Autosequence.hpp Autosequence.cpp AutosequenceObjectDefinitions.hpp
+    Thermocouple.hpp Thermocouple.cpp ThermocoupleObjectDefinitions.hpp
     GNCThread.hpp GNCThread.cpp
     Controller.hpp Controller.cpp
     CommandState.hpp
     Node.hpp
-
     QMLtestclass.hpp QMLtestclass.cpp
 )
 
@@ -29,6 +32,7 @@ qt_add_qml_module(appBLT-GUI-Maker
     Valve.hpp Valve.cpp ValveObjectDefinitions.hpp
     GNCThread.hpp GNCThread.cpp
     Controller.hpp Controller.cpp
+
     CommandState.hpp
 
 

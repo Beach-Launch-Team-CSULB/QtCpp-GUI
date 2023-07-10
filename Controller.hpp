@@ -83,4 +83,5 @@ signals:
 public slots:
 };
 
+Q_DECLARE_METATYPE(Controller)
 #endif // CONTROLLER_HPP
