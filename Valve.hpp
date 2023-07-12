@@ -42,17 +42,11 @@ public:
     };
     Q_ENUM(PyroState)
 
-    //enum class ValveNode
-    //{
-    //    ENGINE_NODE = 2,
-    //    PROP_NODE = 3,
-    //    PASA_NODE = 8
-    //};
-    //Q_ENUM(ValveNode)
 private:
     Q_OBJECT
     // Expose object's properties to QML
-    Q_PROPERTY(Valve::ValveState _state READ state NOTIFY stateChanged)
+    Q_PROPERTY(Valve::ValveState valveState READ valveState NOTIFY ValveStateChanged)
+    Q_PROPERTY(Valve::PyroState pyroState READ pyroState NOTIFY pyroStateChanged)
     Q_PROPERTY(quint16 ID READ ID CONSTANT)
     Q_PROPERTY(quint16 commandOff READ commandOff CONSTANT)
     Q_PROPERTY(quint16 commandOn READ commandOn CONSTANT)
@@ -60,7 +54,7 @@ private:
     QML_UNCREATABLE("C++ instantiation only")
     QString _name;
     quint16 _ID;
-    Valve::ValveState _state;
+    Valve::ValveState _valveState;
     quint16 _HP_channel;
 
     quint16 _commandOff;
@@ -78,19 +72,28 @@ private:
     // Pyro
     PyroState _pyroState; //
 
+
+
 public:
     explicit Valve(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0,0,0,0,0});
 
-    Valve::ValveState state() const;
-    void setState(Valve::ValveState newState);
+    Valve::ValveState valveState() const;
+    void setValveState(Valve::ValveState newValveState);
+
+    Valve::PyroState pyroState() const;
+    void setPyroState(Valve::PyroState newPyroState);
 
     QString name() const;
     quint16 ID();
     quint16 commandOff();
     quint16 commandOn();
 
+
+
 signals:
-    void stateChanged();    // for QML to handle
+    void ValveStateChanged();    // for QML to handle
+    void pyroStateChanged();
+
 public slots:
     void onValveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data); // This is wrong, need to fix
     void onValveReceivedFD(const QList<QByteArray>& data);

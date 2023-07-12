@@ -18,6 +18,7 @@ qt_add_executable(appBLT-GUI-Maker
     Thermocouple.hpp Thermocouple.cpp ThermocoupleObjectDefinitions.hpp
     GNCThread.hpp GNCThread.cpp
     Controller.hpp Controller.cpp
+    TankPressController.hpp TankPressController.cpp TankPressControllerObjectDefinitions.hpp
     CommandState.hpp
     Node.hpp
     QMLtestclass.hpp QMLtestclass.cpp

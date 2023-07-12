@@ -2,9 +2,9 @@
 
 Sensor::Sensor(QObject *parent, QList<QVariant> args)
     : QObject{parent}, _name{args.at(0).toString()},
-    _rawSensorID{static_cast<quint16>(args.at(1).toInt())},
-    _sensorNode{static_cast<quint16>(args.at(2).toInt())},
-    _convertedSensorID{static_cast<quint16>(args.at(3).toInt())}
+    _rawSensorID{static_cast<quint16>(args.at(1).toUInt())},
+    _sensorNode{static_cast<quint16>(args.at(2).toUInt())},
+    _convertedSensorID{static_cast<quint16>(args.at(3).toUInt())}
 {
     //_sensorID = _rawSensorID + 1;
     _convertedSensorID = _rawSensorID + 1;
@@ -44,26 +44,30 @@ void Sensor::onSensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data
 
 void Sensor::onSensorReceivedFD(const QList<QByteArray>& data)
 {
-    for (int i = 0; i < data.length(); i = i + 12)
+    for (int i = 0; i < data.length(); i = i + 16)
     {
-        if(_rawSensorID == data.at(i).toInt(nullptr, 16))
+        if(_rawSensorID == data.at(i).toUInt(nullptr, 16))
         {
-            setState(static_cast<SensorState>(data.at(i+1).toInt(nullptr, 16)));
+            setState(static_cast<SensorState>(data.at(i+1).toUInt(nullptr, 16)));
 
-            quint32 currentTimestamp =  data.at(i+5).toInt(nullptr, 16) +
-                                        (data.at(i+4).toInt(nullptr, 16) << 8) +
-                                        (data.at(i+3).toInt(nullptr, 16) << 16) +
-                                        (data.at(i+2).toInt(nullptr, 16) << 24);
+            quint64 currentTimestamp =  static_cast<quint64>(data.at(i+9).toUInt(nullptr, 16)) +
+                                        (static_cast<quint64>(data.at(i+8).toUInt(nullptr, 16)) << 8) +
+                                        (static_cast<quint64>(data.at(i+7).toUInt(nullptr, 16)) << 16) +
+                                        (static_cast<quint64>(data.at(i+6).toUInt(nullptr, 16)) << 24) +
+                                        (static_cast<quint64>(data.at(i+5).toUInt(nullptr, 16)) << 32) +
+                                        (static_cast<quint64>(data.at(i+4).toUInt(nullptr, 16)) << 40) +
+                                        (static_cast<quint64>(data.at(i+3).toUInt(nullptr, 16)) << 48) +
+                                        (static_cast<quint64>(data.at(i+2).toUInt(nullptr, 16)) << 56);
             setTimestamp(currentTimestamp);
 
-            quint16 currentRawValue = data.at(i+7).toInt(nullptr, 16) + (data.at(i+6).toInt(nullptr, 16) << 8);
+            quint16 currentRawValue = data.at(i+7).toUInt(nullptr, 16) + (data.at(i+6).toUInt(nullptr, 16) << 8);
             setRawValue(currentRawValue);
 
-            quint8 u_8x4[4] = { static_cast<quint8>(data.at(i+8).toUInt(nullptr,16)),
-                                static_cast<quint8>(data.at(i+9).toUInt(nullptr,16)),
-                                static_cast<quint8>(data.at(i+10).toUInt(nullptr,16)),
-                                static_cast<quint8>(data.at(i+11).toUInt(nullptr,16))};
-            float currentConvertedValue;
+            quint8 u_8x4[4] = { static_cast<quint8>(data.at(i+12).toUInt(nullptr,16)),
+                                static_cast<quint8>(data.at(i+13).toUInt(nullptr,16)),
+                                static_cast<quint8>(data.at(i+14).toUInt(nullptr,16)),
+                                static_cast<quint8>(data.at(i+15).toUInt(nullptr,16))};
+            float currentConvertedValue = 0.0f;
             memcpy(&currentConvertedValue, u_8x4, 4);
             setConvertedValue(currentConvertedValue);
             break;
@@ -71,16 +75,16 @@ void Sensor::onSensorReceivedFD(const QList<QByteArray>& data)
     }
 }
 
-quint32 Sensor::getTimestamp() const
+quint64 Sensor::getTimestamp() const
 {
-    return timestamp;
+    return _timestamp;
 }
 
-void Sensor::setTimestamp(quint32 newTimestamp)
+void Sensor::setTimestamp(quint64 newTimestamp)
 {
-    if (timestamp == newTimestamp)
+    if (_timestamp == newTimestamp)
         return;
-    timestamp = newTimestamp;
+    _timestamp = newTimestamp;
     emit timestampChanged();
 }
 

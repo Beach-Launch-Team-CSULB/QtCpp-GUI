@@ -1,17 +1,31 @@
 #include "FrameHandler.hpp"
-#include "SensorObjectDefinitions.hpp"
-#include "ValveObjectDefinitions.hpp"
 
+#include "SensorObjectDefinitions.hpp"
+#include "HPSensorObjectDefinitions.hpp"
+#include "ValveObjectDefinitions.hpp"
+#include "AutosequenceObjectDefinitions.hpp"
+#include "TankPressControllerObjectDefinitions.hpp"
+
+QQmlPropertyMap* FrameHandler::tankPressControllers()
+{
+    return &_tankPressControllers;
+}
 
 FrameHandler::FrameHandler(QObject *parent)
     : QObject{parent}
 {
     qDebug() << "Enter FrameHandler constructor"; // Note: because of threading, this might not be an accurate way of finding out where the program crashes
-    foreach(auto& sensorContructingParameter, sensorConstructingParameters) //sensor key List
+    foreach(auto& sensorConstructingParameter, sensorConstructingParameters) //sensor key List
     {                                                                       //{"High_Press_1"} {"High_Press_2"} {"Fuel_Tank_1"} {"Fuel_Tank_2"}
-        _sensors.insert(sensorContructingParameter.at(0).toString(),        //{"Lox_Tank_1"} {"Lox_Tank_2"} {"Fuel_Dome_Reg"} {"Lox_Dome_Reg"}
-                        QVariant::fromValue<Sensor*>(new Sensor{this, sensorContructingParameter}));       //{"Fuel_Prop_Inlet"} {"Lox_Prop_Inlet"} {"Fuel_Injector"}
+        _sensors.insert(sensorConstructingParameter.at(0).toString(),        //{"Lox_Tank_1"} {"Lox_Tank_2"} {"Fuel_Dome_Reg"} {"Lox_Dome_Reg"}
+                        QVariant::fromValue<Sensor*>(new Sensor{this, sensorConstructingParameter}));       //{"Fuel_Prop_Inlet"} {"Lox_Prop_Inlet"} {"Fuel_Injector"}
     }                                                                       //{"LC1"} {"LC2"} {"LC3"} {"Chamber_1"} {"Chamber_2"} {"MV_Pneumatic}
+
+    foreach(auto& HPSensorConstructingParameter, HPSensorConstructingParameters)
+    {
+        _HPSensors.insert(HPSensorConstructingParameter.at(0).toString(),
+                          QVariant::fromValue<HPSensor*>(new HPSensor{this, HPSensorConstructingParameter}));
+    }
 
     foreach(auto& valveConstructingParameter, valveConstructingParameters)  // valve key list
     {                                                                       //{"HV"} {"HP"} {"LDR"} {"FDR"} {"LDV"}
@@ -19,15 +33,43 @@ FrameHandler::FrameHandler(QObject *parent)
                        QVariant::fromValue<Valve*>(new Valve{this, valveConstructingParameter}));        //{"LMV"} {"FMV"} {"IGN1"} {"IGN2"}
     }
 
+    foreach(auto& autosequenceConstructingParameter, autosequenceConstructingParameters)
+    {
+        _autosequences.insert(autosequenceConstructingParameter.at(0).toString(),
+                              QVariant::fromValue<Autosequence*>(new Autosequence{this, autosequenceConstructingParameter}));
+    }
+
+    foreach(auto& tankPressControllerConstructingParameter, tankPressControllerConstructingParameters)
+    {
+        _tankPressControllers.insert(tankPressControllerConstructingParameter.at(0).toString(),
+                                    QVariant::fromValue<TankPressController*>(new TankPressController{this, tankPressControllerConstructingParameter}));
+    }
+
+
     //Connect signals and slots
     foreach(const QString& sensorKey, _sensors.keys()) // iterating through QMap, value is assigned instead of the key
     {
         QObject::connect(this, &FrameHandler::sensorReceived, qvariant_cast<Sensor*>(_sensors.value(sensorKey)), &Sensor::onSensorReceived);
         QObject::connect(this, &FrameHandler::sensorReceivedFD, qvariant_cast<Sensor*>(_sensors.value(sensorKey)), &Sensor::onSensorReceivedFD);
     }
+    foreach(const QString& HPSensorKey, _HPSensors.keys()) // iterating through QMap, value is assigned instead of the key
+    {
+        QObject::connect(this, &FrameHandler::HPSensorReceivedFD, qvariant_cast<HPSensor*>(_HPSensors.value(HPSensorKey)), &HPSensor::onHPSensorReceivedFD);
+    }
     foreach(const QString& valveKey, _valves.keys()) // iterating through QMap, value is assigned instead of the key
     {
         QObject::connect(this, &FrameHandler::valveReceived, qvariant_cast<Valve*>(_valves.value(valveKey)), &Valve::onValveReceived);
+        QObject::connect(this, &FrameHandler::valveReceivedFD, qvariant_cast<Valve*>(_valves.value(valveKey)), &Valve::onValveReceivedFD);
+    }
+    foreach(const QString& autosequenceKey, _autosequences.keys())
+    {
+        QObject::connect(this, &FrameHandler::autosequenceReceivedFD,
+                         qvariant_cast<Autosequence*>(_autosequences.value(autosequenceKey)), &Autosequence::onAutosequenceReceivedFD);
+    }
+    foreach(const QString& tankPressControllerKey, _tankPressControllers.keys())
+    {
+        QObject::connect(this, &FrameHandler::tankPressControllerReceivedFD,
+                         qvariant_cast<TankPressController*>(_tankPressControllers.value(tankPressControllerKey)), &TankPressController::onTankPressControllerReceivedFD);
     }
 
     QThread::currentThread()->setObjectName("Frame Handler thread");
@@ -425,6 +467,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
                 data.append(byte); // data.at(0) = Byte 1, data.at(1) = Byte 2, etc...
             }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // States
             if (PROP_NODE_STATE_ID_OFFSET <= id && id > PROP_NODE_STATE_ID_OFFSET + 10)
             {
@@ -442,9 +485,9 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
                 }
             }
 
-            if (id == AUTOSEQUENCE_ID_OFFSET + engineNode)
+            if (AUTOSEQUENCE_ID_OFFSET <= id && id > AUTOSEQUENCE_ID_OFFSET + 10)
             {
-                // Make an AUtoSequence class
+                emit autosequenceReceivedFD(data);
             }
 
             // Sensors
@@ -454,8 +497,23 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
                 return;
             }
 
+            if (HP_SENSOR_ID_OFFSET <= id && id > HP_SENSOR_ID_OFFSET +10)
+            {
+                emit HPSensorReceivedFD(data);
+                return;
+            }
 
+            if (HP_OBJECT_ID_OFFSET <= id && id > HP_OBJECT_ID_OFFSET + 10)
+            {
+                emit valveReceivedFD(data);
+                return;
+            }
 
+            if (TANK_PRESS_CONTROLLER_ID_OFFSET <= id && id > TANK_PRESS_CONTROLLER_ID_OFFSET + 10)
+            {
+                emit tankPressControllerReceivedFD(data);
+                return;
+            }
         }
 
 
@@ -502,6 +560,11 @@ void FrameHandler::sendFrame(quint32 ID, QString dataHexString, QCanBusFrame::Fr
 
 // Getters and Setters section
 
+QQmlPropertyMap* FrameHandler::HPSensors()
+{
+    return &_HPSensors;
+}
+
 QQmlPropertyMap* FrameHandler::sensors()
 {
     return &_sensors;
@@ -510,6 +573,11 @@ QQmlPropertyMap* FrameHandler::sensors()
 QQmlPropertyMap* FrameHandler::valves()
 {
     return &_valves;
+}
+
+QQmlPropertyMap* FrameHandler::autosequences()
+{
+    return &_autosequences;
 }
 
 FrameHandler::VehicleState FrameHandler::nodeStatusRenegadeEngine() const

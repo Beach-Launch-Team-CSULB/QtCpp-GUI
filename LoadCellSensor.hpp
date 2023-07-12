@@ -1,7 +1,6 @@
 #ifndef LOADCELLSENSOR_HPP
 #define LOADCELLSENSOR_HPP
 
-
 #include <QObject>
 
 

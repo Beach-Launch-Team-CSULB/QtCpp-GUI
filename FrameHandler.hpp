@@ -28,9 +28,11 @@
 #include <algorithm> // to reverse frame ID bits
 
 #include "Sensor.hpp"
+#include "HPSensor.hpp"
 #include "Valve.hpp"
 #include "Controller.hpp"
 #include "Autosequence.hpp"
+#include "TankPressController.hpp"
 //enum class CommandAuthority
 //{
 //    view = 0,
@@ -171,7 +173,11 @@ public:
 private:
     Q_OBJECT
     Q_PROPERTY(QQmlPropertyMap* sensors READ sensors CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap* HPSensors READ HPSensors CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* valves READ valves CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap* autosequences READ autosequences CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap* tankPressControllers READ tankPressControllers CONSTANT)
+
     Q_PROPERTY(VehicleState nodeStatusRenegadeEngine READ nodeStatusRenegadeEngine NOTIFY nodeStatusRenegadeEngineChanged)
     Q_PROPERTY(VehicleState nodeStatusRenegadeProp READ nodeStatusRenegadeProp NOTIFY nodeStatusRenegadePropChanged)
     Q_PROPERTY(MissionState missionStatusRenegadeEngine READ missionStatusRenegadeEngine NOTIFY missionStatusRenegadeEngineChanged)
@@ -187,10 +193,15 @@ private:
     QML_UNCREATABLE("C++ instantiation only")
 
     QCanBusDevice* _can0 {nullptr};
+    QQmlPropertyMap _HPSensors {QQmlPropertyMap(this)};
     QQmlPropertyMap _sensors {QQmlPropertyMap(this)};
     QQmlPropertyMap _valves {QQmlPropertyMap(this)};
-    VehicleState _nodeStatusRenegadeEngine {VehicleState::SETUP}; // ID A = 514     I think these should be used for the frontend logic
-    VehicleState _nodeStatusRenegadeProp {VehicleState::SETUP}; // ID A = 515       I think these should be used for the frontend logic
+    QQmlPropertyMap _autosequences {QQmlPropertyMap(this)};
+    QQmlPropertyMap _tankPressControllers {QQmlPropertyMap(this)};
+
+    Controller* _controller {new Controller(this)};
+    VehicleState _nodeStatusRenegadeEngine {VehicleState::SETUP};
+    VehicleState _nodeStatusRenegadeProp {VehicleState::SETUP};
     MissionState _missionStatusRenegadeEngine {MissionState::PASSIVE};
     MissionState _missionStatusRenegadeProp {MissionState::PASSIVE};
     Command _currentCommandRenegadeEngine {Command::COMMAND_NOCOMMAND};
@@ -284,7 +295,7 @@ private:
     };
 
     QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
-    Controller* _controller {new Controller(this)};
+
 
     QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on
     QList<QCanBusFrame> _remoteFrameList;   // store these frames here to view later on
@@ -292,8 +303,6 @@ private:
     //QCanBusFrame _dataFrame{0,0}; // Maybe just create this inside of the onFramesReceived slot?
 
     QString _busStatus;
-
-
 
 
 public:
@@ -304,20 +313,30 @@ public:
     bool isOperational();
 
     QQmlPropertyMap* sensors();
+    QQmlPropertyMap* HPSensors();
     QQmlPropertyMap* valves();
+    QQmlPropertyMap* autosequences();
+    QQmlPropertyMap* tankPressControllers();
+
     Controller* controller() const;
 
     FrameHandler::VehicleState nodeStatusRenegadeEngine() const;
     void setNodeStatusRenegadeEngine(FrameHandler::VehicleState newNodeStatusRenegadeEngine);
+
     FrameHandler::VehicleState nodeStatusRenegadeProp() const;
     void setNodeStatusRenegadeProp(FrameHandler::VehicleState newNodeStatusRenegadeProp);
+
     FrameHandler::MissionState missionStatusRenegadeEngine() const;
     void setMissionStatusRenegadeEngine(FrameHandler::MissionState newMissionStatusRenegadeEngine);
+
     FrameHandler::MissionState missionStatusRenegadeProp() const;
     void setMissionStatusRenegadeProp(FrameHandler::MissionState newMissionStatusRenegadeProp);
+
     FrameHandler::Command currentCommandRenegadeEngine() const;
     void setCurrentCommandRenegadeEngine(FrameHandler::Command newCurrentCommandRenegadeEngine);
 
+    Command currentCommandRenegadeProp() const;
+    void setCurrentCommandRenegadeProp(Command newCurrentCommandRenegadeProp);
 
     QString busStatus() const;
     void getBusStatus();
@@ -329,8 +348,11 @@ signals:
     void stateReceived(quint16 ID_A, QList<QByteArray> data);
 
     void sensorReceivedFD(const QList<QByteArray>& data);
+    void HPSensorReceivedFD(const QList<QByteArray>& data);
     void valveReceivedFD(const QList<QByteArray>& data);
     void stateReceivedFD(const QList<QByteArray>& data);
+    void tankPressControllerReceivedFD(const QList<QByteArray>& data);
+    void autosequenceReceivedFD(const QList<QByteArray>& data);
 
     void nodeStatusRenegadeEngineChanged();
     void nodeStatusRenegadePropChanged();
@@ -341,15 +363,12 @@ signals:
 
     void busStatusChanged();
 
-
-
+    void tankPressControllersChanged();
 
 public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
 
-
     bool connectCan();
     bool disconnectCan();
-
 
     void onErrorOccurred(QCanBusDevice::CanBusError error);
     void onFramesReceived(); // store a frame in the _dataFrame variable
@@ -362,8 +381,6 @@ public slots: // slots that handled signals from QML should return void or basic
 public:
     void run() override;
 
-    Command currentCommandRenegadeProp() const;
-    void setCurrentCommandRenegadeProp(Command newCurrentCommandRenegadeProp);
 };
 
 Q_DECLARE_METATYPE(FrameHandler)

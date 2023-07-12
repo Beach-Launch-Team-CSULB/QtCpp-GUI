@@ -24,28 +24,27 @@ public:
 
 private:
     Q_OBJECT
-
-    // Expose object's properties to QML
-    Q_PROPERTY(quint32 timestamp READ getTimestamp NOTIFY timestampChanged)
-    Q_PROPERTY(float rawValue READ rawValue NOTIFY rawValueChanged)
-    Q_PROPERTY(float convertedValue READ convertedValue NOTIFY convertedValueChanged)
-    Q_PROPERTY(Sensor::SensorState state READ state NOTIFY stateChanged)
-    Q_PROPERTY(quint16 rawSensorID READ rawSensorID CONSTANT)
-    Q_PROPERTY(Node::NodeID sensorNode READ sensorNode CONSTANT)
     QML_ELEMENT
     QML_UNCREATABLE("C++ instantiation only")
 
     SensorState _state; // for turning on or off. SET BY *RECEIVED* CAN FRAME
-    quint32 timestamp;
+    quint64 _timestamp;
 
     Node::NodeID _sensorNode; // not initialized yet.
     QString _name;
     quint16 _sensorID;
     quint16 _rawSensorID;
-    Node::NodeID _sensorNodeID;
     quint16 _convertedSensorID;
     float _rawValue = {0.0f}; // SET BY *RECEIVED* CAN FRAME. log to a file maybe???
     float _convertedValue = {0.0f};
+
+    // Expose object's properties to QML
+    Q_PROPERTY(quint64 timestamp READ getTimestamp NOTIFY timestampChanged)
+    Q_PROPERTY(float rawValue READ rawValue NOTIFY rawValueChanged)
+    Q_PROPERTY(float convertedValue READ convertedValue NOTIFY convertedValueChanged)
+    Q_PROPERTY(Sensor::SensorState state READ state NOTIFY stateChanged)
+    Q_PROPERTY(quint16 rawSensorID READ rawSensorID CONSTANT)
+    Q_PROPERTY(Node::NodeID sensorNode READ sensorNode CONSTANT)
 
 public:
     explicit Sensor(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0});
@@ -54,8 +53,8 @@ public:
     QString name() const;
 
 
-    quint32 getTimestamp() const;
-    void setTimestamp(quint32 newTimestamp);
+    quint64 getTimestamp() const;
+    void setTimestamp(quint64 newTimestamp);
 
     float rawValue() const;
     void setRawValue(float newRawValue);

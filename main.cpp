@@ -45,19 +45,6 @@ int main(int argc, char *argv[])
     quint16 DANGERZONE {300};
     quint16 NODEID {8};
     quint16 VERIFICATIONID {166};
-    CommandState TEST                   {"TEST",1,3,5,false};
-    CommandState ABORT                  {"ABORT",1,3,7,false};
-    CommandState VENT                   {"VENT",1,3,9,false};
-    CommandState OFF_NOMINAL            {"OFF_NOMINAL",1,22,23,false};
-    CommandState HI_PRESS_ARM           {"HI_PRESS_ARM", 1,10,11,true};
-    CommandState HI_PRESS_PRESSURIZED   {"HI_PRESS_PRESSURIZED",1,12,13,false};
-    CommandState TANK_PRESS_ARM         {"TANK_PRESS_ARM",1,14,15,true};
-    CommandState TANK_PRESS_PRESSURIZED {"TANK_PRESS_PRESSURIZED",1,16,17,false};
-    CommandState FIRE_ARMED             {"FIRE_ARMED",1,18,19,true};
-    CommandState FIRE                   {"FIRE",1,20,21,false};
-    QList<CommandState*> commandList {&TEST,&ABORT,&VENT,&OFF_NOMINAL,&HI_PRESS_ARM,
-                                     &HI_PRESS_PRESSURIZED, &TANK_PRESS_ARM,
-                                     &TANK_PRESS_PRESSURIZED, &FIRE_ARMED,&FIRE}; // for the sole purpose of setcontextproperty
 
 
     // TODO: FINISH THE REMAINING COMMANDS.
@@ -93,11 +80,6 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("NODEID", NODEID);
     engine.rootContext()->setContextProperty("VERIFICATIONID", VERIFICATIONID);
 
-    foreach(CommandState* command, commandList) //expose every single command to QML
-    {
-        engine.rootContext()->setContextProperty(command->stateName(), command);
-    }
-
     engine.rootContext()->setContextProperty("frameHandler", frameHandler);
     engine.rootContext()->setContextProperty("GNC", GNC);
 
@@ -106,14 +88,20 @@ int main(int argc, char *argv[])
 
     qRegisterMetaType<FrameHandler>();
     qRegisterMetaType<Sensor>();
+    qRegisterMetaType<HPSensor>();
     qRegisterMetaType<Valve>();
+    qRegisterMetaType<Autosequence>();
+    qRegisterMetaType<TankPressController>();
 
     // Also expose sensors and valves with setContextProperty too using the foreach loop
 
     qmlRegisterUncreatableType<FrameHandler>("FrameHandlerEnums", 1, 0, "FrameHandlerEnums", "C++ instantiation only");
     qmlRegisterUncreatableType<Sensor>("SensorEnums", 1, 0, "SensorEnums", "C++ instantiation only");
+    qmlRegisterUncreatableType<HPSensor>("HPSensorEnums", 1, 0, "HPSensorEnums", "C++ instantiation only");
     qmlRegisterUncreatableType<Valve>("ValveEnums", 1, 0, "ValveEnums", "C++ instantiation only");
     qmlRegisterUncreatableType<Node>("NodeIDEnums", 1, 0, "NodeIDEnums", "C++ instantiation only");
+    qmlRegisterUncreatableType<Autosequence>("AutosequenceEnums", 1, 0, "AutosequenceEnums", "C++ instantiation only");
+    qmlRegisterUncreatableType<TankPressController>("TankPressControllerEnums", 1, 0, "TankPressControllerEnums", "C++ instantiation only");
 
     // Register C++ objects to QML objects and vice versa. (expose c++ data to QML as a property)
     // also register actionable items in QML and use signals and slots to connect

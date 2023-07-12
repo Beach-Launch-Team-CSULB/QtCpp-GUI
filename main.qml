@@ -4,8 +4,11 @@ import QtQuick.Controls
 // scrollbars
 import FrameHandlerEnums
 import SensorEnums
+import HPSensorEnums
 import ValveEnums
 import NodeIDEnums
+import AutosequenceEnums
+import TankPressControllerEnums
 // things need for button logic: commandStates/currGUIState, valves' states,
 
 Window {
@@ -26,6 +29,9 @@ Window {
             console.log(frameHandler.sensors.High_Press_1)
             console.log(frameHandler.sensors.High_Press_1.rawValue)
             console.log(frameHandler.sensors.High_Press_1.convertedValue)
+            console.log(frameHandler.tankPressControllers.HiPressTankController)
+            console.log(frameHandler.tankPressControllers.HiPressTankController.ventFailsafePressure)
+            console.log(TankPressControllerEnums.OFF_NOMINAL_PASSTHROUGH)
             //console.log(frameHandler.sensors.High_Press_1.)
 
             //console.log(frameHandler.sensors.value("HAHA"));
