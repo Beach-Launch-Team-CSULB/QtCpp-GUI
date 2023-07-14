@@ -9,6 +9,7 @@ import ValveEnums
 import NodeIDEnums
 import AutosequenceEnums
 import TankPressControllerEnums
+import EngineControllerEnums
 // things need for button logic: commandStates/currGUIState, valves' states,
 
 Window {
@@ -32,6 +33,8 @@ Window {
             console.log(frameHandler.tankPressControllers.HiPressTankController)
             console.log(frameHandler.tankPressControllers.HiPressTankController.ventFailsafePressure)
             console.log(TankPressControllerEnums.OFF_NOMINAL_PASSTHROUGH)
+            console.log(frameHandler.sendFrame(1,"1Y9b"));
+            console.log(frameHandler.engineControllers.Engine1)
             //console.log(frameHandler.sensors.High_Press_1.)
 
             //console.log(frameHandler.sensors.value("HAHA"));

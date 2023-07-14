@@ -17,7 +17,7 @@ qt_add_executable(appBLT-GUI-Maker
     Autosequence.hpp Autosequence.cpp AutosequenceObjectDefinitions.hpp
     Thermocouple.hpp Thermocouple.cpp ThermocoupleObjectDefinitions.hpp
     GNCThread.hpp GNCThread.cpp
-    Controller.hpp Controller.cpp
+    EngineController.hpp EngineController.cpp EngineControllerObjectDefinitions.hpp
     TankPressController.hpp TankPressController.cpp TankPressControllerObjectDefinitions.hpp
     CommandState.hpp
     Node.hpp

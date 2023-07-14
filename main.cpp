@@ -92,6 +92,8 @@ int main(int argc, char *argv[])
     qRegisterMetaType<Valve>();
     qRegisterMetaType<Autosequence>();
     qRegisterMetaType<TankPressController>();
+    qRegisterMetaType<Node>();
+    qRegisterMetaType<EngineController>();
 
     // Also expose sensors and valves with setContextProperty too using the foreach loop
 
@@ -102,6 +104,7 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<Node>("NodeIDEnums", 1, 0, "NodeIDEnums", "C++ instantiation only");
     qmlRegisterUncreatableType<Autosequence>("AutosequenceEnums", 1, 0, "AutosequenceEnums", "C++ instantiation only");
     qmlRegisterUncreatableType<TankPressController>("TankPressControllerEnums", 1, 0, "TankPressControllerEnums", "C++ instantiation only");
+    qmlRegisterUncreatableType<EngineController>("EngineControllerEnums", 1, 0, "EngineControllerEnums", "C++ instantiation only");
 
     // Register C++ objects to QML objects and vice versa. (expose c++ data to QML as a property)
     // also register actionable items in QML and use signals and slots to connect

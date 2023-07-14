@@ -18,53 +18,53 @@ void TankPressController::onTankPressControllerReceivedFD(const QList<QByteArray
         {
             setState(static_cast<TankPressController::TankPressControllerState>(data.at(i+1).toUInt(nullptr,16)));
 
-            uint8_t u_8x4[4] = {
-                static_cast<uint8_t>(data.at(i+2).toUInt(nullptr,16)),
-                static_cast<uint8_t>(data.at(i+3).toUInt(nullptr,16)),
-                static_cast<uint8_t>(data.at(i+4).toUInt(nullptr,16)),
-                static_cast<uint8_t>(data.at(i+5).toUInt(nullptr,16))
+            quint8 u_8x4[4] = {
+                static_cast<quint8>(data.at(i+2).toUInt(nullptr,16)),
+                static_cast<quint8>(data.at(i+3).toUInt(nullptr,16)),
+                static_cast<quint8>(data.at(i+4).toUInt(nullptr,16)),
+                static_cast<quint8>(data.at(i+5).toUInt(nullptr,16))
             };
             float Kp = 0.0f;
             memcpy(&Kp, u_8x4, 4);
             setKp(Kp);
 
-            u_8x4[0] = static_cast<uint8_t>(data.at(i+6).toUInt(nullptr,16));
-            u_8x4[1] = static_cast<uint8_t>(data.at(i+7).toUInt(nullptr,16));
-            u_8x4[2] = static_cast<uint8_t>(data.at(i+8).toUInt(nullptr,16));
-            u_8x4[3] = static_cast<uint8_t>(data.at(i+9).toUInt(nullptr,16));
+            u_8x4[0] = static_cast<quint8>(data.at(i+6).toUInt(nullptr,16));
+            u_8x4[1] = static_cast<quint8>(data.at(i+7).toUInt(nullptr,16));
+            u_8x4[2] = static_cast<quint8>(data.at(i+8).toUInt(nullptr,16));
+            u_8x4[3] = static_cast<quint8>(data.at(i+9).toUInt(nullptr,16));
             float Ki = 0.0f;
             memcpy(&Ki, u_8x4, 4);
             setKi(Ki);
 
-            u_8x4[0] = static_cast<uint8_t>(data.at(i+10).toUInt(nullptr,16));
-            u_8x4[1] = static_cast<uint8_t>(data.at(i+11).toUInt(nullptr,16));
-            u_8x4[2] = static_cast<uint8_t>(data.at(i+12).toUInt(nullptr,16));
-            u_8x4[3] = static_cast<uint8_t>(data.at(i+13).toUInt(nullptr,16));
+            u_8x4[0] = static_cast<quint8>(data.at(i+10).toUInt(nullptr,16));
+            u_8x4[1] = static_cast<quint8>(data.at(i+11).toUInt(nullptr,16));
+            u_8x4[2] = static_cast<quint8>(data.at(i+12).toUInt(nullptr,16));
+            u_8x4[3] = static_cast<quint8>(data.at(i+13).toUInt(nullptr,16));
             float Kd = 0.0f;
             memcpy(&Kd, u_8x4, 4);
             setKd(Kd);
 
-            u_8x4[0] = static_cast<uint8_t>(data.at(i+14).toUInt(nullptr,16));
-            u_8x4[1] = static_cast<uint8_t>(data.at(i+15).toUInt(nullptr,16));
-            u_8x4[2] = static_cast<uint8_t>(data.at(i+16).toUInt(nullptr,16));
-            u_8x4[3] = static_cast<uint8_t>(data.at(i+17).toUInt(nullptr,16));
+            u_8x4[0] = static_cast<quint8>(data.at(i+14).toUInt(nullptr,16));
+            u_8x4[1] = static_cast<quint8>(data.at(i+15).toUInt(nullptr,16));
+            u_8x4[2] = static_cast<quint8>(data.at(i+16).toUInt(nullptr,16));
+            u_8x4[3] = static_cast<quint8>(data.at(i+17).toUInt(nullptr,16));
             float controllerThreshold = 0.0f;
             memcpy(&controllerThreshold, u_8x4, 4);
             setControllerThreshold(controllerThreshold);
 
-            u_8x4[0] = static_cast<uint8_t>(data.at(i+18).toUInt(nullptr,16));
-            u_8x4[1] = static_cast<uint8_t>(data.at(i+19).toUInt(nullptr,16));
-            u_8x4[2] = static_cast<uint8_t>(data.at(i+20).toUInt(nullptr,16));
-            u_8x4[3] = static_cast<uint8_t>(data.at(i+21).toUInt(nullptr,16));
+            u_8x4[0] = static_cast<quint8>(data.at(i+18).toUInt(nullptr,16));
+            u_8x4[1] = static_cast<quint8>(data.at(i+19).toUInt(nullptr,16));
+            u_8x4[2] = static_cast<quint8>(data.at(i+20).toUInt(nullptr,16));
+            u_8x4[3] = static_cast<quint8>(data.at(i+21).toUInt(nullptr,16));
             float ventFailsafePressure = 0.0f;
             memcpy(&ventFailsafePressure, u_8x4, 4);
             setVentFailsafePressure(ventFailsafePressure);
 
-            uint32_t valveMinEnergizeTime = data.at(i+25).toUInt(nullptr,16) + (data.at(i+24).toUInt(nullptr,16) << 8)
+            quint32 valveMinEnergizeTime = data.at(i+25).toUInt(nullptr,16) + (data.at(i+24).toUInt(nullptr,16) << 8)
                                             + (data.at(i+23).toUInt(nullptr,16) << 16) + (data.at(i+22).toUInt(nullptr, 16) << 24);
             setValveMinEnergizeTime(valveMinEnergizeTime);
 
-            uint32_t valveMinDeEnergizeTime = data.at(i+29).toUInt(nullptr,16) + (data.at(i+28).toUInt(nullptr,16) << 8)
+            quint32 valveMinDeEnergizeTime = data.at(i+29).toUInt(nullptr,16) + (data.at(i+28).toUInt(nullptr,16) << 8)
                                             + (data.at(i+27).toUInt(nullptr,16) << 16) + (data.at(i+26).toUInt(nullptr, 16) << 24);
             setValveMinDeEnergizeTime(valveMinDeEnergizeTime);
 

@@ -1,48 +1,50 @@
 #include "FrameHandler.hpp"
 
+//Don't include these anywhere else or there will be multiple duplications
 #include "SensorObjectDefinitions.hpp"
 #include "HPSensorObjectDefinitions.hpp"
 #include "ValveObjectDefinitions.hpp"
 #include "AutosequenceObjectDefinitions.hpp"
 #include "TankPressControllerObjectDefinitions.hpp"
-
-QQmlPropertyMap* FrameHandler::tankPressControllers()
-{
-    return &_tankPressControllers;
-}
-
+#include "EngineControllerObjectDefinitions.hpp"
 FrameHandler::FrameHandler(QObject *parent)
     : QObject{parent}
 {
     qDebug() << "Enter FrameHandler constructor"; // Note: because of threading, this might not be an accurate way of finding out where the program crashes
-    foreach(auto& sensorConstructingParameter, sensorConstructingParameters) //sensor key List
+    foreach(const auto& sensorConstructingParameter, sensorConstructingParameters) //sensor key List
     {                                                                       //{"High_Press_1"} {"High_Press_2"} {"Fuel_Tank_1"} {"Fuel_Tank_2"}
         _sensors.insert(sensorConstructingParameter.at(0).toString(),        //{"Lox_Tank_1"} {"Lox_Tank_2"} {"Fuel_Dome_Reg"} {"Lox_Dome_Reg"}
                         QVariant::fromValue<Sensor*>(new Sensor{this, sensorConstructingParameter}));       //{"Fuel_Prop_Inlet"} {"Lox_Prop_Inlet"} {"Fuel_Injector"}
     }                                                                       //{"LC1"} {"LC2"} {"LC3"} {"Chamber_1"} {"Chamber_2"} {"MV_Pneumatic}
 
-    foreach(auto& HPSensorConstructingParameter, HPSensorConstructingParameters)
+    foreach(const auto& HPSensorConstructingParameter, HPSensorConstructingParameters)
     {
         _HPSensors.insert(HPSensorConstructingParameter.at(0).toString(),
                           QVariant::fromValue<HPSensor*>(new HPSensor{this, HPSensorConstructingParameter}));
     }
 
-    foreach(auto& valveConstructingParameter, valveConstructingParameters)  // valve key list
+    foreach(const auto& valveConstructingParameter, valveConstructingParameters)  // valve key list
     {                                                                       //{"HV"} {"HP"} {"LDR"} {"FDR"} {"LDV"}
         _valves.insert(valveConstructingParameter.at(0).toString(),         // {"FDV"} {"LV"} {"FV"}
                        QVariant::fromValue<Valve*>(new Valve{this, valveConstructingParameter}));        //{"LMV"} {"FMV"} {"IGN1"} {"IGN2"}
     }
 
-    foreach(auto& autosequenceConstructingParameter, autosequenceConstructingParameters)
+    foreach(const auto& autosequenceConstructingParameter, autosequenceConstructingParameters)
     {
         _autosequences.insert(autosequenceConstructingParameter.at(0).toString(),
                               QVariant::fromValue<Autosequence*>(new Autosequence{this, autosequenceConstructingParameter}));
     }
 
-    foreach(auto& tankPressControllerConstructingParameter, tankPressControllerConstructingParameters)
+    foreach(const auto& tankPressControllerConstructingParameter, tankPressControllerConstructingParameters)
     {
         _tankPressControllers.insert(tankPressControllerConstructingParameter.at(0).toString(),
                                     QVariant::fromValue<TankPressController*>(new TankPressController{this, tankPressControllerConstructingParameter}));
+    }
+
+    foreach(const auto& engineControllerConstructingParameter, engineControllerConstructingParameters)
+    {
+        _engineControllers.insert(engineControllerConstructingParameter.at(0).toString(),
+                                QVariant::fromValue<EngineController*>(new EngineController{this, engineControllerConstructingParameter}));
     }
 
 
@@ -70,6 +72,11 @@ FrameHandler::FrameHandler(QObject *parent)
     {
         QObject::connect(this, &FrameHandler::tankPressControllerReceivedFD,
                          qvariant_cast<TankPressController*>(_tankPressControllers.value(tankPressControllerKey)), &TankPressController::onTankPressControllerReceivedFD);
+    }
+    foreach(const QString& engineControllerKey, _engineControllers.keys())
+    {
+        QObject::connect(this, &FrameHandler::engineControllerReceivedFD,
+                         qvariant_cast<EngineController*>(_engineControllers.value(engineControllerKey)), &EngineController::onEngineControllerReceivedFD);
     }
 
     QThread::currentThread()->setObjectName("Frame Handler thread");
@@ -225,6 +232,7 @@ bool FrameHandler::isOperational()
     case QCanBusDevice::CanBusStatus::BusOff: // Blue
         return false;
     }
+    qDebug() << "this line in FrameHandler::isOperational() function should not be reached!";
     return false;
 }
 
@@ -375,7 +383,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             }
             if (ID_A == 1100)
             {
-                _controller->setAutosequenceTime(dataFrame.payload().toFloat(nullptr)/1000000); // may need to convert this to int then cast it to float
+                //_controller->setAutosequenceTime(dataFrame.payload().toFloat(nullptr)/1000000); // may need to convert this to int then cast it to float
                 return;
             }
 
@@ -403,6 +411,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             {
                 quint16 controllerID = ((((ID_A+49)/100)*100)-1000)/100; //(((ID_A+49)/100)*100) = round ID_A to the nearest hundred. It works trust me :)
                 quint16 controllerIndex = ID_A % 100;
+                /*
                 if (data.length() == 8)
                 {
                     if ((ID_A == 1502 || ID_A == 1504) && controllerID == _controller->_engineControllerID)
@@ -429,10 +438,12 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
                 //
                 //}
                 }
+
                 else //Node controller ????
                 {
 
                 }
+                */
             }
             // states
             //if (frameID >= 2001 && frameID <= 3000)
@@ -476,18 +487,21 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
                     setNodeStatusRenegadeEngine(static_cast<FrameHandler::VehicleState>(data.at(0).toUInt(nullptr, 16)));
                     setMissionStatusRenegadeEngine(static_cast<FrameHandler::MissionState>(data.at(1).toUInt(nullptr, 16)));
                     setCurrentCommandRenegadeEngine(static_cast<FrameHandler::Command>(data.at(2).toUInt(nullptr, 16)));
+                    return;
                 }
                 if (id == PROP_NODE_STATE_ID_OFFSET + propNode)
                 {
                     setNodeStatusRenegadeProp(static_cast<FrameHandler::VehicleState>(data.at(0).toUInt(nullptr, 16)));
                     setMissionStatusRenegadeProp(static_cast<FrameHandler::MissionState>(data.at(1).toUInt(nullptr, 16)));
                     setCurrentCommandRenegadeProp(static_cast<FrameHandler::Command>(data.at(2).toUInt(nullptr, 16)));
+                    return;
                 }
             }
 
             if (AUTOSEQUENCE_ID_OFFSET <= id && id > AUTOSEQUENCE_ID_OFFSET + 10)
             {
                 emit autosequenceReceivedFD(data);
+                return;
             }
 
             // Sensors
@@ -514,12 +528,13 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
                 emit tankPressControllerReceivedFD(data);
                 return;
             }
+
+            if(ENGINE_CONTROLLER_ID_OFFSET <= id && id > ENGINE_CONTROLLER_ID_OFFSET + 10)
+            {
+                emit engineControllerReceivedFD(data);
+                return;
+            }
         }
-
-
-
-
-
 
     }
 
@@ -541,21 +556,37 @@ void FrameHandler::sendFrame(quint32 ID, QString dataHexString, QCanBusFrame::Fr
 {
     // in QML, just concantenate all the strings to form a byte array represented as string and pass it in as an argument.
     qDebug() << "Enter FrameHandler::sendFrame() function";
-    if(!this->isOperational()) return;
+
+
+
     //dataHexString is passed from QML
     //QByteArray data {QByteArrayLiteral(dataHexString)};
     QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())};
-    QCanBusFrame remoteFrame {ID, data};
-    remoteFrame.setFrameType(frameType);
-    remoteFrame.setBitrateSwitch(bitRateSwitch);
-    remoteFrame.setExtendedFrameFormat(extendedFrameFormat);
-    remoteFrame.setFlexibleDataRateFormat(FlexibleDataRateFormat);
+    QCanBusFrame dataFrame {ID, data};
+    dataFrame.setFrameType(frameType);
+    dataFrame.setBitrateSwitch(bitRateSwitch);
+    dataFrame.setExtendedFrameFormat(extendedFrameFormat);
+    dataFrame.setFlexibleDataRateFormat(FlexibleDataRateFormat);
+
+
+    qInfo() << "frame ID: " << dataFrame.frameId();
+    qInfo() << "QCanBusFrame dataFrame's payload in Hex: " << dataFrame.payload().toHex();
+    qInfo() << "frame type: " << dataFrame.frameType();
+    qInfo() << "bitRateSwitch: " << dataFrame.hasBitrateSwitch();
+    qInfo() << "extendedFrameFormat: " << dataFrame.hasExtendedFrameFormat();
+    qInfo() << "FlexibleDataRateFormat: " << dataFrame.hasFlexibleDataRateFormat();
 
     // for Virtual CAN Testing
     //remoteFrame.setErrorStateIndicator(false);
     //remoteFrame.setLocalEcho(false);
 
-    _can0->writeFrame(remoteFrame);
+    if(!this->isOperational())
+    {
+        qInfo() << "Can not Operational";
+        return;
+    }
+
+    _can0->writeFrame(dataFrame);
 }
 
 // Getters and Setters section
@@ -579,6 +610,18 @@ QQmlPropertyMap* FrameHandler::autosequences()
 {
     return &_autosequences;
 }
+
+
+QQmlPropertyMap* FrameHandler::tankPressControllers()
+{
+    return &_tankPressControllers;
+}
+
+QQmlPropertyMap* FrameHandler::engineControllers()
+{
+    return &_engineControllers;
+}
+
 
 FrameHandler::VehicleState FrameHandler::nodeStatusRenegadeEngine() const
 {
@@ -651,11 +694,6 @@ void FrameHandler::setCurrentCommandRenegadeProp(FrameHandler::Command newCurren
     emit currentCommandRenegadePropChanged();
 }
 
-Controller* FrameHandler::controller() const
-{
-    return _controller;
-}
-
 void FrameHandler::nodeSynchronization()
 {
     if (_nodeStatusRenegadeEngine == _nodeStatusRenegadeProp)
@@ -686,9 +724,9 @@ void FrameHandler::run()
     qInfo() << QThread::currentThread();
     qInfo() << "Hello?";
     qInfo() << QThread::currentThread();
-    qInfo() << this->controller()->IGN1Time();
-    _controller->setIGN1Time(5.2f);
-    qInfo() << _controller->IGN1Time();
+    //qInfo() << this->controller()->IGN1Time();
+    //_controller->setIGN1Time(5.2f);
+    //qInfo() << _controller->IGN1Time();
     this->connectCan();
 
     // set up via buttons in qml instead

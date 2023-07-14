@@ -5,11 +5,10 @@
 #include <qqml.h>
 // make a enum class nested in QOBject class in order to use Q_ENUM to expose the enum class to QML
 // don't think there is any reason to expose this to QML, but I'll just keep it here for now. Might just turn it back to a normal enum class if later on
+
+// Should make this a class to instantantiate individual alaras to store stuff like vehicle state,mission state, command, etc
 class Node: public QObject
 {
-    Q_OBJECT
-    QML_ELEMENT
-    QML_UNCREATABLE("C++ instantiation only")
 public:
     enum class NodeID
     {
@@ -24,9 +23,15 @@ public:
         PASA_NODE = 8
     };
     Q_ENUM(NodeID)
+private:
+    Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("C++ instantiation only")
 
+public:
+    //explicit Node(QObject *parent = nullptr); results in linker error if missing cpp file
     explicit Node() = delete;
 
 };
-
+Q_DECLARE_METATYPE(Node)
 #endif

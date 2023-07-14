@@ -33,6 +33,7 @@
 #include "Controller.hpp"
 #include "Autosequence.hpp"
 #include "TankPressController.hpp"
+#include "EngineController.hpp"
 //enum class CommandAuthority
 //{
 //    view = 0,
@@ -177,6 +178,9 @@ private:
     Q_PROPERTY(QQmlPropertyMap* valves READ valves CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* autosequences READ autosequences CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* tankPressControllers READ tankPressControllers CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap* engineControllers READ engineControllers CONSTANT)
+    // ENGINE CONTROLLER!!!!
+
 
     Q_PROPERTY(VehicleState nodeStatusRenegadeEngine READ nodeStatusRenegadeEngine NOTIFY nodeStatusRenegadeEngineChanged)
     Q_PROPERTY(VehicleState nodeStatusRenegadeProp READ nodeStatusRenegadeProp NOTIFY nodeStatusRenegadePropChanged)
@@ -184,7 +188,6 @@ private:
     Q_PROPERTY(MissionState missionStatusRenegadeProp READ missionStatusRenegadeProp NOTIFY missionStatusRenegadePropChanged)
     Q_PROPERTY(Command currentCommandRenegadeEngine READ currentCommandRenegadeEngine NOTIFY currentCommandRenegadeEngineChanged)
     Q_PROPERTY(Command currentCommandRenegadeProp READ currentCommandRenegadeProp NOTIFY currentCommandRenegadePropChanged)
-    Q_PROPERTY(Controller* controller READ controller CONSTANT)//NOTIFY controllerChanged)
     Q_PROPERTY(QString busStatus READ busStatus NOTIFY busStatusChanged)
 
 
@@ -198,8 +201,8 @@ private:
     QQmlPropertyMap _valves {QQmlPropertyMap(this)};
     QQmlPropertyMap _autosequences {QQmlPropertyMap(this)};
     QQmlPropertyMap _tankPressControllers {QQmlPropertyMap(this)};
+    QQmlPropertyMap _engineControllers{QQmlPropertyMap(this)};
 
-    Controller* _controller {new Controller(this)};
     VehicleState _nodeStatusRenegadeEngine {VehicleState::SETUP};
     VehicleState _nodeStatusRenegadeProp {VehicleState::SETUP};
     MissionState _missionStatusRenegadeEngine {MissionState::PASSIVE};
@@ -317,8 +320,7 @@ public:
     QQmlPropertyMap* valves();
     QQmlPropertyMap* autosequences();
     QQmlPropertyMap* tankPressControllers();
-
-    Controller* controller() const;
+    QQmlPropertyMap* engineControllers();
 
     FrameHandler::VehicleState nodeStatusRenegadeEngine() const;
     void setNodeStatusRenegadeEngine(FrameHandler::VehicleState newNodeStatusRenegadeEngine);
@@ -351,8 +353,9 @@ signals:
     void HPSensorReceivedFD(const QList<QByteArray>& data);
     void valveReceivedFD(const QList<QByteArray>& data);
     void stateReceivedFD(const QList<QByteArray>& data);
-    void tankPressControllerReceivedFD(const QList<QByteArray>& data);
     void autosequenceReceivedFD(const QList<QByteArray>& data);
+    void tankPressControllerReceivedFD(const QList<QByteArray>& data);
+    void engineControllerReceivedFD(const QList<QByteArray>& data);
 
     void nodeStatusRenegadeEngineChanged();
     void nodeStatusRenegadePropChanged();
@@ -380,6 +383,7 @@ public slots: // slots that handled signals from QML should return void or basic
     // May need to connect QML items to the remoteFrameConstruct method...
 public:
     void run() override;
+
 
 };
 
