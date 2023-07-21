@@ -11,20 +11,21 @@ Autosequence::Autosequence(QObject *parent, QList<QVariant> args)
 
 void Autosequence::onAutosequenceReceivedFD(const QList<QByteArray> &data)
 {
+    qInfo() << "Enter Autosequence::onAutosequenceReceivedFD() function with object ID: " << _id;
     for (int i = 0; i < data.length(); i = i + 10) //Payload size is 10 per object
     {
         if (_id == data.at(0).toUInt(nullptr,16))
         {
-            setAutosequenceState(static_cast<Autosequence::AutosequenceState>(data.at(1).toUInt(nullptr,16)));
+            setState(data.at(1).toUInt(nullptr,16));
 
             quint8 u_8x8[8] = { static_cast<quint8>(data.at(9).toUInt(nullptr,16)),
-                                static_cast<quint8>(data.at(8).toUInt(nullptr,16)),
-                                static_cast<quint8>(data.at(7).toUInt(nullptr,16)),
-                                static_cast<quint8>(data.at(6).toUInt(nullptr,16)),
-                                static_cast<quint8>(data.at(5).toUInt(nullptr,16)),
-                                static_cast<quint8>(data.at(4).toUInt(nullptr,16)),
-                                static_cast<quint8>(data.at(3).toUInt(nullptr,16)),
-                                static_cast<quint8>(data.at(2).toUInt(nullptr,16))};
+                               static_cast<quint8>(data.at(8).toUInt(nullptr,16)),
+                               static_cast<quint8>(data.at(7).toUInt(nullptr,16)),
+                               static_cast<quint8>(data.at(6).toUInt(nullptr,16)),
+                               static_cast<quint8>(data.at(5).toUInt(nullptr,16)),
+                               static_cast<quint8>(data.at(4).toUInt(nullptr,16)),
+                               static_cast<quint8>(data.at(3).toUInt(nullptr,16)),
+                               static_cast<quint8>(data.at(2).toUInt(nullptr,16))};
             qint64 currentCountDown {0};
             memcpy(&currentCountDown, u_8x8, 8);
             setCurrentCountdown(currentCountDown);
@@ -61,16 +62,16 @@ void Autosequence::setCurrentCountdown(qint64 newCurrentCountdown)
     emit currentCountdownChanged();
 }
 
-Autosequence::AutosequenceState Autosequence::autosequenceState() const
+QVariant Autosequence::state() const
 {
-    return _autosequenceState;
+    return _state;
 }
 
-void Autosequence::setAutosequenceState(Autosequence::AutosequenceState newAutosequenceState)
+void Autosequence::setState(QVariant newAutosequenceState)
 {
-    if (_autosequenceState == newAutosequenceState)
+    if (_state == newAutosequenceState)
         return;
-    _autosequenceState = newAutosequenceState;
-    emit autosequenceStateChanged();
+    _state = newAutosequenceState;
+    emit stateChanged();
 }
 

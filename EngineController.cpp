@@ -12,12 +12,13 @@ EngineController::EngineController(QObject *parent, QList<QVariant> args)
 
 void EngineController::onEngineControllerReceivedFD(const QList<QByteArray> &data)
 {
+    qInfo() << "Enter EngineController::onEngineControllerReceivedFD function with object ID: " << _id;
     for(int i = 0; i < data.length(); i = i + 18)
     {
         if (_id == data.at(i).toUInt(nullptr,16))
         {
-            setState(static_cast<EngineControllerState>(data.at(i+1).toUInt(nullptr,16)));
-
+            //setState(static_cast<QVariant>(data.at(i+1).toUInt(nullptr,16))); potentially expensive
+            setState(data.at(i+1).toUInt(nullptr,16));
             quint8 u_8x4[4] = {static_cast<quint8>(data.at(i+5).toUInt(nullptr,16)),
                                static_cast<quint8>(data.at(i+4).toUInt(nullptr,16)),
                                static_cast<quint8>(data.at(i+3).toUInt(nullptr,16)),
@@ -70,12 +71,12 @@ quint16 EngineController::nodeID() const
     return _nodeID;
 }
 
-EngineController::EngineControllerState EngineController::state() const
+QVariant EngineController::state() const
 {
     return _state;
 }
 
-void EngineController::setState(EngineController::EngineControllerState newState)
+void EngineController::setState(QVariant newState)
 {
     if (_state == newState)
         return;

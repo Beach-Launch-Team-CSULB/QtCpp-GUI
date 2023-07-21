@@ -1,3 +1,4 @@
+
 #ifndef THERMOCOUPLE_HPP
 #define THERMOCOUPLE_HPP
 

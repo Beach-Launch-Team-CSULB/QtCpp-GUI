@@ -12,11 +12,12 @@ TankPressController::TankPressController(QObject *parent, QList<QVariant> args)
 
 void TankPressController::onTankPressControllerReceivedFD(const QList<QByteArray> &data)
 {
+    qInfo() << "Enter TankPressController::onTankPressControllerReceivedFD function with object ID: " << _id;
     for (int i = 0; i < data.length(); i = i + 30)
     {
         if (_id == data.at(i).toUInt(nullptr,16))
         {
-            setState(static_cast<TankPressController::TankPressControllerState>(data.at(i+1).toUInt(nullptr,16)));
+            setState(data.at(i+1).toUInt(nullptr,16));
 
             quint8 u_8x4[4] = {
                 static_cast<quint8>(data.at(i+2).toUInt(nullptr,16)),
@@ -89,12 +90,12 @@ quint16 TankPressController::nodeID() const
     return _nodeID;
 }
 
-TankPressController::TankPressControllerState TankPressController::state() const
+QVariant TankPressController::state() const
 {
     return _state;
 }
 
-void TankPressController::setState(TankPressController::TankPressControllerState newState)
+void TankPressController::setState(QVariant newState)
 {
     if (_state == newState)
         return;
@@ -192,4 +193,5 @@ void TankPressController::setValveMinDeEnergizeTime(quint32 newValveMinDeEnergiz
     _valveMinDeEnergizeTime = newValveMinDeEnergizeTime;
     emit valveMinDeEnergizeTimeChanged();
 }
+
 

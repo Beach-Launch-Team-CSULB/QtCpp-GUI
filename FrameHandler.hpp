@@ -25,6 +25,7 @@
 #include <QBitArray> // might need to combine with QList to have QBiteArrayList
 #include <QByteArray>
 #include <QByteArrayList>
+#include <QTimer> // to display time, and do other things with timeout signal
 #include <algorithm> // to reverse frame ID bits
 
 #include "Sensor.hpp"
@@ -172,7 +173,9 @@ public:
     Q_ENUM(NodeSyncStatus)
 
 private:
+
     Q_OBJECT
+    // If a type is not convertible between C++ and QML, use QVariant instead (or QVariant*?)
     Q_PROPERTY(QQmlPropertyMap* sensors READ sensors CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* HPSensors READ HPSensors CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* valves READ valves CONSTANT)
@@ -193,9 +196,9 @@ private:
 
     //Q_PROPERTY(QStack<QVarLengthArray<quint32, 2>> throttlePoints READ throttlePoints NOTIFY throttlePoints)
     QML_ELEMENT
-    QML_UNCREATABLE("C++ instantiation only")
+        QML_UNCREATABLE("C++ instantiation only")
 
-    QCanBusDevice* _can0 {nullptr};
+        QCanBusDevice* _can0 {nullptr};
     QQmlPropertyMap _HPSensors {QQmlPropertyMap(this)};
     QQmlPropertyMap _sensors {QQmlPropertyMap(this)};
     QQmlPropertyMap _valves {QQmlPropertyMap(this)};
@@ -242,67 +245,70 @@ private:
                                              MissionState::LANDED};
 
     const QMap<quint16, Command> _commands // This is solely for the command setter.
-    {
-        {static_cast<quint16>(Command::COMMAND_NOCOMMAND), Command::COMMAND_NOCOMMAND},
-        {static_cast<quint16>(Command::COMMAND_passive), Command::COMMAND_passive},
-        {static_cast<quint16>(Command::COMMAND_standby), Command::COMMAND_standby},
-        {static_cast<quint16>(Command::COMMAND_test_exit), Command::COMMAND_test_exit},
-        {static_cast<quint16>(Command::COMMAND_test), Command::COMMAND_test},
-        {static_cast<quint16>(Command::COMMAND_abort), Command::COMMAND_abort},
-        {static_cast<quint16>(Command::COMMAND_passive), Command::COMMAND_passive},
-        {static_cast<quint16>(Command::COMMAND_vent), Command::COMMAND_vent},
-        {static_cast<quint16>(Command::COMMAND_HiPressArm), Command::COMMAND_HiPressArm},
-        {static_cast<quint16>(Command::COMMAND_HiPressPressurized), Command::COMMAND_HiPressPressurized},
-        {static_cast<quint16>(Command::COMMAND_fireArm), Command::COMMAND_fireArm},
-        {static_cast<quint16>(Command::COMMAND_fire), Command::COMMAND_fire},
-        {static_cast<quint16>(Command::COMMAND_ExitOffNominal), Command::COMMAND_ExitOffNominal},
-        {static_cast<quint16>(Command::COMMAND_EnterOffNominal), Command::COMMAND_EnterOffNominal},
-        {static_cast<quint16>(Command::COMMAND_closeHiPress), Command::COMMAND_closeHiPress},
-        {static_cast<quint16>(Command::COMMAND_openHiPress), Command::COMMAND_openHiPress},
-        {static_cast<quint16>(Command::COMMAND_closeHiPressVent), Command::COMMAND_closeHiPressVent},
-        {static_cast<quint16>(Command::COMMAND_openHiPressVent), Command::COMMAND_openHiPressVent},
-        {static_cast<quint16>(Command::COMMAND_closeLoxVent), Command::COMMAND_closeLoxVent},
-        {static_cast<quint16>(Command::COMMAND_openLoxVent), Command::COMMAND_openLoxVent},
-        {static_cast<quint16>(Command::COMMAND_closeLoxPressValve), Command::COMMAND_closeLoxPressValve},
-        {static_cast<quint16>(Command::COMMAND_openLoxPressValve), Command::COMMAND_openLoxPressValve},
-        {static_cast<quint16>(Command::COMMAND_closeLoxPressLineVent), Command::COMMAND_closeLoxPressLineVent},
-        {static_cast<quint16>(Command::COMMAND_openLoxPressLineVent), Command::COMMAND_openLoxPressLineVent},
-        {static_cast<quint16>(Command::COMMAND_closeFuelVent), Command::COMMAND_closeFuelVent},
-        {static_cast<quint16>(Command::COMMAND_openFuelVent), Command::COMMAND_openFuelVent},
-        {static_cast<quint16>(Command::COMMAND_closeFuelPressValve), Command::COMMAND_closeFuelPressValve},
-        {static_cast<quint16>(Command::COMMAND_openFuelPressValve), Command::COMMAND_openFuelPressValve},
-        {static_cast<quint16>(Command::COMMAND_closeFuelPressLineVent), Command::COMMAND_closeFuelPressLineVent},
-        {static_cast<quint16>(Command::COMMAND_openFuelPressLineVent), Command::COMMAND_openFuelPressLineVent},
-        {static_cast<quint16>(Command::COMMAND_openLoxMV), Command::COMMAND_openLoxMV},
-        {static_cast<quint16>(Command::COMMAND_closeFuelMV), Command::COMMAND_closeFuelMV},
-        {static_cast<quint16>(Command::COMMAND_openFuelMV), Command::COMMAND_openFuelMV},
-        {static_cast<quint16>(Command::COMMAND_engineIgniterPyro1_Off), Command::COMMAND_engineIgniterPyro1_Off},
-        {static_cast<quint16>(Command::COMMAND_engineIgniterPyro1_On), Command::COMMAND_engineIgniterPyro1_On},
-        {static_cast<quint16>(Command::COMMAND_engineIgniterPyro2_Off), Command::COMMAND_engineIgniterPyro2_Off},
-        {static_cast<quint16>(Command::COMMAND_engineIgniterPyro2_On), Command::COMMAND_engineIgniterPyro2_On},
-        {static_cast<quint16>(Command::COMMAND_allSensorsOff), Command::COMMAND_allSensorsOff},
-        {static_cast<quint16>(Command::COMMAND_allSensorsSlow), Command::COMMAND_allSensorsSlow},
-        {static_cast<quint16>(Command::COMMAND_allSensorsMedium), Command::COMMAND_allSensorsMedium},
-        {static_cast<quint16>(Command::COMMAND_allSensorsFast), Command::COMMAND_allSensorsFast},
-        {static_cast<quint16>(Command::COMMAND_allSensorsCalibration), Command::COMMAND_allSensorsCalibration},
-        {static_cast<quint16>(Command::COMMAND_propProgSetting), Command::COMMAND_propProgSetting},
-        {static_cast<quint16>(Command::COMMAND_node1RESET), Command::COMMAND_node1RESET},
-        {static_cast<quint16>(Command::COMMAND_node2RESET), Command::COMMAND_node2RESET},
-        {static_cast<quint16>(Command::COMMAND_node3RESET), Command::COMMAND_node3RESET},
-        {static_cast<quint16>(Command::COMMAND_node4RESET), Command::COMMAND_node4RESET},
-        {static_cast<quint16>(Command::COMMAND_node5RESET), Command::COMMAND_node5RESET},
-        {static_cast<quint16>(Command::COMMAND_node6RESET), Command::COMMAND_node6RESET},
-        {static_cast<quint16>(Command::COMMAND_GLOBALRESET), Command::COMMAND_GLOBALRESET},
-        {static_cast<quint16>(Command::COMMAND_reseved), Command::COMMAND_reseved},
-        {static_cast<quint16>(Command::COMMAND_SIZE), Command::COMMAND_SIZE}
-    };
+        {
+            {static_cast<quint16>(Command::COMMAND_NOCOMMAND), Command::COMMAND_NOCOMMAND},
+            {static_cast<quint16>(Command::COMMAND_passive), Command::COMMAND_passive},
+            {static_cast<quint16>(Command::COMMAND_standby), Command::COMMAND_standby},
+            {static_cast<quint16>(Command::COMMAND_test_exit), Command::COMMAND_test_exit},
+            {static_cast<quint16>(Command::COMMAND_test), Command::COMMAND_test},
+            {static_cast<quint16>(Command::COMMAND_abort), Command::COMMAND_abort},
+            {static_cast<quint16>(Command::COMMAND_passive), Command::COMMAND_passive},
+            {static_cast<quint16>(Command::COMMAND_vent), Command::COMMAND_vent},
+            {static_cast<quint16>(Command::COMMAND_HiPressArm), Command::COMMAND_HiPressArm},
+            {static_cast<quint16>(Command::COMMAND_HiPressPressurized), Command::COMMAND_HiPressPressurized},
+            {static_cast<quint16>(Command::COMMAND_fireArm), Command::COMMAND_fireArm},
+            {static_cast<quint16>(Command::COMMAND_fire), Command::COMMAND_fire},
+            {static_cast<quint16>(Command::COMMAND_ExitOffNominal), Command::COMMAND_ExitOffNominal},
+            {static_cast<quint16>(Command::COMMAND_EnterOffNominal), Command::COMMAND_EnterOffNominal},
+            {static_cast<quint16>(Command::COMMAND_closeHiPress), Command::COMMAND_closeHiPress},
+            {static_cast<quint16>(Command::COMMAND_openHiPress), Command::COMMAND_openHiPress},
+            {static_cast<quint16>(Command::COMMAND_closeHiPressVent), Command::COMMAND_closeHiPressVent},
+            {static_cast<quint16>(Command::COMMAND_openHiPressVent), Command::COMMAND_openHiPressVent},
+            {static_cast<quint16>(Command::COMMAND_closeLoxVent), Command::COMMAND_closeLoxVent},
+            {static_cast<quint16>(Command::COMMAND_openLoxVent), Command::COMMAND_openLoxVent},
+            {static_cast<quint16>(Command::COMMAND_closeLoxPressValve), Command::COMMAND_closeLoxPressValve},
+            {static_cast<quint16>(Command::COMMAND_openLoxPressValve), Command::COMMAND_openLoxPressValve},
+            {static_cast<quint16>(Command::COMMAND_closeLoxPressLineVent), Command::COMMAND_closeLoxPressLineVent},
+            {static_cast<quint16>(Command::COMMAND_openLoxPressLineVent), Command::COMMAND_openLoxPressLineVent},
+            {static_cast<quint16>(Command::COMMAND_closeFuelVent), Command::COMMAND_closeFuelVent},
+            {static_cast<quint16>(Command::COMMAND_openFuelVent), Command::COMMAND_openFuelVent},
+            {static_cast<quint16>(Command::COMMAND_closeFuelPressValve), Command::COMMAND_closeFuelPressValve},
+            {static_cast<quint16>(Command::COMMAND_openFuelPressValve), Command::COMMAND_openFuelPressValve},
+            {static_cast<quint16>(Command::COMMAND_closeFuelPressLineVent), Command::COMMAND_closeFuelPressLineVent},
+            {static_cast<quint16>(Command::COMMAND_openFuelPressLineVent), Command::COMMAND_openFuelPressLineVent},
+            {static_cast<quint16>(Command::COMMAND_openLoxMV), Command::COMMAND_openLoxMV},
+            {static_cast<quint16>(Command::COMMAND_closeFuelMV), Command::COMMAND_closeFuelMV},
+            {static_cast<quint16>(Command::COMMAND_openFuelMV), Command::COMMAND_openFuelMV},
+            {static_cast<quint16>(Command::COMMAND_engineIgniterPyro1_Off), Command::COMMAND_engineIgniterPyro1_Off},
+            {static_cast<quint16>(Command::COMMAND_engineIgniterPyro1_On), Command::COMMAND_engineIgniterPyro1_On},
+            {static_cast<quint16>(Command::COMMAND_engineIgniterPyro2_Off), Command::COMMAND_engineIgniterPyro2_Off},
+            {static_cast<quint16>(Command::COMMAND_engineIgniterPyro2_On), Command::COMMAND_engineIgniterPyro2_On},
+            {static_cast<quint16>(Command::COMMAND_allSensorsOff), Command::COMMAND_allSensorsOff},
+            {static_cast<quint16>(Command::COMMAND_allSensorsSlow), Command::COMMAND_allSensorsSlow},
+            {static_cast<quint16>(Command::COMMAND_allSensorsMedium), Command::COMMAND_allSensorsMedium},
+            {static_cast<quint16>(Command::COMMAND_allSensorsFast), Command::COMMAND_allSensorsFast},
+            {static_cast<quint16>(Command::COMMAND_allSensorsCalibration), Command::COMMAND_allSensorsCalibration},
+            {static_cast<quint16>(Command::COMMAND_propProgSetting), Command::COMMAND_propProgSetting},
+            {static_cast<quint16>(Command::COMMAND_node1RESET), Command::COMMAND_node1RESET},
+            {static_cast<quint16>(Command::COMMAND_node2RESET), Command::COMMAND_node2RESET},
+            {static_cast<quint16>(Command::COMMAND_node3RESET), Command::COMMAND_node3RESET},
+            {static_cast<quint16>(Command::COMMAND_node4RESET), Command::COMMAND_node4RESET},
+            {static_cast<quint16>(Command::COMMAND_node5RESET), Command::COMMAND_node5RESET},
+            {static_cast<quint16>(Command::COMMAND_node6RESET), Command::COMMAND_node6RESET},
+            {static_cast<quint16>(Command::COMMAND_GLOBALRESET), Command::COMMAND_GLOBALRESET},
+            {static_cast<quint16>(Command::COMMAND_reseved), Command::COMMAND_reseved},
+            {static_cast<quint16>(Command::COMMAND_SIZE), Command::COMMAND_SIZE}
+        };
 
     QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
 
+    QTimer _timer;
 
-    QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on
-    QList<QCanBusFrame> _remoteFrameList;   // store these frames here to view later on
-    QList<QCanBusFrame> _errorFrameList;    // store these frames here to view later on
+
+    QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on (or just write to a file)
+    QList<QCanBusFrame> _remoteFrameList;   // store these frames here to view later on (or just write to a file)
+    QList<QCanBusFrame> _errorFrameList;    // store these frames here to view later on (or just write to a file)
+    // Write to a file: "frameID: payload bytes || description of the frame"
     //QCanBusFrame _dataFrame{0,0}; // Maybe just create this inside of the onFramesReceived slot?
 
     QString _busStatus;
@@ -368,6 +374,12 @@ signals:
 
     void tankPressControllersChanged();
 
+    void progress();
+    void started();
+    void stopped();
+    void paused();
+    void resumed();
+
 public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
 
     bool connectCan();
@@ -379,8 +391,17 @@ public slots: // slots that handled signals from QML should return void or basic
     void onStateChanged(QCanBusDevice::CanBusDeviceState state);
 
     void sendFrame(quint32 ID, QString dataHexString, QCanBusFrame::FrameType frameType = QCanBusFrame::DataFrame,
-                               bool bitRateSwitch = false , bool extendedFrameFormat = false, bool FlexibleDataRateFormat = false); // invoked via a signal in QML
+                   bool bitRateSwitch = false , bool extendedFrameFormat = false, bool FlexibleDataRateFormat = false); // invoked via a signal in QML
     // May need to connect QML items to the remoteFrameConstruct method...
+
+    void onStarted();
+    void onStopped();
+    void onPaused();
+    void onResumed();
+
+private slots:
+    void timeout(); //QTimer
+
 public:
     void run() override;
 
@@ -388,5 +409,6 @@ public:
 };
 
 Q_DECLARE_METATYPE(FrameHandler)
+
 
 #endif

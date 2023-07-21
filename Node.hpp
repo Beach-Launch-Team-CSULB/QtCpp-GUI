@@ -26,11 +26,11 @@ public:
 private:
     Q_OBJECT
     QML_ELEMENT
-    QML_UNCREATABLE("C++ instantiation only")
+        QML_UNCREATABLE("C++ instantiation only")
 
-public:
-    //explicit Node(QObject *parent = nullptr); results in linker error if missing cpp file
-    explicit Node() = delete;
+        public:
+                 //explicit Node(QObject *parent = nullptr); results in linker error if missing cpp file
+                 explicit Node() = delete;
 
 };
 Q_DECLARE_METATYPE(Node)

@@ -21,9 +21,9 @@ public:
 private:
     Q_OBJECT
     QML_ELEMENT
-    QML_UNCREATABLE("C++ instantiation only")
+        QML_UNCREATABLE("C++ instantiation only")
 
-    Autosequence::AutosequenceState _autosequenceState {Autosequence::AutosequenceState::STANDBY};
+        QVariant _state {QVariant(static_cast<quint8>(Autosequence::AutosequenceState::STANDBY))};
 
     QString _name{""};
 
@@ -41,7 +41,7 @@ private:
     Q_PROPERTY(quint16 hostNodeID READ hostNodeID CONSTANT)
 
     Q_PROPERTY(qint64 currentCountdown READ currentCountdown NOTIFY currentCountdownChanged)
-    Q_PROPERTY(Autosequence::AutosequenceState autosequenceState READ autosequenceState NOTIFY autosequenceStateChanged)
+    Q_PROPERTY(QVariant state READ state NOTIFY stateChanged)
 
 
 public:
@@ -56,8 +56,8 @@ public:
     qint64 currentCountdown() const;
     void setCurrentCountdown(qint64 newCurrentCountdown);
 
-    Autosequence::AutosequenceState autosequenceState() const;
-    void setAutosequenceState(Autosequence::AutosequenceState newAutosequenceState);
+    QVariant state() const;
+    void setState(QVariant newState);
 
 
 
@@ -66,7 +66,7 @@ signals:
     void idChanged();
     void hostNodeIDChanged();
     void currentCountdownChanged();
-    void autosequenceStateChanged();
+    void stateChanged();
     void nameChanged();
 
 public slots:

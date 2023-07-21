@@ -23,12 +23,12 @@ public:
 private:
     Q_OBJECT
     QML_ELEMENT
-    QML_UNCREATABLE("C++ instantiation only")
+        QML_UNCREATABLE("C++ instantiation only")
 
-    QString _name {""};
+        QString _name {""};
     quint16 _id {0};
     quint16 _nodeID{0};
-    HPSensor::SensorState _sensorState {HPSensor::SensorState::OFF};
+    QVariant _sensorState {QVariant(static_cast<quint8>(HPSensor::SensorState::OFF))};
 
     float _outputValue {0.0f};
     quint64 _timestamp {0};
@@ -39,7 +39,7 @@ private:
 
     Q_PROPERTY(quint16 nodeID READ nodeID CONSTANT)
 
-    Q_PROPERTY(HPSensor::SensorState sensorState READ sensorState NOTIFY sensorStateChanged)
+    Q_PROPERTY(QVariant sensorState READ sensorState NOTIFY sensorStateChanged)
 
     Q_PROPERTY(float outputValue READ outputValue NOTIFY outputValueChanged)
 
@@ -52,8 +52,8 @@ public:
     quint16 id() const;
     quint16 nodeID() const;
 
-    HPSensor::SensorState sensorState() const;
-    void setSensorState(HPSensor::SensorState newSensorState);
+    QVariant sensorState() const;
+    void setSensorState(QVariant newSensorState);
 
     float outputValue() const;
     void setOutputValue(float newOutputValue);

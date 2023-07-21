@@ -23,34 +23,25 @@
 #include <QByteArray>
 #include <QByteArrayList>
 
+#include <windows.h>
+
 // Class file includes
 #include "FrameHandler.hpp"
 #include "GNCThread.hpp"
 #include "CommandState.hpp"
-
+#include "DirHelper.hpp"
 #define WIN1000 // How do I set flags
-
-#ifdef WIN1000
-    #include <windows.h>
-#elif
-    #include <X11/Xlib.h> // on raspberry pi
-#endif
 
 //make a function to create can bus objects instead????
 // another function to connect?
 
+
 int main(int argc, char *argv[])
 {
-
-    quint16 DANGERZONE {300};
-    quint16 NODEID {8};
-    quint16 VERIFICATIONID {166};
-
-
-    // TODO: FINISH THE REMAINING COMMANDS.
-
     QGuiApplication app(argc, argv);
-    // Setup
+
+    qInfo() << "Hello";
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
     QDir appDir {QGuiApplication::applicationDirPath()};
     QThreadPool* pool {QThreadPool::globalInstance()};
@@ -72,13 +63,11 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     engine.rootContext()->setContextProperty("appDir", appDir.absolutePath());
-    //engine.rootContext()->setContextProperty("monitorWidth", 99999999999)
-    //engine.rootContext()->setContextProperty("monitorHeight", 9999999999)
-
+    //engine.rootContext()->setContextProperty("monitorWidth", GetSystemMetrics(SM_CXSCREEN));
+    //engine.rootContext()->setContextProperty("monitorHeight", GetSystemMetrics(SM_CYSCREEN));
+    qInfo() << GetSystemMetrics(SM_CXSCREEN);
+    qInfo() << GetSystemMetrics(SM_CYSCREEN);
     // Expose objects to the QML engine
-    engine.rootContext()->setContextProperty("DANGERZONE", DANGERZONE);
-    engine.rootContext()->setContextProperty("NODEID", NODEID);
-    engine.rootContext()->setContextProperty("VERIFICATIONID", VERIFICATIONID);
 
     engine.rootContext()->setContextProperty("frameHandler", frameHandler);
     engine.rootContext()->setContextProperty("GNC", GNC);
@@ -115,22 +104,23 @@ int main(int argc, char *argv[])
     // Create an instance of the component
     // QObject* qmlObject {component.create()};
 
-    //const QUrl url(u"qrc:/BLT-GUI-Maker/main.qml"_qs);
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    const QUrl url(u"file:///C:/CodeStuff/Beach Launch Team/BLT-GUI-Maker/main.qml"_qs);
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-                     &app, [url](QObject *obj, const QUrl &objUrl) {
-        if (!obj && url == objUrl)
-            QCoreApplication::exit(-1);
-    }, Qt::QueuedConnection);
+
+
+    const QUrl url(u"file:///C:/CodeStuff/Beach Launch Team/BLT-Theseus-GUI/Main.qml"_qs);
+
+
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
+        &app, []() { QCoreApplication::exit(-1); },
+        Qt::QueuedConnection);
 
     // How to load multiple windows
     engine.load(url);
-    engine.load(url);
+    //engine.load(url);
 
     // Starting threads, where the application begins running:
     pool->start(frameHandler);
     pool->start(GNC);
     qInfo() << QThread::currentThread();
+
     return app.exec();
 }

@@ -27,13 +27,13 @@ public:
 private:
     Q_OBJECT
     QML_ELEMENT
-    QML_UNCREATABLE("C++ instantiation only")
+        QML_UNCREATABLE("C++ instantiation only")
 
-    QString _name {""};
+        QString _name {""};
     quint16 _id {0};
     quint16 _nodeID{0};
 
-    EngineControllerState _state {EngineControllerState::PASSIVE};
+    QVariant _state {QVariant(static_cast<quint8>(EngineControllerState::PASSIVE))};
 
     qint32 _fuelMVAutosequenceActuation = 0;
     qint32 _loxMVAutosequenceActuation = 0;
@@ -47,7 +47,7 @@ private:
 
     Q_PROPERTY(quint16 nodeID READ nodeID CONSTANT)
 
-    Q_PROPERTY(EngineControllerState state READ state NOTIFY stateChanged)
+    Q_PROPERTY(QVariant state READ state NOTIFY stateChanged)
 
     Q_PROPERTY(qint32 fuelMVAutosequenceActuation READ fuelMVAutosequenceActuation NOTIFY fuelMVAutosequenceActuationChanged)
 
@@ -67,8 +67,8 @@ public:
     qint32 fuelMVAutosequenceActuation() const;
     void setFuelMVAutosequenceActuation(qint32 newFuelMVAutosequenceActuation);
 
-    EngineControllerState state() const;
-    void setState(EngineControllerState newState);
+    QVariant state() const;
+    void setState(QVariant newState);
 
     qint32 loxMVAutosequenceActuation() const;
     void setLoxMVAutosequenceActuation(qint32 newLoxMVAutosequenceActuation);

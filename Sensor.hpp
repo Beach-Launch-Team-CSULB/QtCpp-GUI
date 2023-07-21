@@ -27,7 +27,7 @@ private:
     QML_ELEMENT
     QML_UNCREATABLE("C++ instantiation only")
 
-    SensorState _state; // for turning on or off. SET BY *RECEIVED* CAN FRAME
+    QVariant _state {QVariant(static_cast<quint8>(SensorState::OFF))}; // for turning on or off. SET BY *RECEIVED* CAN FRAME
     quint64 _timestamp;
 
     Node::NodeID _sensorNode; // not initialized yet.
@@ -42,7 +42,7 @@ private:
     Q_PROPERTY(quint64 timestamp READ getTimestamp NOTIFY timestampChanged)
     Q_PROPERTY(float rawValue READ rawValue NOTIFY rawValueChanged)
     Q_PROPERTY(float convertedValue READ convertedValue NOTIFY convertedValueChanged)
-    Q_PROPERTY(Sensor::SensorState state READ state NOTIFY stateChanged)
+    Q_PROPERTY(QVariant state READ state NOTIFY stateChanged)
     Q_PROPERTY(quint16 rawSensorID READ rawSensorID CONSTANT)
     Q_PROPERTY(Node::NodeID sensorNode READ sensorNode CONSTANT)
 
@@ -62,8 +62,8 @@ public:
     float convertedValue() const;
     void setConvertedValue(float newConvertedValue);
 
-    Sensor::SensorState state() const;
-    void setState(Sensor::SensorState newState);
+    QVariant state() const;
+    void setState(QVariant newState);
 
     quint16 rawSensorID();
 

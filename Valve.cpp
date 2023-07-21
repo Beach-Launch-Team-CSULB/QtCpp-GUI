@@ -1,7 +1,5 @@
 #include "Valve.hpp"
 
-
-
 Valve::Valve(QObject *parent, QList<QVariant> args)
     : QObject{parent}, _name{args.at(0).toString()},
       _ID{static_cast<quint16>(args.at(1).toUInt())},
@@ -15,6 +13,8 @@ Valve::Valve(QObject *parent, QList<QVariant> args)
 }
 void Valve::onValveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data)
 {
+    /* this needs rework
+    qInfo() << "Enter Valve::onValveReceived function with object ID: " << _ID;
     // check for valve ID before doing anything.
     switch(_valveNode)
     {
@@ -68,23 +68,25 @@ void Valve::onValveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data)
         }
         break;
     }
-
+*/
 }
 
 void Valve::onValveReceivedFD(const QList<QByteArray>& data)
 {
+    qInfo() << "Enter Valve::onValveReceivedID function with object ID: " << _ID;
     for (int i = 0; i < data.length(); i = i + 2)
     {
         if (_ID == data.at(i).toUInt(nullptr,16))
         {
             if(_ID == 26 || _ID == 27) //Pyro's ID's
             {
-                setPyroState(static_cast<Valve::PyroState>(data.at(i+1).toUInt(nullptr,16)));
+                setPyroState(data.at(i+1).toUInt(nullptr,16));
                 break;
             }
             else
             {
-                setValveState(static_cast<Valve::ValveState>(data.at(i+1).toUInt(nullptr,16)));
+                //setValveState(static_cast<Valve::ValveState>(data.at(i+1).toUInt(nullptr,16)));
+                setValveState(data.at(i+1).toUInt(nullptr,16));
                 break;
             }
 
@@ -98,24 +100,24 @@ QString Valve::name() const
 }
 
 
-Valve::ValveState Valve::valveState() const
+QVariant Valve::valveState() const
 {
     return _valveState;
 }
 
-void Valve::setValveState(Valve::ValveState newValveState)
+void Valve::setValveState(QVariant newValveState)
 {
     if (_valveState == newValveState) return;
     _valveState = newValveState;
     emit ValveStateChanged(); // for QML to handle
 }
 
-Valve::PyroState Valve::pyroState() const
+QVariant Valve::pyroState() const
 {
     return _pyroState;
 }
 
-void Valve::setPyroState(PyroState newPyroState)
+void Valve::setPyroState(QVariant newPyroState)
 {
     if (_pyroState == newPyroState)
         return;
@@ -137,3 +139,4 @@ quint16 Valve::commandOn()
 {
     return _commandOn;
 }
+

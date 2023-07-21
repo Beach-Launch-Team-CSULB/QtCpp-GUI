@@ -12,9 +12,9 @@ class GNCThread : public QObject, public QRunnable
 {
     Q_OBJECT
     QML_ELEMENT
-    QML_UNCREATABLE("C++ instantiation only")
+        QML_UNCREATABLE("C++ instantiation only")
 
-    Node::NodeID _node {Node::NodeID::TELEMETRY};
+        Node::NodeID _node {Node::NodeID::TELEMETRY};
 public:
 
     explicit GNCThread(QObject *parent = nullptr);

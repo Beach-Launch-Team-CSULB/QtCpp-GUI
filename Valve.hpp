@@ -6,6 +6,7 @@
 #include <QVariant>
 #include "Node.hpp"
 #include <qqml.h>
+
 class Valve : public QObject
 {
 public:
@@ -45,8 +46,9 @@ public:
 private:
     Q_OBJECT
     // Expose object's properties to QML
-    Q_PROPERTY(Valve::ValveState valveState READ valveState NOTIFY ValveStateChanged)
-    Q_PROPERTY(Valve::PyroState pyroState READ pyroState NOTIFY pyroStateChanged)
+    //Q_PROPERTY(Valve::ValveState valveState READ valveState NOTIFY ValveStateChanged)
+    Q_PROPERTY(QVariant valveState READ valveState NOTIFY ValveStateChanged)
+    Q_PROPERTY(QVariant pyroState READ pyroState NOTIFY pyroStateChanged)
     Q_PROPERTY(quint16 ID READ ID CONSTANT)
     Q_PROPERTY(quint16 commandOff READ commandOff CONSTANT)
     Q_PROPERTY(quint16 commandOn READ commandOn CONSTANT)
@@ -54,7 +56,8 @@ private:
     QML_UNCREATABLE("C++ instantiation only")
     QString _name;
     quint16 _ID;
-    Valve::ValveState _valveState;
+    //Valve::ValveState _valveState {Valve::ValveState::CLOSED};
+    QVariant _valveState {QVariant(static_cast<quint8>(Valve::ValveState::FIRE_COMMANDED))};
     quint16 _HP_channel;
 
     quint16 _commandOff;
@@ -70,18 +73,20 @@ private:
     Node::NodeID _valveNode;
 
     // Pyro
-    PyroState _pyroState; //
+    QVariant _pyroState {QVariant(static_cast<quint8>(Valve::PyroState::OFF))}; //
 
 
 
 public:
     explicit Valve(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0,0,0,0,0});
 
-    Valve::ValveState valveState() const;
-    void setValveState(Valve::ValveState newValveState);
+    //Valve::ValveState valveState() const;
+    //void setValveState(Valve::ValveState newValveState);
+    QVariant valveState() const;
+    void setValveState(QVariant newValveState);
 
-    Valve::PyroState pyroState() const;
-    void setPyroState(Valve::PyroState newPyroState);
+    QVariant pyroState() const;
+    void setPyroState(QVariant newPyroState);
 
     QString name() const;
     quint16 ID();

@@ -36,7 +36,7 @@ private:
     QString _name = "";
     quint16 _id = 0;
     quint16 _nodeID = 0;
-    TankPressController::TankPressControllerState _state = {TankPressControllerState::PASSIVE};
+    QVariant _state {QVariant(static_cast<quint8>(TankPressControllerState::PASSIVE))};
 
 
     float _Kp = 0;
@@ -52,7 +52,7 @@ private:
 
     Q_PROPERTY(quint16 nodeID READ nodeID CONSTANT)
 
-    Q_PROPERTY(TankPressController::TankPressControllerState state READ state NOTIFY stateChanged)
+    Q_PROPERTY(QVariant state READ state NOTIFY stateChanged)
 
     Q_PROPERTY(float Kp READ Kp NOTIFY KpChanged)
 
@@ -77,8 +77,8 @@ public:
 
     quint16 nodeID() const;
 
-    TankPressController::TankPressControllerState state() const;
-    void setState(TankPressController::TankPressControllerState newState);
+    QVariant state() const;
+    void setState(QVariant newState);
 
     float Kp() const;
     void setKp(float newKp);
@@ -122,4 +122,5 @@ public slots:
     void onTankPressControllerReceivedFD(const QList<QByteArray>& data);
 };
 Q_DECLARE_METATYPE(TankPressController)
+
 #endif // TANKPRESSCONTROLLER_HPP

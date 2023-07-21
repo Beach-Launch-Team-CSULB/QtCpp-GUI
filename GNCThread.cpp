@@ -1,4 +1,6 @@
+
 #include "GNCThread.hpp"
+
 
 GNCThread::GNCThread(QObject *parent)
     : QObject{parent}
@@ -34,3 +36,4 @@ void GNCThread::run()
 
     }
 }
+

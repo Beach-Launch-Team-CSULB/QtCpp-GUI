@@ -14,6 +14,7 @@ Sensor::Sensor(QObject *parent, QList<QVariant> args)
 
 void Sensor::onSensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data)
 {
+    qInfo() << "Enter Sensor::onSensorReceived() function with object ID: " << _sensorID;
     // check for sensor ID before doing anything
     if (_convertedSensorID == ID_A)
     {
@@ -44,11 +45,12 @@ void Sensor::onSensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data
 
 void Sensor::onSensorReceivedFD(const QList<QByteArray>& data)
 {
+    qInfo() << "Enter Sensor::onSensorReceivedFD() function with object ID: " << _sensorID;
     for (int i = 0; i < data.length(); i = i + 16)
     {
         if(_rawSensorID == data.at(i).toUInt(nullptr, 16))
         {
-            setState(static_cast<SensorState>(data.at(i+1).toUInt(nullptr, 16)));
+            setState(data.at(i+1).toUInt(nullptr, 16));
 
             quint64 currentTimestamp =  static_cast<quint64>(data.at(i+9).toUInt(nullptr, 16)) +
                                         (static_cast<quint64>(data.at(i+8).toUInt(nullptr, 16)) << 8) +
@@ -101,6 +103,8 @@ float Sensor::rawValue() const
 
 void Sensor::setRawValue(float newRawValue)
 {
+    if(qFuzzyCompare(_rawValue,newRawValue))
+        return;
     _rawValue = newRawValue;
     emit rawValueChanged(); // QML will handle this signal
 }
@@ -112,17 +116,21 @@ float Sensor::convertedValue() const
 
 void Sensor::setConvertedValue(float newConvertedValue)
 {
+    if(qFuzzyCompare(_convertedValue,newConvertedValue));
+        return;
     _convertedValue = newConvertedValue;
     emit convertedValueChanged();
 }
 
-Sensor::SensorState Sensor::state() const
+QVariant Sensor::state() const
 {
     return _state;
 }
 
-void Sensor::setState(Sensor::SensorState newState)
+void Sensor::setState(QVariant newState)
 {
+    if(_state == newState)
+        return;
     _state = newState;
     emit stateChanged();
 }
@@ -136,3 +144,4 @@ Node::NodeID Sensor::sensorNode() const
 {
     return _sensorNode;
 }
+

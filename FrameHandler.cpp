@@ -1,6 +1,5 @@
 #include "FrameHandler.hpp"
-
-//Don't include these anywhere else or there will be multiple duplications
+//Don't include these anywhere else or there will/could be multiple duplications
 #include "SensorObjectDefinitions.hpp"
 #include "HPSensorObjectDefinitions.hpp"
 #include "ValveObjectDefinitions.hpp"
@@ -78,6 +77,12 @@ FrameHandler::FrameHandler(QObject *parent)
         QObject::connect(this, &FrameHandler::engineControllerReceivedFD,
                          qvariant_cast<EngineController*>(_engineControllers.value(engineControllerKey)), &EngineController::onEngineControllerReceivedFD);
     }
+
+    QObject::connect(this, &FrameHandler::started, this, &FrameHandler::onStarted);
+    QObject::connect(this, &FrameHandler::stopped, this, &FrameHandler::onStopped);
+    QObject::connect(this, &FrameHandler::paused, this, &FrameHandler::onPaused);
+    QObject::connect(this, &FrameHandler::resumed, this, &FrameHandler::onResumed);
+    QObject::connect(&_timer, &QTimer::timeout, this, &FrameHandler::timeout);
 
     QThread::currentThread()->setObjectName("Frame Handler thread");
     qInfo() << QThread::currentThread();
@@ -451,6 +456,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
             //    emit stateReceived(frameID, data);
             //}
         }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         else if (dataFrame.hasFlexibleDataRateFormat())
         {
             quint32 id = dataFrame.frameId();
@@ -477,11 +483,14 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
                 byte.append(payload.at(i)); byte.append(payload.at(i+1)); // put 2 nibbles together to make a byte
                 data.append(byte); // data.at(0) = Byte 1, data.at(1) = Byte 2, etc...
             }
+            ///////////////////////////////////
+            //WRITE FRAMES TO A FILE HERE
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////
             // States
             if (PROP_NODE_STATE_ID_OFFSET <= id && id > PROP_NODE_STATE_ID_OFFSET + 10)
             {
+                //QTimer timeout signal handler ?
                 if (id == PROP_NODE_STATE_ID_OFFSET + engineNode)
                 {
                     setNodeStatusRenegadeEngine(static_cast<FrameHandler::VehicleState>(data.at(0).toUInt(nullptr, 16)));
@@ -557,8 +566,6 @@ void FrameHandler::sendFrame(quint32 ID, QString dataHexString, QCanBusFrame::Fr
     // in QML, just concantenate all the strings to form a byte array represented as string and pass it in as an argument.
     qDebug() << "Enter FrameHandler::sendFrame() function";
 
-
-
     //dataHexString is passed from QML
     //QByteArray data {QByteArrayLiteral(dataHexString)};
     QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())};
@@ -587,6 +594,31 @@ void FrameHandler::sendFrame(quint32 ID, QString dataHexString, QCanBusFrame::Fr
     }
 
     _can0->writeFrame(dataFrame);
+}
+
+void FrameHandler::onStarted()
+{
+
+}
+
+void FrameHandler::onStopped()
+{
+
+}
+
+void FrameHandler::onPaused()
+{
+
+}
+
+void FrameHandler::onResumed()
+{
+
+}
+
+void FrameHandler::timeout()
+{
+
 }
 
 // Getters and Setters section
@@ -733,7 +765,33 @@ void FrameHandler::run()
 
     while(true)
     {
-
+        /*
+        if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 0)
+        {
+            qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
+            qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(1);
+        }
+        else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 1)
+        {
+            qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
+            qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(2);
+        }
+        else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 2)
+        {
+            qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
+            qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(3);
+        }
+        else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 3)
+        {
+            qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
+            qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(4);
+        }
+        else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 4)
+        {
+            qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
+            qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(0);
+        }
+        */
     }
 
     //while (true) //
