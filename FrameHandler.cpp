@@ -587,6 +587,10 @@ void FrameHandler::sendFrame(quint32 ID, QString dataHexString, QCanBusFrame::Fr
     //remoteFrame.setErrorStateIndicator(false);
     //remoteFrame.setLocalEcho(false);
 
+    _logger.outputLogMessage("(testing) CAN frame sent: " + QString::number(dataFrame.frameId()) + "-" + dataFrame.payload().toHex() + "-"
+                             + QString::number(dataFrame.frameType()) + "-" + QString::number(dataFrame.hasBitrateSwitch()) + "-"
+                             + QString::number(dataFrame.hasFlexibleDataRateFormat()));
+
     if(!this->isOperational())
     {
         qInfo() << "Can not Operational";
@@ -652,6 +656,11 @@ QQmlPropertyMap* FrameHandler::tankPressControllers()
 QQmlPropertyMap* FrameHandler::engineControllers()
 {
     return &_engineControllers;
+}
+
+Logger *FrameHandler::logger()
+{
+    return &_logger;
 }
 
 
@@ -744,6 +753,13 @@ QString FrameHandler::busStatus() const
     return _busStatus;
 }
 
+
+void FrameHandler::setLoopToFalse()
+{
+    loop = false;
+}
+
+
 // run
 void FrameHandler::run()
 {
@@ -763,35 +779,60 @@ void FrameHandler::run()
 
     // set up via buttons in qml instead
 
-    while(true)
+    QElapsedTimer timer1;
+    QElapsedTimer timer2;
+    timer1.start();
+    timer2.start();
+    float num = 0;
+
+    while(loop)
     {
-        /*
-        if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 0)
+/*
+        if (timer1.elapsed() > 5)
         {
-            qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
-            qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(1);
+            if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 0)
+            {
+                qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
+                qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(1);
+            }
+            else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 1)
+            {
+                qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
+                qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(2);
+            }
+            else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 2)
+            {
+                qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
+                qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(3);
+            }
+            else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 3)
+            {
+                qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
+                qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(4);
+            }
+            else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 4)
+            {
+                qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
+                qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(0);
+            }
+
+            qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setRawValue(num);
+            num = num + 0.01;
+            timer1.restart();
         }
-        else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 1)
+*/
+
+        if (timer2.elapsed() > 1000)
         {
-            qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
-            qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(2);
+            _logger.outputLogMessage("Test message");
+            timer2.restart();
+            qInfo() << "frameHandler thread still running";
+            //num = num + 1;
+            //qInfo() << num;
+            //if (num >= 5) loop = false;
         }
-        else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 2)
-        {
-            qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
-            qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(3);
-        }
-        else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 3)
-        {
-            qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
-            qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(4);
-        }
-        else if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 4)
-        {
-            qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
-            qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(0);
-        }
-        */
+
+
     }
 
     //while (true) //

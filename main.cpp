@@ -39,9 +39,8 @@
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-
     qInfo() << "Hello";
-
+    QQmlApplicationEngine engine;
 /////////////////////////////////////////////////////////////////////////////////////////////////////
     QDir appDir {QGuiApplication::applicationDirPath()};
     QThreadPool* pool {QThreadPool::globalInstance()};
@@ -53,14 +52,14 @@ int main(int argc, char *argv[])
 
     FrameHandler *frameHandler {new FrameHandler(&app)};
     GNCThread *GNC {new GNCThread(&app)};
-    frameHandler->setAutoDelete(true);  //hmmmmmmmmmmmmmm might crash
-    GNC->setAutoDelete(true);           // might crash
+    frameHandler->setAutoDelete(false);  //hmmmmmmmmmmmmmm might crash
+    GNC->setAutoDelete(false);           // might crash
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
     // Look into lambda functions for signals and slots.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-    QQmlApplicationEngine engine;
+
 
     engine.rootContext()->setContextProperty("appDir", appDir.absolutePath());
     //engine.rootContext()->setContextProperty("monitorWidth", GetSystemMetrics(SM_CXSCREEN));
@@ -71,6 +70,7 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("frameHandler", frameHandler);
     engine.rootContext()->setContextProperty("GNC", GNC);
+    engine.rootContext()->setContextProperty("logger", frameHandler->logger()); // may not need
 
     //engine.rootContext()->setContextProperty("frameHandlerSensors", frameHandler->sensors());
     //qInfo() << frameHandler->sensors().value("High_Press_1"); qInfo() << " HHHHHHHHHHHHHHHHHH";
@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<TankPressController>();
     qRegisterMetaType<Node>();
     qRegisterMetaType<EngineController>();
+    qRegisterMetaType<Logger>();
 
     // Also expose sensors and valves with setContextProperty too using the foreach loop
 
@@ -94,6 +95,7 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<Autosequence>("AutosequenceEnums", 1, 0, "AutosequenceEnums", "C++ instantiation only");
     qmlRegisterUncreatableType<TankPressController>("TankPressControllerEnums", 1, 0, "TankPressControllerEnums", "C++ instantiation only");
     qmlRegisterUncreatableType<EngineController>("EngineControllerEnums", 1, 0, "EngineControllerEnums", "C++ instantiation only");
+    qmlRegisterUncreatableType<Logger>("LoggerEnums", 1, 0, "LoggerEnums", "C++ instantiation only");
 
     // Register C++ objects to QML objects and vice versa. (expose c++ data to QML as a property)
     // also register actionable items in QML and use signals and slots to connect
@@ -116,11 +118,22 @@ int main(int argc, char *argv[])
     // How to load multiple windows
     engine.load(url);
     //engine.load(url);
+    //engine.load(url);
 
     // Starting threads, where the application begins running:
     pool->start(frameHandler);
     pool->start(GNC);
+
+    // Gracefully exits the theads (lol I don't know if this is the correctway)
+    QObject::connect(&app, &QGuiApplication::aboutToQuit, frameHandler, &FrameHandler::setLoopToFalse);
+    //QObject::connect(&app, &QGuiApplication::aboutToQuit, GNC, &GNC::setLoopToFalse);
     qInfo() << QThread::currentThread();
 
+    qInfo() << " before return app.exec()";
     return app.exec();
+    // These lines are never reached!!!!
+    // The threads will still keep running even though if the app is closed down
+    // need to test when deploy
+
+
 }

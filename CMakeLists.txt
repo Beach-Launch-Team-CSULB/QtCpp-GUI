@@ -22,12 +22,17 @@ qt_add_executable(appBLT-Theseus-GUI
     EngineController.hpp EngineController.cpp EngineControllerObjectDefinitions.hpp
     TankPressController.hpp TankPressController.cpp TankPressControllerObjectDefinitions.hpp
     Node.hpp
+
+    Logger.hpp Logger.cpp
 )
 
 qt_add_qml_module(appBLT-Theseus-GUI
     URI BLT-Theseus-GUI
     VERSION 1.0
-    QML_FILES Main.qml Graph.qml HPSensor.qml SensorQML.qml ValveQML.qml
+    QML_FILES   Main.qml MainPage1.qml MainPage2.qml MainPage3.qml
+                StatusBar.qml
+                GraphQML.qml HPSensorQML.qml SensorQML.qml ValveQML.qml
+                Tab.qml
 )
 
 set_target_properties(appBLT-Theseus-GUI PROPERTIES

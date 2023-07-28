@@ -99,6 +99,7 @@ QString Sensor::name() const
 float Sensor::rawValue() const
 {
     return _rawValue;
+    //return _rawValue;
 }
 
 void Sensor::setRawValue(float newRawValue)
