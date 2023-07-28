@@ -84,7 +84,8 @@ Item {
             onDoubleClicked:
             {
                 console.log("State before click" + root.state)
-                if (root.state === "0") //TESTING ONLY
+                if (root.state === "0") //TESTING ONLY. this directly sets the state in the frontend using QML, which
+                                        // interferes with the backend and makes it stop working
                 {
                     root.state = "1"
                 }
@@ -156,13 +157,14 @@ Item {
     Button { // Kinda dangerous since its close to the valve, possible to misclick.
              // consider putting these in another window?
         id: button
-        y: 65
-        width: 45
-        height: 25
-        text: qsTr("Button")
+        y: 45
+        width: 41
+        height: 15
+        text: qsTr("info")
+        //font: 10
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottomMargin: -30
+        anchors.bottomMargin: -20
         onClicked:
         {
             valvePopup.open()

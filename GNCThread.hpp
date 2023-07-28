@@ -16,7 +16,7 @@ class GNCThread : public QObject, public QRunnable
 
         Node::NodeID _node {Node::NodeID::TELEMETRY};
 public:
-
+        bool loop {true};
     explicit GNCThread(QObject *parent = nullptr);
     ~GNCThread();
 

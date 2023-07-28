@@ -35,6 +35,8 @@
 #include "Autosequence.hpp"
 #include "TankPressController.hpp"
 #include "EngineController.hpp"
+
+#include "Logger.hpp"
 //enum class CommandAuthority
 //{
 //    view = 0,
@@ -182,7 +184,8 @@ private:
     Q_PROPERTY(QQmlPropertyMap* autosequences READ autosequences CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* tankPressControllers READ tankPressControllers CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* engineControllers READ engineControllers CONSTANT)
-    // ENGINE CONTROLLER!!!!
+
+    Q_PROPERTY(Logger* logger READ logger CONSTANT)
 
 
     Q_PROPERTY(VehicleState nodeStatusRenegadeEngine READ nodeStatusRenegadeEngine NOTIFY nodeStatusRenegadeEngineChanged)
@@ -196,9 +199,9 @@ private:
 
     //Q_PROPERTY(QStack<QVarLengthArray<quint32, 2>> throttlePoints READ throttlePoints NOTIFY throttlePoints)
     QML_ELEMENT
-        QML_UNCREATABLE("C++ instantiation only")
+    QML_UNCREATABLE("C++ instantiation only")
 
-        QCanBusDevice* _can0 {nullptr};
+    QCanBusDevice* _can0 {nullptr};
     QQmlPropertyMap _HPSensors {QQmlPropertyMap(this)};
     QQmlPropertyMap _sensors {QQmlPropertyMap(this)};
     QQmlPropertyMap _valves {QQmlPropertyMap(this)};
@@ -212,6 +215,9 @@ private:
     MissionState _missionStatusRenegadeProp {MissionState::PASSIVE};
     Command _currentCommandRenegadeEngine {Command::COMMAND_NOCOMMAND};
     Command _currentCommandRenegadeProp {Command::COMMAND_NOCOMMAND};
+
+    Logger _logger {Logger(this)};
+
     // Implement this............. Every time other node updates, the setter for this must be called to check if all nodes are in the same state
     NodeSyncStatus _nodeSyncStatus; // updates every time a node changed and checks if all nodes are in the same state
 
@@ -315,6 +321,7 @@ private:
 
 
 public:
+    bool loop {true};
     explicit FrameHandler(QObject *parent = nullptr);
     ~FrameHandler();
 
@@ -327,6 +334,8 @@ public:
     QQmlPropertyMap* autosequences();
     QQmlPropertyMap* tankPressControllers();
     QQmlPropertyMap* engineControllers();
+
+    Logger* logger();
 
     FrameHandler::VehicleState nodeStatusRenegadeEngine() const;
     void setNodeStatusRenegadeEngine(FrameHandler::VehicleState newNodeStatusRenegadeEngine);
@@ -381,6 +390,8 @@ signals:
     void resumed();
 
 public slots: // slots that handled signals from QML should return void or basic types that can be converted between C++ and QML
+
+    void setLoopToFalse();
 
     bool connectCan();
     bool disconnectCan();
