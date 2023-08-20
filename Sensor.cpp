@@ -77,6 +77,16 @@ void Sensor::onSensorReceivedFD(const QList<QByteArray>& data)
     }
 }
 
+void Sensor::emitUpdateGraphQML_rawValue()
+{
+    emit updateGraphQML_rawValue(static_cast<float>(_timestamp)/1'000'000, _rawValue); // for Connections in QML
+}
+
+void Sensor::emitUpdateGraphQML_convertedValue()
+{
+    emit updateGraphQML_convertedValue(static_cast<float>(_timestamp)/1'000'000, _convertedValue); // for Connections in QML
+}
+
 quint64 Sensor::getTimestamp() const
 {
     return _timestamp;
@@ -117,7 +127,7 @@ float Sensor::convertedValue() const
 
 void Sensor::setConvertedValue(float newConvertedValue)
 {
-    if(qFuzzyCompare(_convertedValue,newConvertedValue));
+    if(qFuzzyCompare(_convertedValue, newConvertedValue))
         return;
     _convertedValue = newConvertedValue;
     emit convertedValueChanged();

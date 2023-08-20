@@ -4,7 +4,7 @@ project(BLT-Theseus-GUI VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick SerialBus)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Core Quick Qml Gui SerialBus Charts)
 
 qt_standard_project_setup()
 
@@ -44,7 +44,7 @@ set_target_properties(appBLT-Theseus-GUI PROPERTIES
 )
 
 target_link_libraries(appBLT-Theseus-GUI
-    PRIVATE Qt6::Quick Qt6::SerialBus
+    PRIVATE Qt6::Core Qt6::Quick Qt6::Qml Qt6::Gui Qt6::SerialBus Qt6::Charts
 )
 
 install(TARGETS appBLT-Theseus-GUI

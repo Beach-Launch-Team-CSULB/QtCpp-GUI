@@ -3,9 +3,9 @@
 Logger::Logger(QObject *parent)
     : QObject{parent}
 {
+    QObject::connect(&_digitalDateTimeTimer, &QTimer::timeout, this, &Logger::digitalDateTimeDisplay);
     _digitalDateTimeTimer.setInterval(1000);
     _digitalDateTimeTimer.start();
-    QObject::connect(&_digitalDateTimeTimer, &QTimer::timeout, this, &Logger::digitalDateTimeDisplay);
 }
 
 QString Logger::message() const
