@@ -23,15 +23,15 @@ public:
 private:
     Q_OBJECT
     QML_ELEMENT
-        QML_UNCREATABLE("C++ instantiation only")
+    QML_UNCREATABLE("C++ instantiation only")
 
-        QString _name {""};
+    QString _name {""};
     quint16 _id {0};
     quint16 _nodeID{0};
     QVariant _sensorState {QVariant(static_cast<quint8>(HPSensor::SensorState::OFF))};
 
-    float _outputValue {0.0f};
     quint64 _timestamp {0};
+    float _outputValue {0.0f};
 
     Q_PROPERTY(QString name READ name CONSTANT)
 
@@ -67,8 +67,12 @@ signals:
 
     void sensorStateChanged();
 
+    void updateGraphQML_outputValue(float x_timestamp, float y_outputValue);
 public slots:
+    void emitUpdateGraphQML_outputValue();
+
     void onHPSensorReceivedFD(const QList<QByteArray>& data);
+
 };
 Q_DECLARE_METATYPE(HPSensor)
 #endif // HPSENSOR_HPP

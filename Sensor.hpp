@@ -28,7 +28,7 @@ private:
     QML_UNCREATABLE("C++ instantiation only")
 
     QVariant _state {QVariant(static_cast<quint8>(SensorState::OFF))}; // for turning on or off. SET BY *RECEIVED* CAN FRAME
-    quint64 _timestamp;
+    quint64 _timestamp = 0; // Microseconds
 
     Node::NodeID _sensorNode; // not initialized yet.
     QString _name;
@@ -48,6 +48,7 @@ private:
 
 public:
     explicit Sensor(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0});
+
 
     Node::NodeID sensorNode() const;
     QString name() const;
@@ -74,8 +75,12 @@ signals:
     void stateChanged();
 
     void sensorNodeIDChanged();
-
+    void updateGraphQML_rawValue(float x_timestamp, float y_rawValue);
+    void updateGraphQML_convertedValue(float x_timestamp, float y_convertedValue);
 public slots:
+    void emitUpdateGraphQML_rawValue();
+    void emitUpdateGraphQML_convertedValue();
+
     void onSensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data); // receive can frames to update the GUI
     void onSensorReceivedFD(const QList<QByteArray>& data);
 };

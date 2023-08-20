@@ -23,11 +23,12 @@ import EngineControllerEnums
 // won't start due to memory issues
 
 // for autosequencing, do a ListElement with column layout?
+
 import QtQuick3D.Particles3D 6.4
 
 Item {
     id: mainPage1
-    width: 1535
+    width: 1550
     height: 735
     visible: true
     //anchors.fill: parent
@@ -52,161 +53,69 @@ Item {
     }
 */
 
-    // do a GridView for GraphQML.qml
-    ComboBox {
-        id: comboBox1
-        x: 1048
-        y: 66
-        width: 67
-        height: 24
+    // do a Grid for GraphQML.qml
 
-        //model: ["sensor 1","sensor 2", "sensor 3"]
-        model: ListModel { // make a separate model using another .qml for this???
-                 id: graphModel1
-                 ListElement { text: "sensor 1" }
-                 ListElement { text: "sensor 2" }
-                 ListElement { text: "sensor 3" }
-             }
+    Grid {
+        id: graphGrid
+        x: 910
+        y: 20
+        width: 610
+        height: 610
 
-        onAccepted: {
-            // display sensor according to index
+        spacing: 5
+        rows: 3
+        columns: 2
+
+        GraphQML {
+            id: graphQML1
+            defaultSensor: 5
+            //width: 200
+            //height: 200
+        }
+        GraphQML {
+            id: graphQML2
+            defaultSensor: 6
+            //width: 200
+            //height: 200
+        }
+        GraphQML {
+            id: graphQML3
+            defaultSensor: 3
+            //width: 200
+            //height: 200
+        }
+        GraphQML {
+            id: graphQML4
+            defaultSensor: 4
+            //width: 200
+            //height: 200
+        }
+        GraphQML {
+            id: graphQML5
+            defaultSensor: 11
+            //width: 200
+            //height: 200
+        }
+        GraphQML {
+            id: graphQML6
+            defaultSensor: 12
+            //width: 200
+            //height: 200
         }
 
-        //delegate: ItemDelegate { //represents how elements are rendered
-        //    width: parent.width
-        //}
-
-    }
-
-    ComboBox {
-        id: comboBox2
-        x: 1048
-        y: 190
-        width: 67
-        height: 23
-
-        //model: ["sensor 1","sensor 2", "sensor 3"]
-        model: ListModel { // make a separate model using another .qml for this???
-                 id: graphModel2
-                 ListElement { text: "sensor 1" }
-                 ListElement { text: "sensor 2" }
-                 ListElement { text: "sensor 3" }
-             }
-
-        onAccepted: {
-            // display sensor according to index
-        }
-
-        //delegate: ItemDelegate { //represents how elements are rendered
-        //    width: parent.width
-        //}
-
-    }
-
-    ListModel {
-
-    }
-
-    ComboBox {
-        id: comboBox3
-        x: 1048
-        y: 321
-        width: 67
-        height: 18
-
-        //model: ["sensor 1","sensor 2", "sensor 3"]
-        model: ListModel { // make a separate model using another .qml for this???
-                 id: graphModel3
-                 ListElement { text: "sensor 1" }
-                 ListElement { text: "sensor 2" }
-                 ListElement { text: "sensor 3" }
-             }
-
-        //delegate: ItemDelegate { //represents how elements are rendered
-        //    width: parent.width
-        //}
-
-    }
-
-    ComboBox {
-        id: comboBox4
-        x: 1303
-        y: 66
-        width: 67
-        height: 24
-
-        //model: ["sensor 1","sensor 2", "sensor 3"]
-        model: ListModel { // make a separate model using another .qml for this???
-                 id: graphModel4
-                 ListElement { text: "sensor 1" }
-                 ListElement { text: "sensor 2" }
-                 ListElement { text: "sensor 3" }
-             }
-
-        //delegate: ItemDelegate { //represents how elements are rendered
-        //    width: parent.width
-        //}
-
-    }
-
-    ComboBox {
-        id: comboBox5
-        x: 1303
-        y: 190
-        width: 67
-        height: 24
-
-        //model: ["sensor 1","sensor 2", "sensor 3"]
-        model: ListModel { // make a separate model using another .qml for this???
-                 id: graphModel5
-                 ListElement { text: "sensor 1" }
-                 ListElement { text: "sensor 2" }
-                 ListElement { text: "sensor 3" }
-             }
-
-        //delegate: ItemDelegate { //represents how elements are rendered
-        //    width: parent.width
-        //}
-
-    }
-
-    ComboBox {
-        id: comboBox6
-        x: 1303
-        y: 316
-        width: 67
-        height: 24
-
-        //model: ["sensor 1","sensor 2", "sensor 3"]
-        model: ListModel { // make a separate model using another .qml for this???
-                 id: graphModel6
-                 ListElement { text: "sensor 1" }
-                 ListElement { text: "sensor 2" }
-                 ListElement { text: "sensor 3" }
-             }
-
-        currentIndex: 1
-
-        onAccepted: {
-            // display sensor according to index
-        }
-
-        //delegate: ItemDelegate { //represents how elements are rendered
-        //    width: parent.width
-        //}
 
     }
 
     SensorQML {
-
     }
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ValveQML {
         id: fuelDomeReg1
-        x: 740
-        y: 88
+        x: 331
+        y: 75
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
 
 
@@ -217,8 +126,8 @@ Item {
 
     ValveQML {
         id: fuelDomeReg2
-        x: 500
-        y: 198
+        x: 466
+        y: 118
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
 
 
@@ -229,8 +138,8 @@ Item {
 
     ValveQML {
         id: fuelDomeReg5
-        x: 817
-        y: 39
+        x: 280
+        y: 40
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
 
 
@@ -242,80 +151,72 @@ Item {
 
     ValveQML {
         id: valveQML
-        x: 662
-        y: 197
+        x: 569
+        y: 118
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
     }
 
     ValveQML {
         id: valveQML1
-        x: 817
-        y: 198
+        x: 654
+        y: 118
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
     }
 
     ValveQML {
         id: valveQML2
-        x: 346
-        y: 198
+        x: 384
+        y: 118
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
     }
 
     ValveQML {
         id: valveQML3
-        x: 408
-        y: 279
+        x: 431
+        y: 182
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
     }
 
     ValveQML {
         id: valveQML4
-        x: 787
-        y: 279
+        x: 609
+        y: 182
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
     }
 
     ValveQML {
         id: valveQML5
-        x: 481
-        y: 389
+        x: 466
+        y: 295
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
     }
 
     ValveQML {
         id: valveQML6
-        x: 683
-        y: 389
+        x: 580
+        y: 299
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
     }
 
     ValveQML {
         id: valveQML7
-        x: 500
-        y: 653
+        x: 633
+        y: 348
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
     }
 
     ValveQML {
         id: valveQML8
-        x: 668
-        y: 653
+        x: 633
+        y: 417
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
     }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    GraphQML{
+    //GraphQML{
 
-    }
-
-    Connections {
-        target: frameHandler.logger
-        onLogMessageOutput: {
-            console.log(message) // do textArea.append shit,
-                                 // scrollView.contentItem.contentY = asdasdds - asdasdasd;
-        }
-    }
+    //}
 
     Button {
         id: bbb
@@ -337,8 +238,7 @@ Item {
             console.log(TankPressControllerEnums.OFF_NOMINAL_PASSTHROUGH)
             console.log(frameHandler.sendFrame(1,"1Y9b"));
             console.log(frameHandler.engineControllers.Engine1)
-            console.log(frameHandler.logger)
-            console.log(logger)
+            console.log(frameHandler.logger.outputLogMessage("from QML"))
             //pageLoader.source = "MainPage1.qml"
 
             //TEST COMMIT 2
@@ -369,9 +269,9 @@ Item {
     Frame {
         id: frame1
         x: 0
-        y: 515
+        y: 380
         width: 288
-        height: 140
+        height: 126
 
         Label {
             id: label
@@ -381,10 +281,10 @@ Item {
 
     Frame {
         id: frame2
-        x: 943
-        y: 618
+        x: 370
+        y: 515
         width: 215
-        height: 109
+        height: 104
 
         Label {
             id: label1
@@ -394,7 +294,7 @@ Item {
 
     Frame {
         id: frame3
-        x: 1158
+        x: 370
         y: 618
         width: 200
         height: 109
@@ -410,7 +310,7 @@ Item {
         x: 5
         y: 113
         width: 124
-        height: 404
+        height: 226
 
         Rectangle {
             id: rectangle
@@ -421,7 +321,7 @@ Item {
             anchors.leftMargin: -6
             anchors.topMargin: 0
             anchors.rightMargin: -11
-            anchors.bottomMargin: -11
+            anchors.bottomMargin: -51
 
             gradient: Gradient {
                 orientation: Gradient.Horizontal
@@ -433,7 +333,7 @@ Item {
 
     Frame {
         id: frame5
-        x: 943
+        x: 585
         y: 515
         width: 215
         height: 104
@@ -444,8 +344,8 @@ Item {
 
     Frame {
         id: frame6
-        x: 1158
-        y: 515
+        x: 569
+        y: 618
         width: 200
         height: 104
         Label {
@@ -455,49 +355,21 @@ Item {
 
     Rectangle {
         id: rectangle1
-        x: 599
+        x: 528
         y: 113
         width: 4
         height: 200
         color: "#d71818"
     }
-    
-    ScrollView {
-        id: scrollView
-        visible: true
-        clip: false
-        x: 943
-        y: 389
-        width: 421
-        height: 98
-        
 
-    }
-    Label {
-        id: label3
-        y: -16
-        z: 1
-        width: 81
-        height: 16
-        visible: true
-        text: qsTr("Log Messages")
-        anchors.left: scrollView.left
-        anchors.bottom: scrollView.top
-        anchors.bottomMargin: 0
-        anchors.leftMargin: 0
-    }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Rectangle {
-        id: rectangle2
-        y: 373
-        width: 308
-        height: 16
-        color: "#ffffff"
-        anchors.left: scrollView.left
-        anchors.bottom: scrollView.top
-        anchors.leftMargin: 0
-        anchors.bottomMargin: 0
-    }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     //Connections { // do this to connect signal from C++ to slot in QML
 

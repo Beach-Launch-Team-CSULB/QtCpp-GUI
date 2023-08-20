@@ -97,4 +97,9 @@ void HPSensor::setTimestamp(quint64 newTimestamp)
     emit timestampChanged();
 }
 
+void HPSensor::emitUpdateGraphQML_outputValue()
+{
+    emit updateGraphQML_outputValue(static_cast<float>(_timestamp)/1'000'000, _outputValue);
+}
+
 

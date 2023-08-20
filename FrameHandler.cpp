@@ -52,10 +52,13 @@ FrameHandler::FrameHandler(QObject *parent)
     {
         QObject::connect(this, &FrameHandler::sensorReceived, qvariant_cast<Sensor*>(_sensors.value(sensorKey)), &Sensor::onSensorReceived);
         QObject::connect(this, &FrameHandler::sensorReceivedFD, qvariant_cast<Sensor*>(_sensors.value(sensorKey)), &Sensor::onSensorReceivedFD);
+        QObject::connect(&_sensorsTimer, &QTimer::timeout, qvariant_cast<Sensor*>(_sensors.value(sensorKey)), &Sensor::emitUpdateGraphQML_rawValue);
+        QObject::connect(&_sensorsTimer, &QTimer::timeout, qvariant_cast<Sensor*>(_sensors.value(sensorKey)), &Sensor::emitUpdateGraphQML_convertedValue);
     }
     foreach(const QString& HPSensorKey, _HPSensors.keys()) // iterating through QMap, value is assigned instead of the key
     {
         QObject::connect(this, &FrameHandler::HPSensorReceivedFD, qvariant_cast<HPSensor*>(_HPSensors.value(HPSensorKey)), &HPSensor::onHPSensorReceivedFD);
+        QObject::connect(&_HPSensorsTimer, &QTimer::timeout, qvariant_cast<HPSensor*>(_HPSensors.value(HPSensorKey)), &HPSensor::emitUpdateGraphQML_outputValue);
     }
     foreach(const QString& valveKey, _valves.keys()) // iterating through QMap, value is assigned instead of the key
     {
@@ -83,6 +86,11 @@ FrameHandler::FrameHandler(QObject *parent)
     QObject::connect(this, &FrameHandler::paused, this, &FrameHandler::onPaused);
     QObject::connect(this, &FrameHandler::resumed, this, &FrameHandler::onResumed);
     QObject::connect(&_timer, &QTimer::timeout, this, &FrameHandler::timeout);
+
+    _sensorsTimer.setInterval(100);
+    _HPSensorsTimer.setInterval(100);
+    _sensorsTimer.start(); // move this under the connectCan function in release
+    _HPSensorsTimer.start();
 
     QThread::currentThread()->setObjectName("Frame Handler thread");
     qInfo() << QThread::currentThread();
@@ -117,7 +125,7 @@ bool FrameHandler::connectCan() // need work
     _can0->setConfigurationParameter(QCanBusDevice::CanFdKey, QVariant(true)); // can FD is only truly enabled if both hardware and driver support CAN FD
                                                                                 // otherwise it falls back to can2.0b
     //_can0->setConfigurationParameter(QCanBusDevice::BitRateKey, QVariant(1'000'000));
-    //_can0->setConfigurationParameter(QCanBusDevice::DataBitRateKey, QVariant(8'000'000));
+    _can0->setConfigurationParameter(QCanBusDevice::DataBitRateKey, QVariant(5'000'000));
 
     switch(_can0->state())
     {
@@ -130,11 +138,12 @@ bool FrameHandler::connectCan() // need work
         else
         {
             // connect signals and slots to the Can Bus here
-            //QObject::connect(_can0, &QCanBusDevice::framesReceived, this, &FrameHandler::onFramesReceived,Qt::UniqueConnection); enable this later on and see
+            //QObject::connect(_can0, &QCanBusDevice::framesReceived, this, &FrameHandler::onFramesReceived,Qt::UniqueConnection); // Disable this for now and call manually in run(). Enable this later on and see
             QObject::connect(_can0, &QCanBusDevice::framesWritten, this, &FrameHandler::onFramesWritten,Qt::UniqueConnection);
             QObject::connect(_can0, &QCanBusDevice::errorOccurred, this, &FrameHandler::onErrorOccurred,Qt::UniqueConnection);
             QObject::connect(_can0, &QCanBusDevice::stateChanged, this, &FrameHandler::onStateChanged,Qt::UniqueConnection);
             qDebug() << "Can connected successfully";
+            //_sensorsTimer.start();
             return true;
         }
         break;
@@ -176,6 +185,7 @@ bool FrameHandler::disconnectCan() // might need more work
         _can0->disconnectDevice();
         delete _can0;
         _can0 = nullptr;
+        //_sensorsTimer.stop();
         return true;
     case QCanBusDevice::ClosingState:
         return false;
@@ -250,7 +260,11 @@ void FrameHandler::onErrorOccurred(QCanBusDevice::CanBusError error)
 void FrameHandler::onFramesReceived() // In the future, might need to write frames data to a file
 {
     qDebug() << "Enter FrameHandler::onFramesReceived() function";
-    if(this->isOperational()) return;
+    if(!this->isOperational())
+    {
+        qDebug() << "FrameHandler::onFramesReceived(): can not operational";
+        return;
+    }
 
     while (_can0->framesAvailable()) // while or if
     {
@@ -566,6 +580,13 @@ void FrameHandler::sendFrame(quint32 ID, QString dataHexString, QCanBusFrame::Fr
     // in QML, just concantenate all the strings to form a byte array represented as string and pass it in as an argument.
     qDebug() << "Enter FrameHandler::sendFrame() function";
 
+    if(!this->isOperational())
+    {
+        qInfo() << "FrameHandler::sendFrame(): Can not Operational";
+        _logger.outputLogMessage("CAN not operational.............................................\n............................................................................\n...............................................");
+        return;
+    }
+
     //dataHexString is passed from QML
     //QByteArray data {QByteArrayLiteral(dataHexString)};
     QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())};
@@ -587,17 +608,19 @@ void FrameHandler::sendFrame(quint32 ID, QString dataHexString, QCanBusFrame::Fr
     //remoteFrame.setErrorStateIndicator(false);
     //remoteFrame.setLocalEcho(false);
 
-    _logger.outputLogMessage("(testing) CAN frame sent: " + QString::number(dataFrame.frameId()) + "-" + dataFrame.payload().toHex() + "-"
+    _logger.outputLogMessage("(testing) CAN frame: " + QString::number(dataFrame.frameId()) + "-" + dataFrame.payload().toHex() + "-"
                              + QString::number(dataFrame.frameType()) + "-" + QString::number(dataFrame.hasBitrateSwitch()) + "-"
                              + QString::number(dataFrame.hasFlexibleDataRateFormat()));
+    //_logger.outputLogMessage(&"Can frame sent: " [ _can0->writeFrame(dataFrame)]);
 
-    if(!this->isOperational())
-    {
-        qInfo() << "Can not Operational";
-        return;
-    }
+    //if(!this->isOperational())
+    //{
+    //    qInfo() << "FrameHandler::sendFrame(): Can not Operational";
+    //    return;
+    //}
 
-    _can0->writeFrame(dataFrame);
+    //_can0->writeFrame(dataFrame);
+    _logger.outputLogMessage(&"Can frame sent: " [ _can0->writeFrame(dataFrame)]);
 }
 
 void FrameHandler::onStarted()
@@ -756,7 +779,7 @@ QString FrameHandler::busStatus() const
 
 void FrameHandler::setLoopToFalse()
 {
-    loop = false;
+    _loop = false;
 }
 
 
@@ -783,13 +806,15 @@ void FrameHandler::run()
     QElapsedTimer timer2;
     timer1.start();
     timer2.start();
+    quint64 timeStamp = 0;
     float num = 0;
 
-    while(loop)
+    while(_loop)
     {
-/*
-        if (timer1.elapsed() > 5)
+
+        if (timer1.elapsed() >= 10)
         {
+/*
             if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 0)
             {
                 qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
@@ -815,23 +840,50 @@ void FrameHandler::run()
                 qInfo() << "Valve State: " << qvariant_cast<Valve*>(_valves.value("FDR"))->valveState();
                 qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(0);
             }
-
-            qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setRawValue(num);
+*/
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_1"))->setTimestamp(timeStamp);
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_1"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_2"))->setTimestamp(timeStamp);
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_2"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setTimestamp(timeStamp);
+            qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP1"))->setTimestamp(timeStamp);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP1"))->setOutputValue(2000 - num*num);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP2"))->setTimestamp(timeStamp);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP2"))->setOutputValue(1900 - num*num);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP3"))->setTimestamp(timeStamp);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP3"))->setOutputValue(1800 - num*num);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP4"))->setTimestamp(timeStamp);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP4"))->setOutputValue(1700 - num*num);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP5"))->setTimestamp(timeStamp);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP5"))->setOutputValue(1600 - num*num);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP6"))->setTimestamp(timeStamp);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP6"))->setOutputValue(1500 - num*num);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP7"))->setTimestamp(timeStamp);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP7"))->setOutputValue(1400 - num*num);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP8"))->setTimestamp(timeStamp);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP8"))->setOutputValue(1300 - num*num);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP9"))->setTimestamp(timeStamp);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP9"))->setOutputValue(1200 - num*num);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP10"))->setTimestamp(timeStamp);
+            qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP10"))->setOutputValue(1100 - num*num);
+            //_logger.outputLogMessage(QString::number(rawValue));
+            timeStamp = timeStamp + 10'000;
             num = num + 0.01;
             timer1.restart();
         }
-*/
 
+
+/*
         if (timer2.elapsed() > 1000)
         {
             _logger.outputLogMessage("Test message");
             timer2.restart();
-            qInfo() << "frameHandler thread still running";
             //num = num + 1;
             //qInfo() << num;
             //if (num >= 5) loop = false;
         }
-
+*/
 
     }
 

@@ -1,3 +1,4 @@
+#include <QApplication>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -38,7 +39,8 @@
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    //QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
     qInfo() << "Hello";
     QQmlApplicationEngine engine;
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,16 +116,16 @@ int main(int argc, char *argv[])
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
         &app, []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
-
     // How to load multiple windows
     engine.load(url);
-    //engine.load(url);
-    //engine.load(url);
+    //engine.load(url); // for each call to load, another object is created. This is ok to do when the frontend ONLY grabs data from the backend
+    //engine.load(url); // as a result, each page should ideally do something completely different for optimization
 
     // Starting threads, where the application begins running:
     pool->start(frameHandler);
     pool->start(GNC);
 
+    // Important
     // Gracefully exits the theads (lol I don't know if this is the correctway)
     QObject::connect(&app, &QGuiApplication::aboutToQuit, frameHandler, &FrameHandler::setLoopToFalse);
     //QObject::connect(&app, &QGuiApplication::aboutToQuit, GNC, &GNC::setLoopToFalse);
@@ -131,9 +133,7 @@ int main(int argc, char *argv[])
 
     qInfo() << " before return app.exec()";
     return app.exec();
-    // These lines are never reached!!!!
-    // The threads will still keep running even though if the app is closed down
-    // need to test when deploy
+
 
 
 }

@@ -50,7 +50,7 @@
  * @brief
  * Receive commands from the Alara to update the GUI
  */
-
+#define EVENT_MESSAGE_ID 20
 #define AUTOSEQUENCE_ID_OFFSET 50
 #define SENSOR_SUITE_ID_OFFSET 150
 #define PROP_NODE_STATE_ID_OFFSET 200
@@ -201,6 +201,16 @@ private:
     QML_ELEMENT
     QML_UNCREATABLE("C++ instantiation only")
 
+    bool _loop {true};
+
+    QTimer _timer = QTimer{this};
+    QTimer _HPSensorsTimer = QTimer{this};
+    QTimer _sensorsTimer = QTimer{this};
+    QTimer _valvesTimer = QTimer{this};
+    QTimer _autosequencesTimer = QTimer{this};
+    QTimer _tankPressControllersTimer = QTimer{this};
+    QTimer _engineControllersTimer = QTimer{this};
+
     QCanBusDevice* _can0 {nullptr};
     QQmlPropertyMap _HPSensors {QQmlPropertyMap(this)};
     QQmlPropertyMap _sensors {QQmlPropertyMap(this)};
@@ -308,7 +318,7 @@ private:
 
     QStack<QVarLengthArray<quint32, 2>> _throttlePoints;
 
-    QTimer _timer;
+
 
 
     QList<QCanBusFrame> _dataFrameList;     // store these frames here to view later on (or just write to a file)
@@ -321,7 +331,7 @@ private:
 
 
 public:
-    bool loop {true};
+
     explicit FrameHandler(QObject *parent = nullptr);
     ~FrameHandler();
 

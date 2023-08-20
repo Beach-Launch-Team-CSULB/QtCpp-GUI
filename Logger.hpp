@@ -35,7 +35,7 @@ public:
 signals:
     void messageChanged();
     void digitalDateTimeChanged();
-    void logMessageOutput(QString message);
+    void logMessageOutput(QString message); // connect via QML Connection
 
 public slots:
     void outputLogMessage(const QString& message);
