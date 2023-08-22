@@ -6,8 +6,8 @@
 #include "Sensor.hpp"
 // {Sensor Name, Raw Sensor ID, Converted Sensor ID, sensor state}
 QList<QList<QVariant>> sensorConstructingParameters { // making const QList< const QList< const QVariant>> results in error?
-            {"High_Press_1", 70, 3, 81},
-            {"High_Press_2", 72, 3, 81},
+            {"High_Press_Fuel", 70, 3, 81},
+            {"High_Press_Lox", 72, 3, 81},
             {"Fuel_Tank_1", 62, 3, 81},
             {"Fuel_Tank_2", 64, 3, 81},
             {"Lox_Tank_1", 66, 3, 81},

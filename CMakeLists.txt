@@ -31,7 +31,7 @@ qt_add_qml_module(appBLT-Theseus-GUI
     VERSION 1.0
     QML_FILES   Main.qml MainPage1.qml MainPage2.qml MainPage3.qml
                 StatusBar.qml
-                GraphQML.qml HPSensorQML.qml SensorQML.qml ValveQML.qml
+                GraphQML.qml HPSensorQML.qml SensorQML.qml ValveQML.qml AutosequenceButton.qml
                 Tab.qml
 )
 

@@ -11,7 +11,7 @@ FrameHandler::FrameHandler(QObject *parent)
 {
     qDebug() << "Enter FrameHandler constructor"; // Note: because of threading, this might not be an accurate way of finding out where the program crashes
     foreach(const auto& sensorConstructingParameter, sensorConstructingParameters) //sensor key List
-    {                                                                       //{"High_Press_1"} {"High_Press_2"} {"Fuel_Tank_1"} {"Fuel_Tank_2"}
+    {                                                                       //{"High_Press_Fuel"} {"High_Press_Lox"} {"Fuel_Tank_1"} {"Fuel_Tank_2"}
         _sensors.insert(sensorConstructingParameter.at(0).toString(),        //{"Lox_Tank_1"} {"Lox_Tank_2"} {"Fuel_Dome_Reg"} {"Lox_Dome_Reg"}
                         QVariant::fromValue<Sensor*>(new Sensor{this, sensorConstructingParameter}));       //{"Fuel_Prop_Inlet"} {"Lox_Prop_Inlet"} {"Fuel_Injector"}
     }                                                                       //{"LC1"} {"LC2"} {"LC3"} {"Chamber_1"} {"Chamber_2"} {"MV_Pneumatic}
@@ -114,6 +114,7 @@ bool FrameHandler::connectCan() // need work
     if(!_can0)
     {
         qDebug() << errorString;
+        _logger.outputLogMessage("Error connecting CAN, error string: " + errorString);
         return false;
     }
 
@@ -125,7 +126,8 @@ bool FrameHandler::connectCan() // need work
     _can0->setConfigurationParameter(QCanBusDevice::CanFdKey, QVariant(true)); // can FD is only truly enabled if both hardware and driver support CAN FD
                                                                                 // otherwise it falls back to can2.0b
     //_can0->setConfigurationParameter(QCanBusDevice::BitRateKey, QVariant(1'000'000));
-    _can0->setConfigurationParameter(QCanBusDevice::DataBitRateKey, QVariant(5'000'000));
+    _can0->setConfigurationParameter(QCanBusDevice::DataBitRateKey, QVariant(5'000'000)); // Remeber to modify the _logger.outputLogMessage
+
 
     switch(_can0->state())
     {
@@ -133,6 +135,7 @@ bool FrameHandler::connectCan() // need work
         if(!_can0->connectDevice())
         {
             qDebug() << "Device could not be connected";
+            _logger.outputLogMessage("CAN could not be connected");
             return false;
         }
         else
@@ -144,19 +147,24 @@ bool FrameHandler::connectCan() // need work
             QObject::connect(_can0, &QCanBusDevice::stateChanged, this, &FrameHandler::onStateChanged,Qt::UniqueConnection);
             qDebug() << "Can connected successfully";
             //_sensorsTimer.start();
+            _logger.outputLogMessage("CAN connected successfully");
+            _logger.outputLogMessage("CAN settings:\n   -Bit Rate Key: 0.5 Mbps\n   -Receive Own Key: true\n   -CanFD key: true\n   -DataBitRateKey:   5 Mbps");
             return true;
         }
         break;
     case QCanBusDevice::ConnectingState:
         qDebug() << "The device is being connected...";
+        _logger.outputLogMessage("CAN is being connected...");
         return false;
         break;
     case QCanBusDevice::ConnectedState:
         qDebug() << "The device is already connected";
+        _logger.outputLogMessage("CAN is already connected");
         return false;
         break;
     case QCanBusDevice::ClosingState:
         qDebug() << "The device is closing...";
+        _logger.outputLogMessage("CAN is currently closing...");
         return false;
         break;
     }
@@ -169,14 +177,18 @@ bool FrameHandler::disconnectCan() // might need more work
     if(!_can0)
     {
         qDebug() << "No can device to be disconnected";
+        _logger.outputLogMessage("No CAN device to be disconnected");
         return false;
     }
+
     switch (_can0->state())
     {
     case QCanBusDevice::UnconnectedState:
+        _logger.outputLogMessage("CAN is already unconnected");
         return false;
     case QCanBusDevice::ConnectingState:
-        //return false;
+        _logger.outputLogMessage("CAN is connecting...");
+        return false;
     case QCanBusDevice::ConnectedState:
         //QObject::disconnect(_can0, &QCanBusDevice::framesReceived, this, &FrameHandler::onFramesReceived);
         QObject::disconnect(_can0, &QCanBusDevice::framesWritten, this, &FrameHandler::onFramesWritten);
@@ -186,8 +198,10 @@ bool FrameHandler::disconnectCan() // might need more work
         delete _can0;
         _can0 = nullptr;
         //_sensorsTimer.stop();
+        _logger.outputLogMessage("CAN has been disconnected...");
         return true;
     case QCanBusDevice::ClosingState:
+        _logger.outputLogMessage("CAN is already closing...");
         return false;
     }
     return false;
@@ -256,7 +270,7 @@ void FrameHandler::onErrorOccurred(QCanBusDevice::CanBusError error)
     qDebug() << "Enter FrameHandler::onErrorOccured() function";
 }
 
-// TODO FOR TOMORROW: WORK ON VALVE STUFF, ID 546 & ID 547 & (maybe) ID 552
+
 void FrameHandler::onFramesReceived() // In the future, might need to write frames data to a file
 {
     qDebug() << "Enter FrameHandler::onFramesReceived() function";
@@ -558,9 +572,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
                 return;
             }
         }
-
     }
-
 }
 
 void FrameHandler::onFramesWritten(quint64 framesCount)
@@ -798,7 +810,7 @@ void FrameHandler::run()
     //qInfo() << this->controller()->IGN1Time();
     //_controller->setIGN1Time(5.2f);
     //qInfo() << _controller->IGN1Time();
-    this->connectCan();
+    //this->connectCan(); // Do this via a menu button. Same for disconnect too
 
     // set up via buttons in qml instead
 
@@ -811,8 +823,7 @@ void FrameHandler::run()
 
     while(_loop)
     {
-
-        if (timer1.elapsed() >= 10)
+        if (timer1.elapsed() >= 10) // 1 or 5 or 10
         {
 /*
             if(qvariant_cast<Valve*>(_valves.value("FDR"))->valveState() == 0)
@@ -841,11 +852,16 @@ void FrameHandler::run()
                 qvariant_cast<Valve*>(_valves.value("FDR"))->setValveState(0);
             }
 */
-            qvariant_cast<Sensor*>(_sensors.value("High_Press_1"))->setTimestamp(timeStamp);
-            qvariant_cast<Sensor*>(_sensors.value("High_Press_1"))->setConvertedValue(1700 - num*num);
-            qvariant_cast<Sensor*>(_sensors.value("High_Press_2"))->setTimestamp(timeStamp);
-            qvariant_cast<Sensor*>(_sensors.value("High_Press_2"))->setConvertedValue(1700 - num*num);
+
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_Fuel"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_Fuel"))->setTimestamp(timeStamp);
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_Fuel"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_Lox"))->setTimestamp(timeStamp);
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_Lox"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<Sensor*>(_sensors.value("Chamber_1"))->setTimestamp(timeStamp);
+            qvariant_cast<Sensor*>(_sensors.value("Chamber_1"))->setConvertedValue(1700 - num*num);
             qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setTimestamp(timeStamp);
+            qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setRawValue(num);
             qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setConvertedValue(1700 - num*num);
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP1"))->setTimestamp(timeStamp);
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP1"))->setOutputValue(2000 - num*num);
@@ -867,10 +883,12 @@ void FrameHandler::run()
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP9"))->setOutputValue(1200 - num*num);
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP10"))->setTimestamp(timeStamp);
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP10"))->setOutputValue(1100 - num*num);
+
             //_logger.outputLogMessage(QString::number(rawValue));
             timeStamp = timeStamp + 10'000;
             num = num + 0.01;
             timer1.restart();
+
         }
 
 

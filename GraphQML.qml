@@ -21,6 +21,8 @@ Item {
 
     property int defaultSensor: 1
 
+    signal comboBoxIndexChanged(int index)
+
     Component.onCompleted:
     {
         comboBoxGraph.currentIndex = defaultSensor
@@ -35,10 +37,10 @@ Item {
                 graphLoader.sourceComponent = undefined;
                 break;
             case 1:
-                graphLoader.sourceComponent = high_Press_1;
+                graphLoader.sourceComponent = high_Press_Fuel;
                 break;
             case 2:
-                graphLoader.sourceComponent = high_Press_2;
+                graphLoader.sourceComponent = high_Press_Lox;
                 break;
             case 3:
                 graphLoader.sourceComponent = fuel_Tank_1;
@@ -143,6 +145,7 @@ Item {
                 graphLoader.sourceComponent = renPropHP10;
                 break;
         }
+        comboBoxIndexChanged(index);
     }
 
     function appendAndAdjustView(x, y, chartView, lineSeries, safeThreshold = 700, warningThreshold = 1000, criticalThreshold = 1200)    // member variables of the object linesSeries are passed by reference, so lineSeries.someMember should
@@ -150,10 +153,10 @@ Item {
     {
         var numberOfDataPoints = 100;
 
-        var minXMargin = 8; // left of latest data point
-        var maxXMargin = 2; // right of latest data point (leave some margin)
-        var minYMargin = 80; // bottom of latest data point
-        var maxYMargin = 20; // top of latest data point (leave some margin)
+        var minXMargin = 8; // distance left of latest data point
+        var maxXMargin = 2; // distance right of latest data point (leave some margin)
+        var minYMargin = 80; // distance bottom of latest data point
+        var maxYMargin = 20; // distance top of latest data point (leave some margin)
 
 
         // The range between min and max of x axis (timestamp) should be 0-60
@@ -210,34 +213,35 @@ Item {
         }
         else if (safeThreshold <= y && y < warningThreshold) // && y < 1000
         {
+            lineSeries.axisX.labelsColor = "yellow"
+            lineSeries.axisX.color = "yellow"
+            lineSeries.axisY.labelsColor = "yellow"
+            lineSeries.axisY.color = "yellow"
+            chartView.titleColor = "yellow"
+        }
+        else if (warningThreshold <= y && y < criticalThreshold)
+        {
             lineSeries.axisX.labelsColor = "orange"
             lineSeries.axisX.color = "orange"
             lineSeries.axisY.labelsColor = "orange"
             lineSeries.axisY.color = "orange"
             chartView.titleColor = "orange"
         }
-        else if (warningThreshold <= y && y < criticalThreshold)
+        else if (y >= criticalThreshold)
         {
             lineSeries.axisX.labelsColor = "red"
             lineSeries.axisX.color = "red"
             lineSeries.axisY.labelsColor = "red"
             lineSeries.axisY.color = "red"
             chartView.titleColor = "red"
-        }
-        else if (y >= criticalThreshold)
-        {
-            lineSeries.axisX.labelsColor = "pink"
-            lineSeries.axisX.color = "pink"
-            lineSeries.axisY.labelsColor = "pink"
-            lineSeries.axisY.color = "pink"
-            chartView.titleColor = "pink"
             // for Critical point use ternary operator for cool flashing a cool flashing effect
         }
+        yValueText.text = y.toFixed(2) + " psi"
     }
 
 
     function action() {
-                    console.log("High_Press_1")
+                    console.log("High_Press_Fuel")
                 }
 
     Loader {
@@ -266,10 +270,10 @@ Item {
             name: "Select sensor" // graphLoader.sourceComponent = undefined
         }
         ListElement {  //1
-            name: "High_Press_1"
+            name: "High_Press_Fuel"
         }
         ListElement {  //2
-            name: "High_Press_2"
+            name: "High_Press_Lox"
         }
         ListElement {  //3
             name: "Fuel_Tank_1"
@@ -379,9 +383,9 @@ Item {
     }
 
     Component {
-        id: high_Press_1
+        id: high_Press_Fuel
         ChartView {
-            id: high_Press_1_ChartView
+            id: high_Press_Fuel_ChartView
             title: "High Press 1 (Pressure (psi) vs. Time (s))"
             visible: true
             legend.visible: false
@@ -389,7 +393,7 @@ Item {
             theme: ChartView.ChartThemeBlueCerulean
 
             ValuesAxis {
-                id:  high_Press_1_valuesAxisX
+                id:  high_Press_Fuel_valuesAxisX
                 //titleText: "Time (s)"
                 min: 0
                 max: 10
@@ -399,7 +403,7 @@ Item {
                 gridVisible: true
             }
             ValuesAxis {
-                id:  high_Press_1_valuesAxisY
+                id:  high_Press_Fuel_valuesAxisY
                 //titleText: "Pressure (psi)"
                 min: 0
                 max: 100
@@ -415,24 +419,24 @@ Item {
                 //shadesBorderColor: "blue"
             }
             LineSeries {
-                id: high_Press_1_LineSeries
+                id: high_Press_Fuel_LineSeries
 
-                axisX: high_Press_1_valuesAxisX
-                axisY: high_Press_1_valuesAxisY
+                axisX: high_Press_Fuel_valuesAxisX
+                axisY: high_Press_Fuel_valuesAxisY
             }
             Connections {
-                target: frameHandler.sensors.High_Press_1
+                target: frameHandler.sensors.High_Press_Fuel
                 onUpdateGraphQML_convertedValue: {
-                    appendAndAdjustView(x_timestamp, y_convertedValue, high_Press_1_ChartView, high_Press_1_LineSeries);
+                    appendAndAdjustView(x_timestamp, y_convertedValue, high_Press_Fuel_ChartView, high_Press_Fuel_LineSeries);
                 }
             }
         }
     }
 
     Component {
-        id: high_Press_2
+        id: high_Press_Lox
         ChartView {
-            id: high_Press_2_ChartView
+            id: high_Press_Lox_ChartView
             title: "High Press 2 (Pressure (psi) vs. Time (s))"
             visible: true
             legend.visible: false
@@ -440,7 +444,7 @@ Item {
             theme: ChartView.ChartThemeBlueCerulean
 
             ValuesAxis {
-                id:  high_Press_2_valuesAxisX
+                id:  high_Press_Lox_valuesAxisX
                 //titleText: "Time (s)"
                 min: 0
                 max: 10
@@ -450,7 +454,7 @@ Item {
                 gridVisible: true
             }
             ValuesAxis {
-                id:  high_Press_2_valuesAxisY
+                id:  high_Press_Lox_valuesAxisY
                 //titleText: "Pressure (psi)"
                 min: 0
                 max: 100
@@ -466,15 +470,15 @@ Item {
                 //shadesBorderColor: "blue"
             }
             LineSeries {
-                id: high_Press_2_LineSeries
+                id: high_Press_Lox_LineSeries
 
-                axisX: high_Press_2_valuesAxisX
-                axisY: high_Press_2_valuesAxisY
+                axisX: high_Press_Lox_valuesAxisX
+                axisY: high_Press_Lox_valuesAxisY
             }
             Connections {
-                target: frameHandler.sensors.High_Press_2
+                target: frameHandler.sensors.High_Press_Lox
                 onUpdateGraphQML_convertedValue: {
-                    appendAndAdjustView(x_timestamp, y_convertedValue, high_Press_2_ChartView, high_Press_2_LineSeries);
+                    appendAndAdjustView(x_timestamp, y_convertedValue, high_Press_Lox_ChartView, high_Press_Lox_LineSeries);
                 }
             }
         }
@@ -893,7 +897,7 @@ Item {
                 axisY: chamber_1_valuesAxisY
             }
             Connections {
-                target: frameHandler.sensors.chamber_1_Inlet
+                target: frameHandler.sensors.Chamber_1
                 onUpdateGraphQML_convertedValue: {
                     appendAndAdjustView(x_timestamp, y_convertedValue, chamber_1_ChartView, chamber_1_LineSeries);
                 }
@@ -937,7 +941,7 @@ Item {
                 axisY: chamber_2_valuesAxisY
             }
             Connections {
-                target: frameHandler.sensors.chamber_2_Inlet
+                target: frameHandler.sensors.Chamber_2
                 onUpdateGraphQML_convertedValue: {
                     appendAndAdjustView(x_timestamp, y_convertedValue, chamber_2_ChartView, chamber_2_LineSeries);
                 }
@@ -1875,11 +1879,23 @@ Item {
             //console.log(ValveEnums.ValveState.FIRE_COMMANDED)
             //console.log(ValveEnums.PyroState.FIRED)
             //console.log(frameHandler.sensors)
-            //console.log(frameHandler.sensors.High_Press_1)
+            //console.log(frameHandler.sensors.High_Press_Fuel)
             //graphLoader.sourceComponent = comboBoxGraph
 
             // ChartView.visible = true
             // then set loader.soureComponent = ChartView
         }
+    }
+
+    Text {
+        id: yValueText
+        y: 4
+        color: "white"
+        text: " "
+        anchors.left: comboBoxGraph.right
+        anchors.right: parent.right
+        font.pixelSize: 14
+        anchors.rightMargin: 0
+        anchors.leftMargin: 60
     }
 }

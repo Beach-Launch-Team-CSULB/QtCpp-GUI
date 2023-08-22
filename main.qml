@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtCharts
 
 // scrollbars
+
 import FrameHandlerEnums
 import SensorEnums
 import HPSensorEnums
@@ -13,13 +14,25 @@ import AutosequenceEnums
 import TankPressControllerEnums
 import EngineControllerEnums
 import LoggerEnums
+
+
 Window {
     //ApplicationWindow{
     id: window
-    width: 1550//640
-    height: 785 //480
+    width: 1550//640 // If there is a need to use a bigger monitor, then adjust width and height and position of
+    height: 785 //480 // everything in accordance to that monitor's size
     visible: true
     title: qsTr(appDir + " --- Theseus GUI")
+
+    // Rememberances for loaders
+    property int main_defaultGraphQMLSensor1: 1
+    property int main_defaultGraphQMLSensor2: 6
+    property int main_defaultGraphQMLSensor3: 3
+    property int main_defaultGraphQMLSensor4: 4
+    property int main_defaultGraphQMLSensor5: 11
+    property int main_defaultGraphQMLSensor6: 12
+
+
 
 
     Component.onCompleted: { // Top level setup, and signal & handler connections (maybe)
@@ -40,68 +53,86 @@ Window {
         id: statusBar
 
         TabBar {
+            id: tabBar
             x: 590
             y: 0
-            width: 236
-            height: 42
+            width: 260
+            height: 50
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 0
 
             TabButton {
                 id: mainPage1Button
                 x: 581
-                y: 0
                 width: 49
-                height: 26
                 text: qsTr("Main")
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: -1
+                anchors.topMargin: 0
                 onClicked:
                 {
                     mainLoader.source = "MainPage1.qml"
                     logScrollView.visible = true
                     en_dis_logging_button.visible = true
+                    logFlushButton.visible = true
                 }
             }
 
             TabButton {
                 id: mainPage2Button
                 x: 629
-                y: 0
                 width: 55
-                height: 26
                 text: qsTr("Tanks")
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 0
+                anchors.topMargin: -3
                 onClicked:
                 {
                     mainLoader.source = "MainPage2.qml"
                     logScrollView.visible = false
                     en_dis_logging_button.visible = false
+                    logFlushButton.visible = false
                 }
             }
 
             TabButton {
                 id: mainPage3Button
                 x: 102
-                y: -3
                 width: 69
-                height: 26
                 text: qsTr("Sensors")
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 0
+                anchors.topMargin: -3 // DO BAR GRAPHS FOR THE SENSORS(OR TANKS) TO SAVE DATA POINTS!!!!
                 onClicked:
                 {
                     mainLoader.source = "MainPage3.qml"
                     logScrollView.visible = false
                     en_dis_logging_button.visible = false
+                    logFlushButton.visible = false
                 }
 
             }
             TabButton {
                 id: mainPage4Button
-                x: 720
-                y: 0
-                width: 66
-                height: 26
-                text: qsTr("Dumpster")
+                x: 170
+                width: 91
+                text: qsTr("GNC/Telemetry")
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 0
+                anchors.topMargin: -3
                 onClicked:
                 {
-                    mainLoader.source = "MainPage3.qml"
+                    //var component = Qt.createComponent("GraphQML.qml");
+                    //var windowy    = component.createObject(window);
+                    //windowy.show();
+                    mainLoader.source = "MainPage4.qml"
                     logScrollView.visible = false
                     en_dis_logging_button.visible = false
+                    logFlushButton.visible = false
                 }
 
             }
@@ -109,23 +140,32 @@ Window {
 
         ToolBar {
             id: toolBar
+            y: 26
             width: 360
+            height: 20
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 0
+            anchors.leftMargin: 0
 
             ToolButton {
                 id: toolButton
-                width: 60
-                text: qsTr("Tool Button")
+                width: 87
+                text: "Tool Button 1" // Do pictures instead
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.leftMargin: -6
                 anchors.bottomMargin: 0
                 anchors.topMargin: 0
+                onClicked: {
+                    console.log(toolButton.text + " clicked")
+                }
             }
 
             ToolButton {
                 id: toolButton1
-                text: qsTr("Tool Button")
+                text: "Tool Button 2" // Do pictures instead
                 anchors.left: toolButton.right
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
@@ -142,7 +182,7 @@ Window {
             width: 344
             height: 50
             color: "#fc0c0c"
-            text: qsTr(frameHandler.logger.digitalDateTime.toLocaleString())
+            text: frameHandler.logger.digitalDateTime.toLocaleString()
             font.pixelSize: 21
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
@@ -194,23 +234,6 @@ Window {
             //onActiveFocusChanged: {
 
             //}
-
-            function appendAndScroll(message)
-            {
-                var maxScrollPosition = logScrollView.contentItem.height - logScrollView.height;
-                var atBottom = logScrollView.contentItem.contentY === maxScrollPosition;
-                var currentHeight = logScrollView.contentItem.contentY
-
-                if(atBottom)
-                {
-                    logTextArea.append(message)
-                }
-                else
-                {
-                    logTextArea.append(message)
-                    //logScrollView.contentItem.contentY = currentHeight
-                }
-            }
         }
 
     }
@@ -219,43 +242,145 @@ Window {
         target: frameHandler.logger
         onLogMessageOutput:
         {
-            console.log(message) // do textArea.append shit,
-            // scrollView.contentItem.contentY = asdasdds - asdasdasd;
-            //logTextArea.append(message)
-            logTextArea.appendAndScroll(message)
-            logTextArea.appendAndScroll(logTextArea.lineCount)
-            logTextArea.appendAndScroll(logTextArea.length)
-            while (logTextArea.length >= 10000)
+            if (en_dis_logging_button.state === "1")
             {
-                logTextArea.remove(0, 200)
+                // Flush log buffer here when logging is enabled again
+                // logTextArea.append(buffer) // buffer should be QString in C++
+                // frameHandler.logger.clearBuffer();
+                if (frameHandler.logger.messageBuffer.length > 1)
+                {
+                    logTextArea.append(frameHandler.logger.messageBuffer);
+                    frameHandler.logger.clearMessageBuffer();
+                }
+
+
+
+                console.log(message) // do textArea.append shit,
+                logTextArea.append(message)
+                logTextArea.append(logTextArea.lineCount)
+                logTextArea.append(logTextArea.length)
+                logScrollView.contentItem.contentY = logTextArea.height - logScrollView.contentItem.height
+                while (logTextArea.length >= 10000)
+                {
+                    logTextArea.remove(0, 200)
+                }
+
+
+                if (true)
+                {
+
+                }
+                else if( true)
+                {
+                    //logScrollView.contentItem.contentY
+                }
             }
-
-            // Probably needs to do a flag that enables or disables logging so that user can scroll up and down
-            // do an enable and a disable button
-            // To let the user know, do this:
-            // When enable button is clicked, it changes its color to green
-            // when disable button is clicked, it changes its color to red
-            // or do just one button that combines both features.
-
-            //if (logTextArea.contentHeight >= logScrollView.height)
-            //{
-            //    console.log("logScrollView is at the bottom")
-            console.log("before: " + logScrollView.contentItem.contentY)
-            //logScrollView.contentItem.contentY = 0//logTextArea.height - logScrollView.contentItem.height
-            //}
-            console.log("after: " + logScrollView.contentItem.contentY)
-            //console.log("before: " + logScrollView.contentItem.contentX)
-            //console.log("before: " + logScrollView.contentItem.contentX)
-            console.log(logTextArea.height)
-            console.log(logScrollView.contentItem.height)
-
-            if (true)
+            else if (en_dis_logging_button.state === "0")
             {
-
+                // Make a buffer in C++, and when logging is disabled, logs are stored
+                // in that buffer instead and flushed when logging is enabled again
+                frameHandler.logger.loadUpMessageBuffer(message);
             }
-            else if( true)
+        }
+    }
+
+    MenuBar{
+        id: mainMenuBar
+        y: 0
+        width: 360
+        height: 30
+        anchors.left: parent.left
+        anchors.leftMargin: 0
+
+        // Make a menu for selecting objects to configure via can frame
+        Menu {
+            title: "CAN"
+            Action {
+                text: "&Connect CAN"
+                shortcut: "Ctrl+C"
+                onTriggered: {
+                    frameHandler.connectCan();
+                }
+            }
+            Action {
+                text: "&Disconnect CAN"
+                shortcut: "Ctrl+D"
+                onTriggered: {
+                    frameHandler.disconnectCan();
+                }
+            }
+        }
+        Menu {
+            title: "Object configuration" // append ... at the end to indicate the opening of a new popup/stackview/window to configure the object
+            Action { text: "Configure object 1..."} // open a popup/stackview/window to configure the object and a button to send the configuration command via CAN
+            Action { text: "Configure object 2..."} // open a popup/stackview/window to configure the object and a button to send the configuration command via CAN
+            Action { text: "Configure object 3..."} // open a popup/stackview/window to configure the object and a button to send the configuration command via CAN
+            Action { text: "Configure object 4..."} // open a popup/stackview/window to configure the object and a button to send the configuration command via CAN
+            Action { text: "Configure object 1..."} // ALSO PUT NAME OF THE OBJECT BEING CONFIGURED IN THE POPUP TO NOTIFY WHAT IS BEING CHANGED
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+            Action { text: "Configure object 1..."}
+            Action { text: "Configure object 2..."}
+            Action { text: "Configure object 3..."}
+            Action { text: "Configure object 4..."}
+        }
+
+    }
+
+    Button {
+        id: logFlushButton
+        x: 130
+        y: 568
+        width: 85
+        height: 54
+        text: qsTr("Flush Logs")
+        visible: true
+        antialiasing: true
+        onClicked: {
+            if (en_dis_logging_button.state === "1" && frameHandler.logger.messageBuffer.length > 1)
             {
-                //logScrollView.contentItem.contentY
+                frameHandler.logger.outputLogMessage("Log buffer flushed");
             }
 
         }
@@ -271,7 +396,7 @@ Window {
         height: 140
     }
 
-    // Do the said logic for the en_dis_logging_button to enable/disable logging
+    //    // Do the said logic for the en_dis_logging_button to enable/disable logging
 
     Rectangle {
         id: en_dis_logging_button
@@ -283,11 +408,24 @@ Window {
         radius: 11
         border.color: "#000000"
         // Do states for switching between enable and disable logging
+        state: "1" // enabled by default
+
+        MouseArea
+        {
+            id: logMouseArea
+            anchors.fill: en_dis_logging_button
+            acceptedButtons: Qt.LeftButton
+            hoverEnabled: true
+            enabled: true
+            onClicked: {
+                parseInt(en_dis_logging_button.state) ? en_dis_logging_button.state = "0" : en_dis_logging_button.state = "1"
+            }
+        }
 
         Label {
-            id: label
+            id: logButtonLabel
             x: 10
-            text: qsTr("Enable/Disable logging")
+            text: qsTr(" ")
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.right: parent.right
@@ -295,6 +433,32 @@ Window {
             anchors.rightMargin: 0
             anchors.leftMargin: 0
         }
+
+        states: [ // Name the states with string instead of int to distinguish between C++ and QML
+            State{
+                name: "0" // Disable
+                PropertyChanges {
+                    target: en_dis_logging_button
+                    color: "red"
+                }
+                PropertyChanges {
+                    target: logButtonLabel
+                    text: "Logging Disabled"
+                }
+            },
+
+            State{
+                name: "1" // Enable
+                PropertyChanges {
+                    target: en_dis_logging_button
+                    color: "lawngreen"
+                }
+                PropertyChanges {
+                    target: logButtonLabel
+                    text: "Logging Enabled"
+                }
+            }
+        ]
     }
 
     Rectangle {
@@ -319,7 +483,7 @@ Window {
         }
 
         Label {
-            id: label3
+            id: logLabel
             y: -16
             z: 1
             width: 81
@@ -331,6 +495,7 @@ Window {
             anchors.leftMargin: 5
         }
     }
+
 
 
 }

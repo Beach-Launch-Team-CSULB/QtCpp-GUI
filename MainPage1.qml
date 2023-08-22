@@ -32,7 +32,11 @@ Item {
     height: 735
     visible: true
     //anchors.fill: parent
-/*
+
+    Component.onCompleted: {
+        console.log(window.aaaaa)
+    }
+    /*
     Rectangle{
         id: testRect1
         width: 200
@@ -68,37 +72,81 @@ Item {
 
         GraphQML {
             id: graphQML1
-            defaultSensor: 5
+            defaultSensor: window.main_defaultGraphQMLSensor1
+
+            Connections {
+                target: graphQML1
+                onComboBoxIndexChanged: {
+                    window.main_defaultGraphQMLSensor1 = index
+                }
+            }
+
             //width: 200
             //height: 200
         }
         GraphQML {
             id: graphQML2
-            defaultSensor: 6
+            defaultSensor: window.main_defaultGraphQMLSensor2
+
+            Connections {
+                target: graphQML2
+                onComboBoxIndexChanged: {
+                    window.main_defaultGraphQMLSensor2 = index
+                }
+            }
             //width: 200
             //height: 200
         }
         GraphQML {
             id: graphQML3
-            defaultSensor: 3
+            defaultSensor: window.main_defaultGraphQMLSensor3
+
+            Connections {
+                target: graphQML3
+                onComboBoxIndexChanged: {
+                    window.main_defaultGraphQMLSensor3 = index
+                }
+            }
             //width: 200
             //height: 200
         }
         GraphQML {
             id: graphQML4
-            defaultSensor: 4
+            defaultSensor: window.main_defaultGraphQMLSensor4
+
+
+            Connections {
+                target: graphQML4
+                onComboBoxIndexChanged: {
+                    window.main_defaultGraphQMLSensor4 = index
+                }
+            }
             //width: 200
             //height: 200
         }
         GraphQML {
             id: graphQML5
-            defaultSensor: 11
+            defaultSensor: window.main_defaultGraphQMLSensor5
+
+            Connections {
+                target: graphQML5
+                onComboBoxIndexChanged: {
+                    window.main_defaultGraphQMLSensor5 = index
+                }
+            }
             //width: 200
             //height: 200
         }
         GraphQML {
             id: graphQML6
-            defaultSensor: 12
+            defaultSensor: window.main_defaultGraphQMLSensor6
+
+            Connections {
+                target: graphQML6
+                onComboBoxIndexChanged: {
+                    window.main_defaultGraphQMLSensor6 = index
+                }
+            }
             //width: 200
             //height: 200
         }
@@ -107,40 +155,89 @@ Item {
     }
 
     SensorQML {
+        x: 916
+        y: 685
+        width: 50
+        height: 50
     }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ValveQML {
-        id: fuelDomeReg1
-        x: 331
-        y: 75
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
-
-
-        Component.onCompleted: {
-
-        }
-    }
-
-    ValveQML {
-        id: fuelDomeReg2
-        x: 466
-        y: 118
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
-
-
-        Component.onCompleted: {
-
-        }
-    }
-
-    ValveQML {
-        id: fuelDomeReg5
+        id: hiPress
         x: 280
         y: 40
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
+
+        valveID: frameHandler.valves.HP.ID
+        valveName: frameHandler.valves.HP.name
+        state: frameHandler.valves.HP.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.HP.commandOff
+        valveCommandOn: frameHandler.valves.HP.commandOn
+
+
+
+        Component.onCompleted: {
+
+        }
+    }
+
+    ValveQML {
+        id: hiPressVent
+        x: 331
+        y: 75
+
+        valveID: frameHandler.valves.HPV.ID
+        valveName: frameHandler.valves.HPV.name
+        state: frameHandler.valves.HPV.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.HPV.commandOff
+        valveCommandOn: frameHandler.valves.HPV.commandOn
+
+
+        Component.onCompleted: {
+
+        }
+    }
+
+    ValveQML {
+        id: loxDomeVent
+        x: 384
+        y: 118
+
+        valveID: frameHandler.valves.LDV.ID
+        valveName: frameHandler.valves.LDV.name
+        state: frameHandler.valves.LDV.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.LDV.commandOff
+        valveCommandOn: frameHandler.valves.LDV.commandOn
+    }
+
+
+    ValveQML {
+        id: loxVent
+        x: 431
+        y: 182
+
+        valveID: frameHandler.valves.LV.ID
+        valveName: frameHandler.valves.LV.name
+        state: frameHandler.valves.LV.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.LV.commandOff
+        valveCommandOn: frameHandler.valves.LV.commandOn
+    }
+
+    ValveQML {
+        id: loxDomeReg
+        x: 466
+        y: 118
+        valveID: frameHandler.valves.LDR.ID
+        valveName: frameHandler.valves.LDR.name
+        state: frameHandler.valves.LDR.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.LDR.commandOff
+        valveCommandOn: frameHandler.valves.LDR.commandOn
 
 
         Component.onCompleted: {
@@ -150,70 +247,95 @@ Item {
 
 
     ValveQML {
-        id: valveQML
+        id: fuelDomeReg
         x: 569
         y: 118
+        valveID: frameHandler.valves.FDR.ID
+        valveName: frameHandler.valves.FDR.name
         state: frameHandler.valves.FDR.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.FDR.commandOff
+        valveCommandOn: frameHandler.valves.FDR.commandOn
     }
 
-    ValveQML {
-        id: valveQML1
-        x: 654
-        y: 118
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
-    }
 
     ValveQML {
-        id: valveQML2
-        x: 384
-        y: 118
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
-    }
-
-    ValveQML {
-        id: valveQML3
-        x: 431
-        y: 182
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
-    }
-
-    ValveQML {
-        id: valveQML4
+        id: fuelVent
         x: 609
         y: 182
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
+        valveID: frameHandler.valves.FV.ID
+        valveName: frameHandler.valves.FV.name
+        state: frameHandler.valves.FV.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.FV.commandOff
+        valveCommandOn: frameHandler.valves.FV.commandOn
     }
 
+
     ValveQML {
-        id: valveQML5
-        x: 466
+        id: fuelDomeVent
+        x: 654
+        y: 118
+        valveID: frameHandler.valves.FDV.ID
+        valveName: frameHandler.valves.FDV.name
+        state: frameHandler.valves.FDV.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.FDV.commandOff
+        valveCommandOn: frameHandler.valves.FDV.commandOn
+    }
+
+
+
+    ValveQML {
+        id: loxMainValve
+        x: 440
         y: 295
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
+        valveID: frameHandler.valves.LMV.ID
+        valveName: frameHandler.valves.LMV.name
+        state: frameHandler.valves.LMV.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.LMV.commandOff
+        valveCommandOn: frameHandler.valves.LMV.commandOn
     }
 
     ValveQML {
-        id: valveQML6
+        id: fuelMainValve
         x: 580
-        y: 299
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
+        y: 295
+        valveID: frameHandler.valves.FMV.ID
+        valveName: frameHandler.valves.FMV.name
+        state: frameHandler.valves.FMV.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.FMV.commandOff
+        valveCommandOn: frameHandler.valves.FMV.commandOn
     }
 
     ValveQML {
-        id: valveQML7
-        x: 633
-        y: 348
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
+        id: igniter1
+        x: 440
+        y: 367
+        valveID: frameHandler.valves.IGN1.ID
+        valveName: frameHandler.valves.IGN1.name
+        state: frameHandler.valves.IGN1.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.IGN1.commandOff
+        valveCommandOn: frameHandler.valves.IGN1.commandOn
     }
 
     ValveQML {
-        id: valveQML8
-        x: 633
-        y: 417
-        state: frameHandler.valves.FDR.valveState.toString() // Set state here
+        id: igniter2
+        x: 580
+        y: 367
+        valveID: frameHandler.valves.IGN2.ID
+        valveName: frameHandler.valves.IGN2.name
+        state: frameHandler.valves.IGN2.valveState.toString() // Set state here
+
+        valveCommandOff: frameHandler.valves.IGN2.commandOff
+        valveCommandOn: frameHandler.valves.IGN2.commandOn
     }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GraphQML{
 
     //}
@@ -227,23 +349,25 @@ Item {
         text: "Click me"
         onClicked:
         {
-            console.log(ValveEnums.ValveState.FIRE_COMMANDED)
-            console.log(ValveEnums.PyroState.FIRED)
-            console.log(frameHandler.sensors)
-            console.log(frameHandler.sensors.High_Press_1)
-            console.log(frameHandler.sensors.High_Press_1.rawValue)
-            console.log(frameHandler.sensors.High_Press_1.convertedValue)
-            console.log(frameHandler.tankPressControllers.HiPressTankController)
-            console.log(frameHandler.tankPressControllers.HiPressTankController.ventFailsafePressure)
-            console.log(TankPressControllerEnums.OFF_NOMINAL_PASSTHROUGH)
-            console.log(frameHandler.sendFrame(1,"1Y9b"));
-            console.log(frameHandler.engineControllers.Engine1)
+            //console.log(window.aaaaa)
+            //window.aaaaa = "BBBBBBBBBBBBBBB"
+
+            console.log("ValveID: " + frameHandler.valves.HP.ID)
+
+            //            console.log(ValveEnums.ValveState.FIRE_COMMANDED)
+            //            console.log(ValveEnums.PyroState.FIRED)
+            //            console.log(frameHandler.sensors)
+
+            //            console.log(frameHandler.tankPressControllers.HiPressTankController)
+            //            console.log(frameHandler.tankPressControllers.HiPressTankController.ventFailsafePressure)
+            //            console.log(TankPressControllerEnums.OFF_NOMINAL_PASSTHROUGH)
+            //            console.log(frameHandler.sendFrame(1,"1Y9b"));
+            //            console.log(frameHandler.engineControllers.Engine1)
             console.log(frameHandler.logger.outputLogMessage("from QML"))
             //pageLoader.source = "MainPage1.qml"
 
             //TEST COMMIT 2
             //window.color = "#4c5169"
-            //console.log(frameHandler.sensors.High_Press_1.)
 
             //console.log(frameHandler.sensors.value("HAHA"));
             //frameHandler.connectCan()
@@ -268,9 +392,9 @@ Item {
 
     Frame {
         id: frame1
-        x: 0
+        x: 129
         y: 380
-        width: 288
+        width: 159
         height: 126
 
         Label {
@@ -307,27 +431,27 @@ Item {
 
     Frame {
         id: frame4
-        x: 5
-        y: 113
-        width: 124
-        height: 226
+        x: 0
+        width: 129
+        anchors.top: parent.top
+        anchors.bottom: frame1.bottom
+        anchors.topMargin: 115
+        anchors.bottomMargin: 0
 
-        Rectangle {
-            id: rectangle
-            color: "black"
-            border.color: "#914040"
-            border.width: 4
+        Column {
+            id: column
             anchors.fill: parent
-            anchors.leftMargin: -6
-            anchors.topMargin: 0
-            anchors.rightMargin: -11
-            anchors.bottomMargin: -51
+            anchors.bottomMargin: 0
+            anchors.rightMargin: 0
 
-            gradient: Gradient {
-                orientation: Gradient.Horizontal
-                GradientStop { position: 0.9; color: "white"}
-                GradientStop { position: 0.5; color: "black"}
+            AutosequenceButton {
+                id: autosequenceButton
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.rightMargin: 3
+                anchors.leftMargin: 0
             }
+
         }
     }
 
@@ -362,13 +486,56 @@ Item {
         color: "#d71818"
     }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    Frame {
+        id: frame7
+        x: 704
+        y: 20
+        width: 200
+        height: 441
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
+        Text {
+            id: text1
+            x: 27
+            y: 168
+            color: "#f8f7f7"
+            text: qsTr("STATES AND NODES STUFF")
+            font.pixelSize: 12
+        }
+
+        Text {
+            id: text2
+            x: 27
+            y: 362
+            color: "#f8f7f7"
+            text: qsTr("AUTOSEQUENCE TIMER")
+            font.pixelSize: 12
+        }
+    }
+
+    Frame {
+        id: frame8
+        x: 504
+        y: 20
+        width: 171
+        height: 60
+
+        Text {
+            id: text3
+            x: 43
+            y: 21
+            color: "#fbfbfb"
+            text: qsTr("High Press Stuff")
+            font.pixelSize: 12
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     //Connections { // do this to connect signal from C++ to slot in QML

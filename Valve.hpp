@@ -50,6 +50,7 @@ private:
     Q_PROPERTY(QVariant valveState READ valveState NOTIFY ValveStateChanged)
     Q_PROPERTY(QVariant pyroState READ pyroState NOTIFY pyroStateChanged)
     Q_PROPERTY(quint16 ID READ ID CONSTANT)
+    Q_PROPERTY(QString name READ name CONSTANT)
     Q_PROPERTY(quint16 commandOff READ commandOff CONSTANT)
     Q_PROPERTY(quint16 commandOn READ commandOn CONSTANT)
     QML_ELEMENT
@@ -57,7 +58,7 @@ private:
     QString _name;
     quint16 _ID;
     //Valve::ValveState _valveState {Valve::ValveState::CLOSED};
-    QVariant _valveState {QVariant(static_cast<quint8>(Valve::ValveState::FIRE_COMMANDED))};
+    QVariant _valveState {QVariant(static_cast<quint8>(Valve::ValveState::CLOSED))};
     quint16 _HP_channel;
 
     quint16 _commandOff;
@@ -77,6 +78,8 @@ private:
 
 
 
+
+
 public:
     explicit Valve(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0,0,0,0,0});
 
@@ -88,7 +91,7 @@ public:
     QVariant pyroState() const;
     void setPyroState(QVariant newPyroState);
 
-    QString name() const;
+    QString name();
     quint16 ID();
     quint16 commandOff();
     quint16 commandOn();

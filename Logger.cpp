@@ -8,15 +8,15 @@ Logger::Logger(QObject *parent)
     _digitalDateTimeTimer.start();
 }
 
-QString Logger::message() const
+QString Logger::messageBuffer() const
 {
-    return _message; // Should modify this such that it newlines in the log window in QML
+    return _messageBuffer; // Should modify this such that it newlines in the log window in QML
 }
 
-void Logger::setMessage(const QString &newMessage)
+void Logger::setMessageBuffer(const QString &newMessageBuffer)
 {
-    _message = newMessage;
-    emit messageChanged();
+    _messageBuffer = newMessageBuffer;
+    emit messageBufferChanged();
 }
 
 
@@ -32,6 +32,16 @@ void Logger::outputLogMessage(const QString& message)
 void Logger::digitalDateTimeDisplay()
 {
     setDigitalDateTime(QDateTime::currentDateTime());
+}
+
+void Logger::loadUpMessageBuffer(const QString& message)
+{
+    _messageBuffer = _messageBuffer + message + '\n';
+}
+
+void Logger::clearMessageBuffer()
+{
+    _messageBuffer = "";
 }
 
 QDateTime Logger::digitalDateTime() const
