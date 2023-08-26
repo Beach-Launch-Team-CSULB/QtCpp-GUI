@@ -7,7 +7,7 @@ Valve::Valve(QObject *parent, QList<QVariant> args)
       _commandOff{static_cast<quint16>(args.at(3).toUInt())},
       _commandOn{static_cast<quint16>(args.at(4).toUInt())},
       _something_to_do_with_text_styling{static_cast<quint16>(args.at(5).toUInt())},
-    _valveNode{static_cast<Node::NodeID>(args.at(6).toUInt())}
+      _valveNode{static_cast<Node::NodeID>(args.at(6).toUInt())}
 {
     qInfo() << _name << " " <<_valveNode;
 }
@@ -94,12 +94,6 @@ void Valve::onValveReceivedFD(const QList<QByteArray>& data)
     }
 }
 
-QString Valve::name() const
-{
-    return _name;
-}
-
-
 QVariant Valve::valveState() const
 {
     return _valveState;
@@ -123,6 +117,11 @@ void Valve::setPyroState(QVariant newPyroState)
         return;
     _pyroState = newPyroState;
     emit pyroStateChanged();
+}
+
+QString Valve::name()
+{
+    return _name;
 }
 
 quint16 Valve::ID()

@@ -31,7 +31,7 @@ private:
     quint64 _timestamp = 0; // Microseconds
 
     Node::NodeID _sensorNode; // not initialized yet.
-    QString _name;
+    QString _name = " ";
     quint16 _sensorID;
     quint16 _rawSensorID;
     quint16 _convertedSensorID;
@@ -45,14 +45,16 @@ private:
     Q_PROPERTY(QVariant state READ state NOTIFY stateChanged)
     Q_PROPERTY(quint16 rawSensorID READ rawSensorID CONSTANT)
     Q_PROPERTY(Node::NodeID sensorNode READ sensorNode CONSTANT)
+    Q_PROPERTY(QString name READ name CONSTANT)
+
 
 public:
     explicit Sensor(QObject *parent = nullptr, QList<QVariant> args = {0,0,0,0});
 
 
     Node::NodeID sensorNode() const;
-    QString name() const;
 
+    QString name() const;
 
     quint64 getTimestamp() const;
     void setTimestamp(quint64 newTimestamp);
@@ -77,6 +79,8 @@ signals:
     void sensorNodeIDChanged();
     void updateGraphQML_rawValue(float x_timestamp, float y_rawValue);
     void updateGraphQML_convertedValue(float x_timestamp, float y_convertedValue);
+    void updateSensorQML_rawValue(float rawValue);
+    void updateSensorQML_convertedValue(float convertedValue);
 public slots:
     void emitUpdateGraphQML_rawValue();
     void emitUpdateGraphQML_convertedValue();

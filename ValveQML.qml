@@ -12,15 +12,23 @@ Item {
     property color enableOn: "green"
     property color enableStale: "yellow"
 
+    property int fontSize: 9
+
+    property string valveName: "VALVE"
+    property int valveID: 0
+
+    property int valveCommandOff: 0 // Convert to hex, then from hex convert to string.
+    property int valveCommandOn: 0 // The extra step could be cut if the conversion to hex results in a string
+
 
     property alias valveRectItem: valveRect
 
     property alias valveLabelItem: valveLabel
-    property string name: "VALVE"
+
 
     property alias valveImageItem: valveImage //source is set from main qml
 
-    property alias valveMouseAreaItem: valveMouseArea
+    property alias valveMouseAreaForMain: valveMouseArea
 
     property alias valveScaleUpItem: valveScaleUp
     property alias valveScaleDownItem: valveScaleDown
@@ -35,7 +43,7 @@ Item {
         color: "red"
         radius: width
         anchors.fill: parent
-        border.color: "black"
+        border.color: "white"
         border.width: 1.2
 
         //anchors.fill: parent
@@ -65,43 +73,71 @@ Item {
             width: 30
             height: 25
             z: 10
-            text: root.name
+            text: root.valveName
             anchors.verticalCenter: parent.verticalCenter
             anchors.bottom: parent.bottom
-            font.pointSize: 7
+            horizontalAlignment: Text.AlignHCenter
+            font.pointSize: fontSize
             anchors.bottomMargin: 15
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
         MouseArea
         {
-            id: valveMouseArea
+            id: valveMouseArea // use an alias to expose this to main to handle the doubleClicked signal there. Send on/off commands during offNominal
             width: parent.width
             height: parent.height
             anchors.fill: parent
             hoverEnabled: true
             enabled: true
-            onDoubleClicked:
+            onDoubleClicked: // Only Clickable (ie sending valve commands) when vehicle state is in offNominaloffNominaloffNominaloffNominal
             {
+
+                // if (VehicleState === a number that represents nominal (which is 6))
+                //{
+                console.log(valveName);
+                console.log(valveID);
+                console.log(valveCommandOff);
+                console.log(valveCommandOn);
+                console.log(valveCommandOff.toString(16));
+                console.log(valveCommandOn.toString(16));
                 console.log("State before click" + root.state)
-                if (root.state === "0") //TESTING ONLY. this directly sets the state in the frontend using QML, which
+                if (root.state === "0") // Closed //TESTING ONLY. this directly sets the state in the frontend using QML, which
                                         // interferes with the backend and makes it stop working
                 {
-                    root.state = "1"
+                    frameHandler.sendFrame(window.commandFrameID, valveCommandOn.toString(16))  // nominal
+
                 }
-                else if (root.state === "1")
+                else
                 {
-                    root.state = "2"
+                    frameHandler.sendFrame(window.commandFrameID, valveCommandOff.toString(16))  // nominal
                 }
-                else if (root.state === "2")
+                /*
+                else if (root.state === "1") // Open
                 {
-                    root.state = "3"
+                    // frameHandler.sendFrame(valveID, valveCommandOff.toString(16)) // nominal
+
                 }
-                else if (root.state === "3")
+                else if (root.state === "2") // FireCommanded
                 {
-                    root.state = "4"
+                    root.state = "3" // delete this later on
                 }
+                else if (root.state === "3") // OpenCommanded
+                {
+                    root.state = "4" // delete this later on
+                }
+                else if (root.state === "4") // CloseCommanded
+                {
+                    //root.state = "0" // delete this later on
+                }
+                */
                 console.log("State after click" + root.state)
+                //}
+
+                // if (VehicleState === a number that represents nominal)
+                //  {
+                //  }
+
             }
             onEntered:
             {
@@ -178,11 +214,11 @@ Item {
             name: "0" // Closed
             PropertyChanges {
                 target: gradientStop1;
-                color: "yellow"
+                color: "red"
             }
             PropertyChanges {
                 target: gradientStop2;
-                color: "yellow"
+                color: "red"
             }
             PropertyChanges {
                 target: gradientStop3;
@@ -198,19 +234,19 @@ Item {
             name: "1" // Open
             PropertyChanges {
                 target: gradientStop1;
-                color: "blue"
+                color: "lawngreen"
             }
             PropertyChanges {
                 target: gradientStop2;
-                color: "blue"
+                color: "lawngreen"
             }
             PropertyChanges {
                 target: gradientStop3;
-                color: "red"
+                color: "lawngreen"
             }
             PropertyChanges {
                 target: gradientStop4;
-                color: "red"
+                color: "lawngreen"
             }
         },
 
@@ -218,19 +254,19 @@ Item {
             name: "2" // FireCommanded
             PropertyChanges {
                 target: gradientStop1;
-                color: "green"
+                color: "darkorange"
             }
             PropertyChanges {
                 target: gradientStop2;
-                color: "green"
+                color: "darkorange"
             }
             PropertyChanges {
                 target: gradientStop3;
-                color: "red"
+                color: "darkorange"
             }
             PropertyChanges {
                 target: gradientStop4;
-                color: "red"
+                color: "darkorange"
             }
         },
 
@@ -238,19 +274,19 @@ Item {
             name: "3" // OpenCommanded
             PropertyChanges {
                 target: gradientStop1;
-                color: "pink"
+                color: "darkorange"
             }
             PropertyChanges {
                 target: gradientStop2;
-                color: "pink"
+                color: "darkorange"
             }
             PropertyChanges {
                 target: gradientStop3;
-                color: "red"
+                color: "lawngreen"
             }
             PropertyChanges {
                 target: gradientStop4;
-                color: "red"
+                color: "lawngreen"
             }
         },
 
@@ -258,11 +294,11 @@ Item {
             name: "4" // CloseCommanded
             PropertyChanges {
                 target: gradientStop1;
-                color: "black"
+                color: "gold"
             }
             PropertyChanges {
                 target: gradientStop2;
-                color: "black"
+                color: "gold"
             }
             PropertyChanges {
                 target: gradientStop3;

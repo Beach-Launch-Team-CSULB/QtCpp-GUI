@@ -7,7 +7,7 @@
 #include "Valve.hpp"
 //{Valve name, Object ID, HP channel, state, Command OFF, command On, "something to do with text styling", "marker for refresh valve function?"}
 QList<QList<QVariant>> valveConstructingParameters {
-    {"HV", 16, 2, 34, 35, 122, QVariant::fromValue(Node::NodeID::ENGINE_NODE)},
+    {"HP", 16, 2, 34, 35, 122, QVariant::fromValue(Node::NodeID::ENGINE_NODE)},
     {"HPV", 17, 1, 32, 33, 121, QVariant::fromValue(Node::NodeID::ENGINE_NODE)},
     {"LDR", 19, 3, 38, 39, 133, QVariant::fromValue(Node::NodeID::PROP_NODE)},
     {"FDR", 22, 7, 44, 45, 137, QVariant::fromValue(Node::NodeID::PROP_NODE)},

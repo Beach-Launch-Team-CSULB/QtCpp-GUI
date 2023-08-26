@@ -194,6 +194,8 @@ private:
     Q_PROPERTY(MissionState missionStatusRenegadeProp READ missionStatusRenegadeProp NOTIFY missionStatusRenegadePropChanged)
     Q_PROPERTY(Command currentCommandRenegadeEngine READ currentCommandRenegadeEngine NOTIFY currentCommandRenegadeEngineChanged)
     Q_PROPERTY(Command currentCommandRenegadeProp READ currentCommandRenegadeProp NOTIFY currentCommandRenegadePropChanged)
+    Q_PROPERTY(NodeSyncStatus nodeSyncStatus READ nodeSyncStatus NOTIFY nodeSyncStatusChanged) // the change happened inside of the nodeStatusRenegadeEngine and nodeStatusRenegadeProp setters
+
     Q_PROPERTY(QString busStatus READ busStatus NOTIFY busStatusChanged)
 
 
@@ -229,7 +231,9 @@ private:
     Logger _logger {Logger(this)};
 
     // Implement this............. Every time other node updates, the setter for this must be called to check if all nodes are in the same state
-    NodeSyncStatus _nodeSyncStatus; // updates every time a node changed and checks if all nodes are in the same state
+    //NodeSyncStatus _nodeSyncStatus; // updates every time a node changed and checks if all nodes are in the same state
+    NodeSyncStatus _nodeSyncStatus = NodeSyncStatus::NOT_IN_SYNC;
+
 
     const QList<VehicleState> _vehicleStates {  VehicleState::SETUP, // This is solely for the vehicleState setter.
                                              VehicleState::PASSIVE,
@@ -365,10 +369,12 @@ public:
     Command currentCommandRenegadeProp() const;
     void setCurrentCommandRenegadeProp(Command newCurrentCommandRenegadeProp);
 
+    NodeSyncStatus nodeSyncStatus() const;
+    void setNodeSyncStatus(); // No arguments needed. It picks from the node sync enum
+
     QString busStatus() const;
     void getBusStatus();
 
-    void nodeSynchronization(); // don't wanna make bool for other scenarios
 signals:
     void sensorReceived(quint16 ID_A, quint32 ID_B, QList<QByteArray> data);
     void valveReceived(quint16 HP1, quint16 HP2, QList<QByteArray> data);
@@ -388,6 +394,8 @@ signals:
     void missionStatusRenegadePropChanged();
     void currentCommandRenegadeEngineChanged();
     void currentCommandRenegadePropChanged();
+
+    void nodeSyncStatusChanged();
 
     void busStatusChanged();
 

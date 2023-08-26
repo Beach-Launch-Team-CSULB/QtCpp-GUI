@@ -75,7 +75,6 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("logger", frameHandler->logger()); // may not need
 
     //engine.rootContext()->setContextProperty("frameHandlerSensors", frameHandler->sensors());
-    //qInfo() << frameHandler->sensors().value("High_Press_1"); qInfo() << " HHHHHHHHHHHHHHHHHH";
 
     qRegisterMetaType<FrameHandler>();
     qRegisterMetaType<Sensor>();
@@ -118,6 +117,8 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
     // How to load multiple windows
     engine.load(url);
+    //engine.load(url);
+    //engine.load(u"file:///C:/CodeStuff/Beach Launch Team/BLT-Theseus-GUI/GraphQML.qml"_qs);
     //engine.load(url); // for each call to load, another object is created. This is ok to do when the frontend ONLY grabs data from the backend
     //engine.load(url); // as a result, each page should ideally do something completely different for optimization
 

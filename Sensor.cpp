@@ -117,6 +117,7 @@ void Sensor::setRawValue(float newRawValue)
     if(qFuzzyCompare(_rawValue,newRawValue))
         return;
     _rawValue = newRawValue;
+    emit updateSensorQML_rawValue(_rawValue);
     emit rawValueChanged(); // QML will handle this signal
 }
 
@@ -130,6 +131,7 @@ void Sensor::setConvertedValue(float newConvertedValue)
     if(qFuzzyCompare(_convertedValue, newConvertedValue))
         return;
     _convertedValue = newConvertedValue;
+    emit updateSensorQML_convertedValue(_convertedValue);
     emit convertedValueChanged();
 }
 
