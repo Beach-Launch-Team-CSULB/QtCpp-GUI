@@ -591,14 +591,14 @@ void FrameHandler::sendFrame(quint32 ID, QString dataHexString, QCanBusFrame::Fr
 {
     // in QML, just concantenate all the strings to form a byte array represented as string and pass it in as an argument.
     qDebug() << "Enter FrameHandler::sendFrame() function";
-
+/*
     if(!this->isOperational())
     {
         qInfo() << "FrameHandler::sendFrame(): Can not Operational";
         _logger.outputLogMessage("CAN not operational.............................................\n............................................................................\n...............................................");
         return;
     }
-
+*/
     //dataHexString is passed from QML
     //QByteArray data {QByteArrayLiteral(dataHexString)};
     QByteArray data {QByteArray::fromHex(dataHexString.toLatin1())};
@@ -625,14 +625,26 @@ void FrameHandler::sendFrame(quint32 ID, QString dataHexString, QCanBusFrame::Fr
                              + QString::number(dataFrame.hasFlexibleDataRateFormat()));
     //_logger.outputLogMessage(&"Can frame sent: " [ _can0->writeFrame(dataFrame)]);
 
-    //if(!this->isOperational())
-    //{
-    //    qInfo() << "FrameHandler::sendFrame(): Can not Operational";
-    //    return;
-    //}
+    if(!this->isOperational()) // delete this when deploy
+    {
+        qInfo() << "FrameHandler::sendFrame(): Can not Operational";
+        return;
+    }
 
     //_can0->writeFrame(dataFrame);
-    _logger.outputLogMessage(&"Can frame sent: " [ _can0->writeFrame(dataFrame)]);
+    if (_can0->writeFrame(dataFrame))
+    {
+        _logger.outputLogMessage("SUCCESS in sending CAN frame: " + QString::number(dataFrame.frameId()) + "-" + dataFrame.payload().toHex() + "-"
+                                 + QString::number(dataFrame.frameType()) + "-" + QString::number(dataFrame.hasBitrateSwitch()) + "-"
+                                 + QString::number(dataFrame.hasFlexibleDataRateFormat()));
+    }
+    else
+    {
+        _logger.outputLogMessage("FAILED to send CAN frame: " + QString::number(dataFrame.frameId()) + "-" + dataFrame.payload().toHex() + "-"
+                                 + QString::number(dataFrame.frameType()) + "-" + QString::number(dataFrame.hasBitrateSwitch()) + "-"
+                                 + QString::number(dataFrame.hasFlexibleDataRateFormat()));
+    }
+    //_logger.outputLogMessage(&"Can frame sent: " [ _can0->writeFrame(dataFrame)]);
 }
 
 void FrameHandler::onStarted()
@@ -708,6 +720,7 @@ void FrameHandler::setNodeStatusRenegadeEngine(FrameHandler::VehicleState newNod
 {
     _nodeStatusRenegadeEngine = newNodeStatusRenegadeEngine;
     emit nodeStatusRenegadeEngineChanged();
+    setNodeSyncStatus();
 }
 
 FrameHandler::VehicleState FrameHandler::nodeStatusRenegadeProp() const
@@ -719,7 +732,7 @@ void FrameHandler::setNodeStatusRenegadeProp(FrameHandler::VehicleState newNodeS
 {
     _nodeStatusRenegadeProp = newNodeStatusRenegadeProp;
     emit nodeStatusRenegadePropChanged();
-    nodeSynchronization();
+    setNodeSyncStatus();
 }
 
 FrameHandler::MissionState FrameHandler::missionStatusRenegadeEngine() const
@@ -729,6 +742,8 @@ FrameHandler::MissionState FrameHandler::missionStatusRenegadeEngine() const
 
 void FrameHandler::setMissionStatusRenegadeEngine(FrameHandler::MissionState newMissionStatusRenegadeEngine)
 {
+    if (_missionStatusRenegadeEngine == newMissionStatusRenegadeEngine)
+        return;
     _missionStatusRenegadeEngine = newMissionStatusRenegadeEngine;
     emit missionStatusRenegadeEngineChanged();
 }
@@ -740,6 +755,8 @@ FrameHandler::MissionState FrameHandler::missionStatusRenegadeProp() const
 
 void FrameHandler::setMissionStatusRenegadeProp(FrameHandler::MissionState newMissionStatusRenegadeProp)
 {
+    if (_missionStatusRenegadeProp == newMissionStatusRenegadeProp)
+        return;
     _missionStatusRenegadeProp = newMissionStatusRenegadeProp;
     emit missionStatusRenegadePropChanged();
 }
@@ -770,15 +787,22 @@ void FrameHandler::setCurrentCommandRenegadeProp(FrameHandler::Command newCurren
     emit currentCommandRenegadePropChanged();
 }
 
-void FrameHandler::nodeSynchronization()
+FrameHandler::NodeSyncStatus FrameHandler::nodeSyncStatus() const
+{
+    return _nodeSyncStatus;
+}
+
+void FrameHandler::setNodeSyncStatus()
 {
     if (_nodeStatusRenegadeEngine == _nodeStatusRenegadeProp)
     {
         _nodeSyncStatus = NodeSyncStatus::IN_SYNC;
+        emit nodeSyncStatusChanged(); // in QML, say onNodeSyncStatusChanged: {} then _nodeSyncStatus
     }
     else if (_nodeStatusRenegadeEngine != _nodeStatusRenegadeProp)
     {
         _nodeSyncStatus = NodeSyncStatus::NOT_IN_SYNC;
+        emit nodeSyncStatusChanged();
     }
     // need to expand
 }
@@ -886,22 +910,37 @@ void FrameHandler::run()
 
             //_logger.outputLogMessage(QString::number(rawValue));
             timeStamp = timeStamp + 10'000;
-            num = num + 0.01;
+            num = num + 0.01; // Keep this for QML to keep track of performance issue, i.e. it lags if this number stutters
             timer1.restart();
+
+
+
+
 
         }
 
 
-/*
+
         if (timer2.elapsed() > 1000)
         {
-            _logger.outputLogMessage("Test message");
+            //_logger.outputLogMessage("Test message");
+            //setNodeSyncStatus();
+            if (_nodeStatusRenegadeEngine == VehicleState::HI_PRESS_PRESSURIZED)
+            {
+                setNodeStatusRenegadeEngine(VehicleState::HI_PRESS_ARM);
+                setNodeStatusRenegadeProp(VehicleState::HI_PRESS_ARM);
+            }
+            else
+            {
+                setNodeStatusRenegadeEngine(VehicleState::HI_PRESS_PRESSURIZED);
+                setNodeStatusRenegadeProp(VehicleState::HI_PRESS_PRESSURIZED);
+            }
             timer2.restart();
             //num = num + 1;
             //qInfo() << num;
             //if (num >= 5) loop = false;
         }
-*/
+
 
     }
 

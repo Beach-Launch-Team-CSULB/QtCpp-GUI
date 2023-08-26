@@ -21,6 +21,10 @@ Item {
 
     property int defaultSensor: 1
 
+    property real safeThresholdFromMain: 700.0
+    property real warningThresholdFromMain: 1000.0
+    property real criticalThresholdFromMain: 1200.0
+
     signal comboBoxIndexChanged(int index)
 
     Component.onCompleted:
@@ -148,7 +152,7 @@ Item {
         comboBoxIndexChanged(index);
     }
 
-    function appendAndAdjustView(x, y, chartView, lineSeries, safeThreshold = 700, warningThreshold = 1000, criticalThreshold = 1200)    // member variables of the object linesSeries are passed by reference, so lineSeries.someMember should
+    function appendAndAdjustView(x, y, chartView, lineSeries, safeThreshold = safeThresholdFromMain, warningThreshold = warningThresholdFromMain, criticalThreshold = criticalThresholdFromMain)    // member variables of the object linesSeries are passed by reference, so lineSeries.someMember should
                                             // affect the someMember variable of the original object
     {
         var numberOfDataPoints = 100;

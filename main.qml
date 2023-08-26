@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtCharts
-
+import QtMultimedia
 // scrollbars
 
 import FrameHandlerEnums
@@ -22,15 +22,71 @@ Window {
     width: 1550//640 // If there is a need to use a bigger monitor, then adjust width and height and position of
     height: 785 //480 // everything in accordance to that monitor's size
     visible: true
-    title: qsTr(appDir + " --- Theseus GUI")
+    title: appDir + " --- Theseus GUI"
+
+    property string fileAppDir: "file:///" + appDir
+    property string commandFrameID: (1).toString(16)
+    property string objectConfigurationFrameID: (2).toString(16)
+    property string nextLine : "\n                "
 
     // Rememberances for loaders
-    property int main_defaultGraphQMLSensor1: 1
+    property int main_defaultGraphQMLSensor1: 5
     property int main_defaultGraphQMLSensor2: 6
     property int main_defaultGraphQMLSensor3: 3
     property int main_defaultGraphQMLSensor4: 4
     property int main_defaultGraphQMLSensor5: 11
     property int main_defaultGraphQMLSensor6: 12
+
+    Shortcut {
+        sequence: "1"
+        onActivated: {
+            mainPage1Button.toggle();
+            mainLoader.source = "MainPage1.qml"
+            logScrollView.visible = true
+            en_dis_logging_button.visible = true
+            logFlushButton.visible = true
+        }
+    }
+    Shortcut {
+        sequence: "2"
+        onActivated: {
+            mainPage2Button.toggle();
+            mainLoader.source = "MainPage2.qml"
+            logScrollView.visible = false
+            en_dis_logging_button.visible = false
+            logFlushButton.visible = false
+        }
+    }
+    Shortcut {
+        sequence: "3"
+        onActivated: {
+            mainPage3Button.toggle();
+            mainLoader.source = "MainPage3.qml"
+            logScrollView.visible = false
+            en_dis_logging_button.visible = false
+            logFlushButton.visible = false
+        }
+    }
+    Shortcut {
+        sequence: "4"
+        onActivated: {
+            mainPage4Button.toggle();
+            mainLoader.source = "MainPage4.qml"
+            logScrollView.visible = false
+            en_dis_logging_button.visible = false
+            logFlushButton.visible = false
+        }
+    }
+    Shortcut {
+        sequence: "5"
+        onActivated: {
+            mainPage5Button.toggle();
+            mainLoader.source = "MainPage5.qml"
+            logScrollView.visible = false
+            en_dis_logging_button.visible = false
+            logFlushButton.visible = false
+        }
+    }
 
 
 
@@ -56,7 +112,7 @@ Window {
             id: tabBar
             x: 590
             y: 0
-            width: 260
+            width: 315
             height: 50
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
@@ -134,7 +190,21 @@ Window {
                     en_dis_logging_button.visible = false
                     logFlushButton.visible = false
                 }
+            }
 
+            TabButton {
+                id: mainPage5Button
+                x: 261
+                y: -3
+                text: "Cameras"
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 0
+                anchors.topMargin: -3
+                onClicked:
+                {
+
+                }
             }
         }
 
@@ -177,9 +247,9 @@ Window {
 
         Text {
             id: dateTime
-            x: 1191
+            x: 1116
             y: 0
-            width: 344
+            width: 419
             height: 50
             color: "#fc0c0c"
             text: frameHandler.logger.digitalDateTime.toLocaleString()
@@ -226,8 +296,9 @@ Window {
             color: "blue"
             placeholderText: "No log messages received..."
             placeholderTextColor: "gray"
-            focus: false
-            activeFocusOnPress: true
+            //focus: false
+            activeFocusOnPress: false
+            readOnly: true
             width: logScrollView.width
             height: 140
             //anchors.fill: parent
@@ -257,9 +328,10 @@ Window {
 
                 console.log(message) // do textArea.append shit,
                 logTextArea.append(message)
-                logTextArea.append(logTextArea.lineCount)
-                logTextArea.append(logTextArea.length)
+                //logTextArea.append(logTextArea.lineCount)
+                //logTextArea.append(logTextArea.length)
                 logScrollView.contentItem.contentY = logTextArea.height - logScrollView.contentItem.height
+                logScrollView.contentItem.contentX = 0
                 while (logTextArea.length >= 10000)
                 {
                     logTextArea.remove(0, 200)
@@ -365,16 +437,33 @@ Window {
             Action { text: "Configure object 3..."}
             Action { text: "Configure object 4..."}
         }
+        Menu {
+            title: "Sensor rates"
+            Action {
+                text: "All Sensors Off"
+            }
+            Action {
+                text: "All Sensors Slow"
+            }
+            Action {
+                text: "All Sensors Medium"
+            }
+            Action {
+                text: "All Sensors Fast"
+            }
+            Action {
+                text: "All Sensors Calibration"
+            }
+        }
 
     }
-
     Button {
         id: logFlushButton
         x: 130
         y: 568
         width: 85
         height: 54
-        text: qsTr("Flush Logs")
+        text: "Flush Logs"
         visible: true
         antialiasing: true
         onClicked: {
@@ -382,10 +471,20 @@ Window {
             {
                 frameHandler.logger.outputLogMessage("Log buffer flushed");
             }
-
         }
     }
-
+/*
+    Button {
+        id: resetLogViewButton
+        x: 180
+        y: 568
+        width: 85
+        height: 54
+        text: "Reset Log View"
+        visible: true
+        antialiasing: true
+    }
+*/
     Rectangle {
         id: logRectangle
         visible: logScrollView.visible

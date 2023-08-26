@@ -12,6 +12,8 @@ Item {
     property color enableOn: "green"
     property color enableStale: "yellow"
 
+    property int fontSize: 9
+
     property string valveName: "VALVE"
     property int valveID: 0
 
@@ -26,7 +28,7 @@ Item {
 
     property alias valveImageItem: valveImage //source is set from main qml
 
-    property alias valveMouseAreaItem: valveMouseArea
+    property alias valveMouseAreaForMain: valveMouseArea
 
     property alias valveScaleUpItem: valveScaleUp
     property alias valveScaleDownItem: valveScaleDown
@@ -75,14 +77,14 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             anchors.bottom: parent.bottom
             horizontalAlignment: Text.AlignHCenter
-            font.pointSize: 9
+            font.pointSize: fontSize
             anchors.bottomMargin: 15
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
         MouseArea
         {
-            id: valveMouseArea
+            id: valveMouseArea // use an alias to expose this to main to handle the doubleClicked signal there. Send on/off commands during offNominal
             width: parent.width
             height: parent.height
             anchors.fill: parent
@@ -90,6 +92,7 @@ Item {
             enabled: true
             onDoubleClicked: // Only Clickable (ie sending valve commands) when vehicle state is in offNominaloffNominaloffNominaloffNominal
             {
+
                 // if (VehicleState === a number that represents nominal (which is 6))
                 //{
                 console.log(valveName);
@@ -102,13 +105,18 @@ Item {
                 if (root.state === "0") // Closed //TESTING ONLY. this directly sets the state in the frontend using QML, which
                                         // interferes with the backend and makes it stop working
                 {
-                    // frameHandler.sendFrame(valveID, valveCommandOn.toString(16))  // nominal
-                    root.state = "1" // delete this later on
+                    frameHandler.sendFrame(window.commandFrameID, valveCommandOn.toString(16))  // nominal
+
                 }
+                else
+                {
+                    frameHandler.sendFrame(window.commandFrameID, valveCommandOff.toString(16))  // nominal
+                }
+                /*
                 else if (root.state === "1") // Open
                 {
                     // frameHandler.sendFrame(valveID, valveCommandOff.toString(16)) // nominal
-                    root.state = "2" // delete this later on
+
                 }
                 else if (root.state === "2") // FireCommanded
                 {
@@ -122,6 +130,7 @@ Item {
                 {
                     //root.state = "0" // delete this later on
                 }
+                */
                 console.log("State after click" + root.state)
                 //}
 
