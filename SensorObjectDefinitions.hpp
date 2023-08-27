@@ -3,7 +3,6 @@
 #include <QList>
 #include <QVariant>
 #include <QMap>
-#include "Sensor.hpp"
 // {Sensor Name, Raw Sensor ID, Converted Sensor ID, sensor state}
 QList<QList<QVariant>> sensorConstructingParameters { // making const QList< const QList< const QVariant>> results in error?
             {"High_Press_Fuel", 70, 3, 81},
@@ -19,10 +18,10 @@ QList<QList<QVariant>> sensorConstructingParameters { // making const QList< con
             {"Fuel_Injector", 54, 2, 81},
             {"Chamber_1", 50, 2, 51},
             {"Chamber_2", 52, 2, 81},
-            {"MV_Pneumatic", 56, 2, 81}
-            //{"Load_Cell_1", 37, 37},
-            //{"Load_Cell_2", 43, 43},
-            //{"Load_Cell_3", 49, 49},
+            {"MV_Pneumatic", 56, 2, 81},
+            {"Load_Cell_1", 32, 4, 81},
+            {"Load_Cell_2", 38, 4, 81},
+            {"Load_Cell_3", 44, 4, 81}
     // Underscores instead of spaces to be able to register these objects with the QML engine
 };
 

@@ -4,7 +4,7 @@ project(BLT-Theseus-GUI VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Core Quick Qml Gui SerialBus Charts Multimedia)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Core Quick QuickControls2 Qml Gui SerialBus Charts Multimedia)
 
 qt_standard_project_setup()
 
@@ -32,7 +32,7 @@ qt_add_qml_module(appBLT-Theseus-GUI
     QML_FILES   Main.qml MainPage1.qml MainPage2.qml MainPage3.qml
                 StatusBar.qml
                 GraphQML.qml HPSensorQML.qml SensorQML.qml ValveQML.qml AutosequenceButton.qml
-                Tab.qml
+                Tab.qml CountdownTimerQML.qml AutosequenceQML.qml VehicleStateQML.qml
 )
 
 set_target_properties(appBLT-Theseus-GUI PROPERTIES
@@ -44,7 +44,7 @@ set_target_properties(appBLT-Theseus-GUI PROPERTIES
 )
 
 target_link_libraries(appBLT-Theseus-GUI
-    PRIVATE Qt6::Core Qt6::Quick Qt6::Qml Qt6::Gui Qt6::SerialBus Qt6::Charts Qt6::Multimedia
+    PRIVATE Qt6::Core Qt6::Quick Qt6::Qml Qt6::Gui Qt6::SerialBus Qt6::Charts Qt6::Multimedia Qt6::QuickControls2
 )
 
 install(TARGETS appBLT-Theseus-GUI

@@ -877,16 +877,16 @@ void FrameHandler::run()
             }
 */
 
-            qvariant_cast<Sensor*>(_sensors.value("High_Press_Fuel"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_Fuel"))->setConvertedValue(1100 - num*num);
             qvariant_cast<Sensor*>(_sensors.value("High_Press_Fuel"))->setTimestamp(timeStamp);
-            qvariant_cast<Sensor*>(_sensors.value("High_Press_Fuel"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_Fuel"))->setConvertedValue(1100 - num*num);
             qvariant_cast<Sensor*>(_sensors.value("High_Press_Lox"))->setTimestamp(timeStamp);
-            qvariant_cast<Sensor*>(_sensors.value("High_Press_Lox"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<Sensor*>(_sensors.value("High_Press_Lox"))->setConvertedValue(1100 - num*num);
             qvariant_cast<Sensor*>(_sensors.value("Chamber_1"))->setTimestamp(timeStamp);
-            qvariant_cast<Sensor*>(_sensors.value("Chamber_1"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<Sensor*>(_sensors.value("Chamber_1"))->setConvertedValue(1100 - num*num);
             qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setTimestamp(timeStamp);
             qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setRawValue(num);
-            qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setConvertedValue(1700 - num*num);
+            qvariant_cast<Sensor*>(_sensors.value("Lox_Tank_1"))->setConvertedValue(1100 - num*num);
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP1"))->setTimestamp(timeStamp);
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP1"))->setOutputValue(2000 - num*num);
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP2"))->setTimestamp(timeStamp);

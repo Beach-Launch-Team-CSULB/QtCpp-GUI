@@ -21,9 +21,9 @@ public:
 private:
     Q_OBJECT
     QML_ELEMENT
-        QML_UNCREATABLE("C++ instantiation only")
+    QML_UNCREATABLE("C++ instantiation only")
 
-        QVariant _state {QVariant(static_cast<quint8>(Autosequence::AutosequenceState::STANDBY))};
+    QVariant _state {QVariant(static_cast<quint8>(Autosequence::AutosequenceState::STANDBY))};
 
     QString _name{""};
 

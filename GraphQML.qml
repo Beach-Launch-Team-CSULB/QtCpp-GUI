@@ -21,9 +21,9 @@ Item {
 
     property int defaultSensor: 1
 
-    property real safeThresholdFromMain: 700.0
-    property real warningThresholdFromMain: 1000.0
-    property real criticalThresholdFromMain: 1200.0
+    property real safeThresholdFromMain: 400.0
+    property real warningThresholdFromMain: 700.0
+    property real criticalThresholdFromMain: 1000.0
 
     signal comboBoxIndexChanged(int index)
 

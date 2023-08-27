@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Controls
+//import QtQuick.Controls.Styles
+//import QtQuick.Controls.Material
 import QtQuick.Layouts
 import QtCharts
 import QtMultimedia
@@ -15,7 +17,11 @@ import TankPressControllerEnums
 import EngineControllerEnums
 import LoggerEnums
 
-
+// need to rework the graph stuff.
+// basically, make a BarSeries graph qml that will replace the current lineseries one,
+// the lineseries can be moved to another dedicated lineseries graphs, with a timer interval
+// of 250/500/1000 ms for performance
+// probably need to load up a window for that
 Window {
     //ApplicationWindow{
     id: window
@@ -104,7 +110,10 @@ Window {
             //GradientStop { position: 1; color: "grey"}
         }
     }
-
+/*
+    Material.theme: Material.Dark
+    Material.accent: Material.Purple
+*/
     StatusBar {
         id: statusBar
 
@@ -284,6 +293,7 @@ Window {
     ScrollView {
         id: logScrollView
         visible: true
+        antialiasing: true
         clip: false
         x: 0
         y: 647
@@ -296,6 +306,10 @@ Window {
             color: "blue"
             placeholderText: "No log messages received..."
             placeholderTextColor: "gray"
+            //style: TextAreaStyle {
+
+            //}
+
             //focus: false
             activeFocusOnPress: false
             readOnly: true
@@ -453,6 +467,33 @@ Window {
             }
             Action {
                 text: "All Sensors Calibration"
+            }
+        }
+        Menu {
+            title: "Reset Node"
+            Action {
+                text: "Reset Node 1"
+            }
+            Action {
+                text: "Reset Node 2 (engine node)"
+            }
+            Action {
+                text: "Reset Node 3 (propulsion node)"
+            }
+            Action {
+                text: "Reset Node 4 (GNC/Telemetry/Sensor node)"
+            }
+            Action {
+                text: "Reset Node 5"
+            }
+            Action {
+                text: "Reset Node 6"
+            }
+            Action {
+                text: "Reset Node 7"
+            }
+            Action {
+                text: "Global reset"
             }
         }
 

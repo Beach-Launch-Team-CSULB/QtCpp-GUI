@@ -27,18 +27,18 @@ public:
 private:
     Q_OBJECT
     QML_ELEMENT
-        QML_UNCREATABLE("C++ instantiation only")
+    QML_UNCREATABLE("C++ instantiation only")
 
-        QString _name {""};
+    QString _name {""};
     quint16 _id {0};
     quint16 _nodeID{0};
 
     QVariant _state {QVariant(static_cast<quint8>(EngineControllerState::PASSIVE))};
 
-    qint32 _fuelMVAutosequenceActuation = 0;
-    qint32 _loxMVAutosequenceActuation = 0;
-    qint32 _igniter1Actuation = 0;
-    qint32 _igniter2Actuation = 0;
+    qint32 _fuelMVAutosequenceActuation = -69000000;
+    qint32 _loxMVAutosequenceActuation = -70000000;
+    qint32 _igniter1Actuation = -71000000;
+    qint32 _igniter2Actuation = -72000000;
 
 
     Q_PROPERTY(QString name READ name CONSTANT)
