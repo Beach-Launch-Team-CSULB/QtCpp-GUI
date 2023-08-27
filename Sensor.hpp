@@ -35,8 +35,8 @@ private:
     quint16 _sensorID;
     quint16 _rawSensorID;
     quint16 _convertedSensorID;
-    float _rawValue = {0.0f}; // SET BY *RECEIVED* CAN FRAME. log to a file maybe???
-    float _convertedValue = {0.0f};
+    float _rawValue = {7969.69f}; // SET BY *RECEIVED* CAN FRAME. log to a file maybe???
+    float _convertedValue = {6969.69f};
 
     // Expose object's properties to QML
     Q_PROPERTY(quint64 timestamp READ getTimestamp NOTIFY timestampChanged)

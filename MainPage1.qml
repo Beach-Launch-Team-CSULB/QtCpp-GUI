@@ -24,7 +24,7 @@ import EngineControllerEnums
 
 // for autosequencing, do a ListElement with column layout?
 
-import QtQuick3D.Particles3D 6.4
+//import QtQuick3D.Particles3D 6.4
 
 Item {
     id: mainPage1
@@ -201,11 +201,11 @@ Item {
 
     SensorQML {
         x: 916
-        y: 681
+        y: 704
         width: 50
-        height: 50
+        height: 27
 
-        sensorConvertedValue: frameHandler.sensors.Lox_Tank_1.rawValue.toFixed(2)
+        sensorValue: frameHandler.sensors.Lox_Tank_1.rawValue.toFixed(2)
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,7 +214,7 @@ Item {
     ValveQML {
         id: hiPress
         x: 241
-        y: 40
+        y: 52
 
         valveID: frameHandler.valves.HP.ID
         valveName: frameHandler.valves.HP.name
@@ -231,7 +231,7 @@ Item {
     ValveQML {
         id: hiPressVent
         x: 292
-        y: 75
+        y: 87
 
         valveID: frameHandler.valves.HPV.ID
         valveName: frameHandler.valves.HPV.name
@@ -360,7 +360,7 @@ Item {
     ValveQML {
         id: igniter1
         y: 367
-        anchors.horizontalCenterOffset: 70
+        anchors.horizontalCenterOffset: -70
         anchors.horizontalCenter: engineNozzleImage.horizontalCenter
         valveID: frameHandler.valves.IGN1.ID
         valveName: frameHandler.valves.IGN1.name
@@ -370,31 +370,10 @@ Item {
         valveCommandOn: frameHandler.valves.IGN1.commandOn
     }
 
-    Rectangle {
-        id: fuelSensorRect
-        x: 524
-        y: 515
-        width: 140
-        height: 105
-        color: "#00000000"
-        border.color: "#ad6e19"
-        border.width: 2
-
-
-        Label {
-            id: fuelLabel
-            color: "#ad6e19"
-            text: qsTr("Fuel")
-            anchors.left: parent.left
-            font.pointSize: 12
-            anchors.leftMargin: 5
-        }
-    }
-
     ValveQML {
         id: igniter2
         y: 367
-        anchors.horizontalCenterOffset: -70
+        anchors.horizontalCenterOffset: 70
         anchors.horizontalCenter: engineNozzleImage.horizontalCenter
         valveID: frameHandler.valves.IGN2.ID
         valveName: frameHandler.valves.IGN2.name
@@ -472,12 +451,171 @@ Item {
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////// SENSOR SECTION /////////////////////////////////////////////////
+
+    Rectangle {
+        id: mainValvePneumaticSensorRect
+        x: 537
+        y: 445
+        width: 118
+        height: 64
+        color: "#00000000"
+        border.color: "#7e0cf8"
+        border.width: 2
+
+        Label {
+            id: mainValvePneumaticLabel
+            y: 2
+            color: "#9066d5"
+            text: "MV Pneumatic"
+            anchors.left: parent.left
+            font.bold: true
+            anchors.leftMargin: 5
+            font.pointSize: 9
+        }
+
+        SensorQML {
+            id: mainValvePneumaticSensor
+            x: 5
+            y: 25
+            width: 50
+            height: 35
+
+            name: "MVP "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.MV_Pneumatic.convertedValue
+
+            Connections
+            {
+                target: frameHandler.sensors.MV_Pneumatic
+                onUpdateSensorQML_convertedValue:
+                {
+                    if (mainValvePneumaticSensor.sensorValue <= mainValvePneumaticSensor.safeThreshold )
+                    {
+                        mainValvePneumaticSensor.state = "safe";
+                    }
+                    if (mainValvePneumaticSensor.safeThreshold < mainValvePneumaticSensor.sensorValue && mainValvePneumaticSensor.sensorValue <= mainValvePneumaticSensor.warningThreshold )
+                    {
+                        mainValvePneumaticSensor.state = "warning";
+                    }
+                    if (mainValvePneumaticSensor.warningThreshold < mainValvePneumaticSensor.sensorValue && mainValvePneumaticSensor.sensorValue <= mainValvePneumaticSensor.criticalThreshold )
+                    {
+                        mainValvePneumaticSensor.state = "critical";
+                    }
+                    if (mainValvePneumaticSensor.criticalThreshold < mainValvePneumaticSensor.sensorValue)
+                    {
+                        mainValvePneumaticSensor.state = "RUNNN";
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        id: highPressSensorRect
+        x: 363
+        y: 445
+        width: 168
+        height: 64
+        color: "#00000000"
+        border.color: "#eceab9"
+        border.width: 2
+
+        Label {
+            id: highPressSensorLabel
+            y: 2
+            color: parent.border.color
+            text: "High Press"
+            anchors.left: parent.left
+            font.bold: true
+            anchors.leftMargin: 5
+            font.pointSize: 9
+        }
+
+        SensorQML {
+            id: highPressLoxSensor
+            x: 5
+            y: 20
+            width: 50
+            height: 35
+
+            name: "*HiPress Lox  "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.High_Press_Lox.convertedValue
+
+            Connections
+            {
+                target: frameHandler.sensors.High_Press_Lox
+                onUpdateSensorQML_convertedValue:
+                {
+                    if (highPressLoxSensor.sensorValue <= highPressLoxSensor.safeThreshold )
+                    {
+                        highPressLoxSensor.state = "safe";
+                    }
+                    if (highPressLoxSensor.safeThreshold < highPressLoxSensor.sensorValue && highPressLoxSensor.sensorValue <= highPressLoxSensor.warningThreshold )
+                    {
+                        highPressLoxSensor.state = "warning";
+                    }
+                    if (highPressLoxSensor.warningThreshold < highPressLoxSensor.sensorValue && highPressLoxSensor.sensorValue <= highPressLoxSensor.criticalThreshold )
+                    {
+                        highPressLoxSensor.state = "critical";
+                    }
+                    if (highPressLoxSensor.criticalThreshold < highPressLoxSensor.sensorValue)
+                    {
+                        highPressLoxSensor.state = "RUNNN";
+                    }
+                }
+            }
+        }
+
+        SensorQML {
+            id: highPressFuelSensor
+            x: 5
+            y: 40
+            width: 50
+            height: 35
+
+            name: "*HiPress Fuel "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.High_Press_Fuel.convertedValue
+
+            Connections
+            {
+                target: frameHandler.sensors.High_Press_Fuel
+                onUpdateSensorQML_convertedValue:
+                {
+                    if (highPressFuelSensor.sensorValue <= highPressFuelSensor.safeThreshold )
+                    {
+                        highPressFuelSensor.state = "safe";
+                    }
+                    if (highPressFuelSensor.safeThreshold < highPressFuelSensor.sensorValue && highPressFuelSensor.sensorValue <= highPressFuelSensor.warningThreshold )
+                    {
+                        highPressFuelSensor.state = "warning";
+                    }
+                    if (highPressFuelSensor.warningThreshold < highPressFuelSensor.sensorValue && highPressFuelSensor.sensorValue <= highPressFuelSensor.criticalThreshold )
+                    {
+                        highPressFuelSensor.state = "critical";
+                    }
+                    if (highPressFuelSensor.criticalThreshold < highPressFuelSensor.sensorValue)
+                    {
+                        highPressFuelSensor.state = "RUNNN";
+                    }
+                }
+            }
+        }
+    }
+
     Rectangle {
         id: loxSensorRect
-        x: 371
+        x: 361
         y: 515
-        width: 140
-        height: 105
+        width: 170
+        height: 130
         color: "transparent"
         border.color: "#6fd3f4"
         border.width: 2
@@ -485,13 +623,451 @@ Item {
         Label {
             id: loxLabel
             y: 0
-            color: "#6fd3f4"
+            color: parent.border.color
             text: "Lox"
             anchors.left: parent.left
+            font.bold: true
             anchors.leftMargin: 5
             font.pointSize: 12
         }
+
+        SensorQML {
+            id: loxTankSensor1
+            x: 5
+            y: 25
+            width: 50
+            height: 35
+
+            name: "*Lox Tank 1      "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.Lox_Tank_1.convertedValue
+
+            Connections
+            {
+                target: frameHandler.sensors.Lox_Tank_1
+                onUpdateSensorQML_convertedValue:
+                {
+                    if (loxTankSensor1.sensorValue <= loxTankSensor1.safeThreshold )
+                    {
+                        loxTankSensor1.state = "safe";
+                    }
+                    if (loxTankSensor1.safeThreshold < loxTankSensor1.sensorValue && loxTankSensor1.sensorValue <= loxTankSensor1.warningThreshold )
+                    {
+                        loxTankSensor1.state = "warning";
+                    }
+                    if (loxTankSensor1.warningThreshold < loxTankSensor1.sensorValue && loxTankSensor1.sensorValue <= loxTankSensor1.criticalThreshold )
+                    {
+                        loxTankSensor1.state = "critical";
+                    }
+                    if (loxTankSensor1.criticalThreshold < loxTankSensor1.sensorValue)
+                    {
+                        loxTankSensor1.state = "RUNNN";
+                    }
+                }
+            }
+        }
+
+        SensorQML {
+            id: loxTankSensor2
+
+            x: 5
+            y: 50
+            width: 50
+            height: 35
+
+            name: "*Lox Tank 2      "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.Lox_Tank_2.convertedValue
+
+            Connections {
+                target: frameHandler.sensors.Lox_Tank_2
+                onUpdateSensorQML_convertedValue: {
+                    if (loxTankSensor2.sensorValue <= loxTankSensor2.safeThreshold )
+                    {
+                        loxTankSensor2.state = "safe";
+                    }
+                    if (loxTankSensor2.safeThreshold < loxTankSensor2.sensorValue && loxTankSensor2.sensorValue <= loxTankSensor2.warningThreshold )
+                    {
+                        loxTankSensor2.state = "warning";
+                    }
+                    if (loxTankSensor2.warningThreshold < loxTankSensor2.sensorValue && loxTankSensor2.sensorValue <= loxTankSensor2.criticalThreshold )
+                    {
+                        loxTankSensor2.state = "critical";
+                    }
+                    if (loxTankSensor2.criticalThreshold < loxTankSensor2.sensorValue)
+                    {
+                        loxTankSensor2.state = "RUNNN";
+                    }
+                }
+            }
+        }
+
+        SensorQML {
+            id: loxDomeRegSensor
+
+            x: 5
+            y: 75
+            width: 50
+            height: 35
+
+            name: "Lox Dome Reg "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.Lox_Dome_Reg.convertedValue
+
+            Connections {
+                target: frameHandler.sensors.Lox_Dome_Reg
+                onUpdateSensorQML_convertedValue: {
+                    if (loxDomeRegSensor.sensorValue <= loxDomeRegSensor.safeThreshold )
+                    {
+                        loxDomeRegSensor.state = "safe";
+                    }
+                    if (loxDomeRegSensor.safeThreshold < loxDomeRegSensor.sensorValue && loxDomeRegSensor.sensorValue <= loxDomeRegSensor.warningThreshold )
+                    {
+                        loxDomeRegSensor.state = "warning";
+                    }
+                    if (loxDomeRegSensor.warningThreshold < loxDomeRegSensor.sensorValue && loxDomeRegSensor.sensorValue <= loxDomeRegSensor.criticalThreshold )
+                    {
+                        loxDomeRegSensor.state = "critical";
+                    }
+                    if (loxDomeRegSensor.criticalThreshold < loxDomeRegSensor.sensorValue)
+                    {
+                        loxDomeRegSensor.state = "RUNNN";
+                    }
+                }
+            }
+        }
+
+        SensorQML {
+            id: loxPropInlet
+
+            x: 5
+            y: 100
+            width: 50
+            height: 35
+
+            name: "Lox Prop Inlet  "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.Lox_Prop_Inlet.convertedValue
+
+            Connections {
+                target: frameHandler.sensors.Lox_Prop_Inlet
+                onUpdateSensorQML_convertedValue: {
+                    if (loxPropInlet.sensorValue <= loxPropInlet.safeThreshold )
+                    {
+                        loxPropInlet.state = "safe";
+                    }
+                    if (loxPropInlet.safeThreshold < loxPropInlet.sensorValue && loxPropInlet.sensorValue <= loxPropInlet.warningThreshold )
+                    {
+                        loxPropInlet.state = "warning";
+                    }
+                    if (loxPropInlet.warningThreshold < loxPropInlet.sensorValue && loxPropInlet.sensorValue <= loxPropInlet.criticalThreshold )
+                    {
+                        loxPropInlet.state = "critical";
+                    }
+                    if (loxPropInlet.criticalThreshold < loxPropInlet.sensorValue)
+                    {
+                        loxPropInlet.state = "RUNNN";
+                    }
+                }
+            }
+        }
     }
+
+    Rectangle {
+        id: fuelSensorRect
+        x: 542
+        y: 515
+        width: 170
+        height: 130
+        color: "#00000000"
+        border.color: "#ad6e19"
+        border.width: 2
+
+
+        Label {
+            id: fuelLabel
+            color: "#ad6e19"
+            text: "Fuel"
+            anchors.left: parent.left
+            font.bold: true
+            font.pointSize: 12
+            anchors.leftMargin: 5
+        }
+
+        SensorQML {
+            id: fuelTankSensor1
+            x: 5
+            y: 25
+            width: 50
+            height: 35
+
+            name: "Fuel Tank 1        "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.Fuel_Tank_1.convertedValue
+
+            Connections
+            {
+                target: frameHandler.sensors.Fuel_Tank_1
+                onUpdateSensorQML_convertedValue:
+                {
+                    if (fuelTankSensor1.sensorValue <= fuelTankSensor1.safeThreshold )
+                    {
+                        fuelTankSensor1.state = "safe";
+                    }
+                    if (fuelTankSensor1.safeThreshold < fuelTankSensor1.sensorValue && fuelTankSensor1.sensorValue <= fuelTankSensor1.warningThreshold )
+                    {
+                        fuelTankSensor1.state = "warning";
+                    }
+                    if (fuelTankSensor1.warningThreshold < fuelTankSensor1.sensorValue && fuelTankSensor1.sensorValue <= fuelTankSensor1.criticalThreshold )
+                    {
+                        fuelTankSensor1.state = "critical";
+                    }
+                    if (fuelTankSensor1.criticalThreshold < fuelTankSensor1.sensorValue)
+                    {
+                        fuelTankSensor1.state = "RUNNN";
+                    }
+                }
+            }
+        }
+
+        SensorQML {
+            id: fuelTankSensor2
+
+            x: 5
+            y: 50
+            width: 50
+            height: 35
+
+            name: "Fuel Tank 2        "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.Fuel_Tank_2.convertedValue
+
+            Connections {
+                target: frameHandler.sensors.Fuel_Tank_2
+                onUpdateSensorQML_convertedValue: {
+                    if (fuelTankSensor2.sensorValue <= fuelTankSensor2.safeThreshold )
+                    {
+                        fuelTankSensor2.state = "safe";
+                    }
+                    if (fuelTankSensor2.safeThreshold < fuelTankSensor2.sensorValue && fuelTankSensor2.sensorValue <= fuelTankSensor2.warningThreshold )
+                    {
+                        fuelTankSensor2.state = "warning";
+                    }
+                    if (fuelTankSensor2.warningThreshold < fuelTankSensor2.sensorValue && fuelTankSensor2.sensorValue <= fuelTankSensor2.criticalThreshold )
+                    {
+                        fuelTankSensor2.state = "critical";
+                    }
+                    if (fuelTankSensor2.criticalThreshold < fuelTankSensor2.sensorValue)
+                    {
+                        fuelTankSensor2.state = "RUNNN";
+                    }
+                }
+            }
+        }
+
+        SensorQML {
+            id: fuelDomeRegSensor
+
+            x: 5
+            y: 75
+            width: 50
+            height: 35
+
+            name: "Fuel Dome Reg "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.Fuel_Dome_Reg.convertedValue
+
+            Connections {
+                target: frameHandler.sensors.Fuel_Dome_Reg
+                onUpdateSensorQML_convertedValue: {
+                    if (fuelDomeRegSensor.sensorValue <= fuelDomeRegSensor.safeThreshold )
+                    {
+                        fuelDomeRegSensor.state = "safe";
+                    }
+                    if (fuelDomeRegSensor.safeThreshold < fuelDomeRegSensor.sensorValue && fuelDomeRegSensor.sensorValue <= fuelDomeRegSensor.warningThreshold )
+                    {
+                        fuelDomeRegSensor.state = "warning";
+                    }
+                    if (fuelDomeRegSensor.warningThreshold < fuelDomeRegSensor.sensorValue && fuelDomeRegSensor.sensorValue <= fuelDomeRegSensor.criticalThreshold )
+                    {
+                        fuelDomeRegSensor.state = "critical";
+                    }
+                    if (fuelDomeRegSensor.criticalThreshold < fuelDomeRegSensor.sensorValue)
+                    {
+                        fuelDomeRegSensor.state = "RUNNN";
+                    }
+                }
+            }
+        }
+
+        SensorQML {
+            id: fuelPropInletSensor
+
+            x: 5
+            y: 100
+            width: 50
+            height: 35
+
+            name: "Fuel Prop Inlet  "
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.Fuel_Prop_Inlet.convertedValue
+
+            Connections {
+                target: frameHandler.sensors.Fuel_Prop_Inlet
+                onUpdateSensorQML_convertedValue: {
+                    if (fuelPropInletSensor.sensorValue <= fuelPropInletSensor.safeThreshold )
+                    {
+                        fuelPropInletSensor.state = "safe";
+                    }
+                    if (fuelPropInletSensor.safeThreshold < fuelPropInletSensor.sensorValue && fuelPropInletSensor.sensorValue <= fuelPropInletSensor.warningThreshold )
+                    {
+                        fuelPropInletSensor.state = "warning";
+                    }
+                    if (fuelPropInletSensor.warningThreshold < fuelPropInletSensor.sensorValue && fuelPropInletSensor.sensorValue <= fuelPropInletSensor.criticalThreshold )
+                    {
+                        fuelPropInletSensor.state = "critical";
+                    }
+                    if (fuelPropInletSensor.criticalThreshold < fuelPropInletSensor.sensorValue)
+                    {
+                        fuelPropInletSensor.state = "RUNNN";
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        id: miscellaneousSensorRect
+        x: 360
+        y: 650
+        width: 352
+        height: 70
+        color: "#00000000"
+        border.color: "#56f247"
+        border.width: 2
+
+        SensorQML {
+            id: chamberSensor1
+
+            x: 50
+            y: 20
+            width: 50
+            height: 35
+
+            name: "Chamber 1"
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.Chamber_1.convertedValue
+
+            Connections {
+                target: frameHandler.sensors.Chamber_1
+                onUpdateSensorQML_convertedValue: {
+                    if (chamberSensor1.sensorValue <= chamberSensor1.safeThreshold )
+                    {
+                        chamberSensor1.state = "safe";
+                    }
+                    if (chamberSensor1.safeThreshold < chamberSensor1.sensorValue && chamberSensor1.sensorValue <= chamberSensor1.warningThreshold )
+                    {
+                        chamberSensor1.state = "warning";
+                    }
+                    if (chamberSensor1.warningThreshold < chamberSensor1.sensorValue && chamberSensor1.sensorValue <= chamberSensor1.criticalThreshold )
+                    {
+                        chamberSensor1.state = "critical";
+                    }
+                    if (chamberSensor1.criticalThreshold < chamberSensor1.sensorValue)
+                    {
+                        chamberSensor1.state = "RUNNN";
+                    }
+                }
+            }
+        }
+
+        SensorQML {
+            id: chamberSensor2
+
+            x: 200
+            y: 20
+            width: 50
+            height: 35
+
+            name: "Chamber 2"
+            safeColor: "white"
+            sensorValue: frameHandler.sensors.Chamber_2.convertedValue
+
+            Connections {
+                target: frameHandler.sensors.Chamber_2
+                onUpdateSensorQML_convertedValue: {
+                    if (chamberSensor2.sensorValue <= chamberSensor2.safeThreshold )
+                    {
+                        chamberSensor2.state = "safe";
+                    }
+                    if (chamberSensor2.safeThreshold < chamberSensor2.sensorValue && chamberSensor2.sensorValue <= chamberSensor2.warningThreshold )
+                    {
+                        chamberSensor2.state = "warning";
+                    }
+                    if (chamberSensor2.warningThreshold < chamberSensor2.sensorValue && chamberSensor2.sensorValue <= chamberSensor2.criticalThreshold )
+                    {
+                        chamberSensor2.state = "critical";
+                    }
+                    if (chamberSensor2.criticalThreshold < chamberSensor2.sensorValue)
+                    {
+                        chamberSensor2.state = "RUNNN";
+                    }
+                }
+            }
+        }
+
+        SensorQML {
+            id: loadCellSensor1
+
+            x: 25
+            y: 40
+            width: 50
+            height: 35
+
+            name: "LC 1"
+            safeColor: "white"
+            warningColor: "white"
+            criticalColor: "white"
+            sensorValue: frameHandler.sensors.Load_Cell_1.convertedValue
+        }
+
+        SensorQML {
+            id: loadCellSensor2
+
+            x: 125
+            y: 40
+            width: 50
+            height: 35
+
+            name: "LC 2"
+            safeColor: "white"
+            warningColor: "white"
+            criticalColor: "white"
+            sensorValue: frameHandler.sensors.Load_Cell_2.convertedValue
+        }
+
+        SensorQML {
+            id: loadCellSensor3
+
+            x: 225
+            y: 40
+            width: 50
+            height: 35
+
+            name: "LC 3"
+            safeColor: "white"
+            warningColor: "white"
+            criticalColor: "white"
+            sensorValue: frameHandler.sensors.Load_Cell_3.convertedValue
+        }
+    }
+
+    /////////////////////////////////// SENSOR SECTION /////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -736,7 +1312,7 @@ Item {
                 //isOverrideButton: true // make a separate qml file for override if there is too much deviation
 
                 buttonOffName: "OVERRIDE \nOFF"
-                buttonOnName: "OVERRIDE \nON"
+                buttonOnName: "OVERRIDE \nON!!!"
 
                 vehicleStateEngineNode: frameHandler.nodeStatusRenegadeEngine.toString()
                 vehicleStatePropNode: frameHandler.nodeStatusRenegadeProp.toString()
@@ -835,6 +1411,7 @@ Item {
                 }
                 else if (ventButton.state === "on")
                 {
+                    frameHandler.logger.outputLogMessage("Exiting vent, entering standby state...")
                     frameHandler.sendFrame(window.commandFrameID, (3).toString(16)); // enter standby state
                 }
             }
@@ -878,11 +1455,12 @@ Item {
                 autosequenceMouseAreaForMain.onDoubleClicked: {
                     if (passiveAutosequenceButton.state === "off")
                     {
-                        frameHandler.logger.outputLogMessage("Note: this passive state can only be entered via the standby state");
+                        frameHandler.logger.outputLogMessage("Note: this passive state can only" + window.nextLine + " be entered via the standby state");
                         frameHandler.sendFrame(window.commandFrameID, (1).toString(16));
                     }
                     else if ((passiveAutosequenceButton.state === "on"))
                     {
+                        frameHandler.logger.outputLogMessage("Exiting passive, entering standby state...")
                         frameHandler.sendFrame(window.commandFrameID, (3).toString(16)); // enter standby state
                     }
                 }
@@ -914,7 +1492,7 @@ Item {
                     else if ((standbyAutosequenceButton.state === "on"))
                     {
                         // Standby is the base state. It should be set off when it enters another state
-                        frameHandler.logger.outputLogMessage("Standby is base state and can only go to a different state")
+                        frameHandler.logger.outputLogMessage("Standby is base state and can only go to" + window.nextLine + "a different state")
                     }
                 }
             }
@@ -925,6 +1503,22 @@ Item {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    VehicleStateQML {
+        id: propNodeState
+        x: 5
+        y: 5
+
+        nodeName: "Prop Node   "
+        state: frameHandler.nodeStatusRenegadeProp.toString()
+    }
+    VehicleStateQML {
+        id: engineNodeState
+        x: 5
+        y: 25
+
+        nodeName: "Engine Node"
+        state: frameHandler.nodeStatusRenegadeEngine.toString()
+    }
 
 
     Frame {
@@ -936,37 +1530,29 @@ Item {
 
         Text {
             id: text1
-            x: 27
-            y: 168
             color: "#f8f7f7"
-            text: qsTr("STATES AND NODES STUFF")
+            text: qsTr("NODES AND STATES")
+            anchors.top: parent.top
             font.pixelSize: 12
+            horizontalAlignment: Text.AlignHCenter
+            anchors.topMargin: 20
+            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Text {
             id: text2
-            x: 27
-            y: 362
+            y: 307
             color: "#f8f7f7"
             text: qsTr("AUTOSEQUENCE TIMER")
             font.pixelSize: 12
-        }
-    }
-
-    Frame {
-        id: frame8
-        x: 569
-        y: 20
-        width: 129
-        height: 60
-
-        Text {
-            id: text3
-            y: 21
-            color: "#fbfbfb"
-            text: qsTr("High Press Stuff")
-            font.pixelSize: 12
+            anchors.horizontalCenterOffset: 1
             anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        AutosequenceQML {
+            id: autosequenceQML
+            x: 15
+            y: 329
         }
     }
 
@@ -1002,9 +1588,9 @@ Item {
     }
     Rectangle {
         id: tankLox
-        x: 387
+        x: 386
         y: 214
-        width: 28
+        width: 29
         height: 65
         color: "#3c91f4"
         radius: 15
@@ -1013,9 +1599,9 @@ Item {
 
     Rectangle {
         id: tankFuel
-        x: 582
+        x: 581
         y: 214
-        width: 28
+        width: 29
         height: 65
         color: "#ad6e19"
         radius: 15
@@ -1036,7 +1622,7 @@ Item {
     Rectangle {
         id: path2
         x: 279
-        y: 58
+        y: 70
         z:-1
         width: 214
         height: 5
@@ -1046,7 +1632,7 @@ Item {
     Rectangle {
         id: path3
         x: 310
-        y: 58
+        y: 70
         z: -1
         width: 5
         height: 20
@@ -1251,7 +1837,7 @@ Item {
     Text {
         id: shortcutAbort
         x: 335
-        y: 452
+        y: 419
         width: 33
         height: 20
         color: "#ffffff"
@@ -1302,53 +1888,65 @@ Item {
     }
 
     Rectangle {
-        id: mainValvePneumaticSensorRect
-        x: 418
-        y: 443
-        width: 155
-        height: 64
-        color: "#00000000"
-        border.color: "#7e0cf8"
-        border.width: 2
-    }
-
-    Rectangle {
-        id: chamberSensorRect
-        x: 371
-        y: 626
-        width: 138
-        height: 105
-        color: "#00000000"
-        border.color: "#56f247"
-        border.width: 2
-    }
-
-    Rectangle {
         id: engineControllerRect
-        x: 752
+        x: 718
         y: 495
-        width: 105
-        height: 150
+        width: 186
+        height: 225
         color: "#00000000"
         border.color: "#56f247"
         border.width: 2
 
         Label {
             id: engineControllerLabel
-            text: "Engine \nController"
+            text: "Engine Controller \n         Timer"
             color: parent.border.color
             anchors.top: parent.top
+            font.bold: true
+            font.pointSize: 12
             anchors.topMargin: 5
             anchors.horizontalCenter: parent.horizontalCenter
         }
-    }
 
-    SensorQML {
-        id: loxTankSensor1
-        x: 406
-        y: 530
-        width: 50
-        height: 35
+        CountdownTimerQML {
+            id: loxMainValveTimer
+            x: 10
+            y: 60
+
+            name: "Lox MV  "
+            fontColor: "#6fd3f4"
+            timerValue: frameHandler.engineControllers.Engine1.loxMVAutosequenceActuation
+        }
+
+        CountdownTimerQML {
+            id: fuelMainValveTimer
+            x: 10
+            y: 100
+
+            name: "Fuel MV "
+            fontColor: "#ad6e19"
+            timerValue: frameHandler.engineControllers.Engine1.fuelMVAutosequenceActuation
+        }
+
+        CountdownTimerQML {
+            id: igniterTimer1
+            x: 10
+            y: 140
+
+            name: "IGN1      "
+            fontColor: "red"
+            timerValue: frameHandler.engineControllers.Engine1.igniter1Actuation
+        }
+        CountdownTimerQML {
+            id: igniterTimer2
+            x: 10
+            y: 180
+
+            name: "IGN2      "
+            fontColor: "red"
+            timerValue: frameHandler.engineControllers.Engine1.igniter2Actuation
+        }
+
     }
 
 
