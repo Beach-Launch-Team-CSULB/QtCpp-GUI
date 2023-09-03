@@ -3,7 +3,6 @@ import QtQuick.Controls
 //import QtQuick.Controls.Styles
 //import QtQuick.Controls.Material
 import QtQuick.Layouts
-import QtCharts
 import QtMultimedia
 // scrollbars
 

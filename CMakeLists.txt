@@ -32,7 +32,7 @@ qt_add_qml_module(appBLT-Theseus-GUI
     QML_FILES   Main.qml MainPage1.qml MainPage2.qml MainPage3.qml
                 StatusBar.qml
                 GraphQML.qml HPSensorQML.qml SensorQML.qml ValveQML.qml AutosequenceButton.qml
-                Tab.qml CountdownTimerQML.qml AutosequenceQML.qml VehicleStateQML.qml
+                Tab.qml CountdownTimerQML.qml AutosequenceQML.qml VehicleStateQML.qml TankStateQML.qml EngineControllerStateQML.qml
 )
 
 set_target_properties(appBLT-Theseus-GUI PROPERTIES

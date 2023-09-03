@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     qInfo() << "Hello";
     QQmlApplicationEngine engine;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
     QDir appDir {QGuiApplication::applicationDirPath()};
     QThreadPool* pool {QThreadPool::globalInstance()};
@@ -73,6 +74,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("frameHandler", frameHandler);
     engine.rootContext()->setContextProperty("GNC", GNC);
     engine.rootContext()->setContextProperty("logger", frameHandler->logger()); // may not need
+    engine.rootContext()->setContextProperty("qmlEngine", &engine);
+
 
     //engine.rootContext()->setContextProperty("frameHandlerSensors", frameHandler->sensors());
 
@@ -125,6 +128,7 @@ int main(int argc, char *argv[])
     // Starting threads, where the application begins running:
     pool->start(frameHandler);
     pool->start(GNC);
+
 
     // Important
     // Gracefully exits the theads (lol I don't know if this is the correctway)

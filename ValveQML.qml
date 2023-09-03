@@ -5,7 +5,6 @@ Item {
     id: root
     width: 40
     height: width
-    state: "0"
 
     property int valveState: 0 // use Qt.toString(1) to convert a number to string for state
     property color enableOff: "red"

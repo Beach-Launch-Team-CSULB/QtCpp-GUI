@@ -33,6 +33,7 @@ Item {
     visible: true
     //anchors.fill: parent
 
+
     Shortcut{
         sequence: "Alt+Q" // abort
         onActivated:
@@ -44,7 +45,7 @@ Item {
             else if (abortButton.state === "on")
             {
                 //frameHandler.sendFrame(window.commandFrameID, )
-                frameHandler.logger.outputLogMessage("Unabort not allowed. Go to vent!")
+                //frameHandler.logger.outputLogMessage("Unabort not allowed. Go to vent!")
             }
         }
     }
@@ -58,7 +59,7 @@ Item {
             }
             else if (ventButton.state === "on")
             {
-                frameHandler.sendFrame(window.commandFrameID, (3).toString(16)); // enter standby state
+                //frameHandler.sendFrame(window.commandFrameID, (3).toString(16)); // enter standby state
             }
         }
     }
@@ -81,26 +82,6 @@ Item {
     Component.onCompleted: {
         console.log(window.aaaaa)
     }
-    /*
-    Rectangle{
-        id: testRect1
-        width: 200
-        height: 200
-        color: "#cb5555"
-        anchors {
-        }
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        Text{
-            id: testText1
-            text: "Page1"
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-    }
-*/
 
     // do a Grid for GraphQML.qml
 
@@ -400,8 +381,6 @@ Item {
         {
             //console.log(window.aaaaa)
             //window.aaaaa = "BBBBBBBBBBBBBBB"
-
-
             //console.log("ValveID: " + frameHandler.valves.HP.ID)
             /*
               */
@@ -1372,7 +1351,7 @@ Item {
                     else if (abortButton.state === "on")
                     {
                         //frameHandler.sendFrame(window.commandFrameID, )
-                        frameHandler.logger.outputLogMessage("Unabort not allowed. Go to vent!")
+                        //frameHandler.logger.outputLogMessage("Unabort not allowed. Go to vent!")
                     }
                 }
             }
@@ -1411,8 +1390,8 @@ Item {
                 }
                 else if (ventButton.state === "on")
                 {
-                    frameHandler.logger.outputLogMessage("Exiting vent, entering standby state...")
-                    frameHandler.sendFrame(window.commandFrameID, (3).toString(16)); // enter standby state
+                    //frameHandler.logger.outputLogMessage("Exiting vent, entering standby state...")
+                    //frameHandler.sendFrame(window.commandFrameID, (3).toString(16)); // enter standby state
                 }
             }
         }
@@ -1531,9 +1510,9 @@ Item {
         Text {
             id: text1
             color: "#f8f7f7"
-            text: qsTr("NODES AND STATES")
+            text: "SOME OTHER STUFF"
             anchors.top: parent.top
-            font.pixelSize: 12
+            font.pixelSize: 15
             horizontalAlignment: Text.AlignHCenter
             anchors.topMargin: 20
             anchors.horizontalCenter: parent.horizontalCenter
@@ -1692,8 +1671,6 @@ Item {
         anchors.horizontalCenter: path1.horizontalCenter
         z: -1
     }
-
-
     Rectangle {
         id: path9
         x: 398
@@ -1890,16 +1867,16 @@ Item {
     Rectangle {
         id: engineControllerRect
         x: 718
-        y: 495
+        y: 467
         width: 186
-        height: 225
+        height: 253
         color: "#00000000"
         border.color: "#56f247"
         border.width: 2
 
         Label {
             id: engineControllerLabel
-            text: "Engine Controller \n         Timer"
+            text: "Engine Controller 1"
             color: parent.border.color
             anchors.top: parent.top
             font.bold: true
@@ -1911,7 +1888,7 @@ Item {
         CountdownTimerQML {
             id: loxMainValveTimer
             x: 10
-            y: 60
+            y: 90
 
             name: "Lox MV  "
             fontColor: "#6fd3f4"
@@ -1921,7 +1898,7 @@ Item {
         CountdownTimerQML {
             id: fuelMainValveTimer
             x: 10
-            y: 100
+            y: 130
 
             name: "Fuel MV "
             fontColor: "#ad6e19"
@@ -1931,7 +1908,7 @@ Item {
         CountdownTimerQML {
             id: igniterTimer1
             x: 10
-            y: 140
+            y: 170
 
             name: "IGN1      "
             fontColor: "red"
@@ -1940,11 +1917,19 @@ Item {
         CountdownTimerQML {
             id: igniterTimer2
             x: 10
-            y: 180
+            y: 210
 
             name: "IGN2      "
             fontColor: "red"
             timerValue: frameHandler.engineControllers.Engine1.igniter2Actuation
+        }
+
+        EngineControllerStateQML {
+            id: engineControllerStateQML
+            x: 10
+            anchors.top: parent.top
+            anchors.topMargin: 45
+            state: frameHandler.engineControllers.Engine1.state.toString()
         }
 
     }
