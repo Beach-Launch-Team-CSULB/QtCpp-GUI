@@ -516,7 +516,7 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
 
             ///////////////////////////////////
             // States
-            if (PROP_NODE_STATE_ID_OFFSET <= id && id > PROP_NODE_STATE_ID_OFFSET + 10)
+            if (PROP_NODE_STATE_ID_OFFSET <= id && id < PROP_NODE_STATE_ID_OFFSET + 10)
             {
                 //QTimer timeout signal handler ?
                 if (id == PROP_NODE_STATE_ID_OFFSET + engineNode)
@@ -535,38 +535,38 @@ void FrameHandler::onFramesReceived() // In the future, might need to write fram
                 }
             }
 
-            if (AUTOSEQUENCE_ID_OFFSET <= id && id > AUTOSEQUENCE_ID_OFFSET + 10)
+            if (AUTOSEQUENCE_ID_OFFSET <= id && id < AUTOSEQUENCE_ID_OFFSET + 10)
             {
                 emit autosequenceReceivedFD(data);
                 return;
             }
 
             // Sensors
-            if (SENSOR_ID_OFFSET <= id && id > SENSOR_ID_OFFSET + 10)
+            if (SENSOR_ID_OFFSET <= id && id < SENSOR_ID_OFFSET + 10)
             {
                 emit sensorReceivedFD(data);
                 return;
             }
 
-            if (HP_SENSOR_ID_OFFSET <= id && id > HP_SENSOR_ID_OFFSET +10)
+            if (HP_SENSOR_ID_OFFSET <= id && id < HP_SENSOR_ID_OFFSET +10)
             {
                 emit HPSensorReceivedFD(data);
                 return;
             }
 
-            if (HP_OBJECT_ID_OFFSET <= id && id > HP_OBJECT_ID_OFFSET + 10)
+            if (HP_OBJECT_ID_OFFSET <= id && id < HP_OBJECT_ID_OFFSET + 10)
             {
                 emit valveReceivedFD(data);
                 return;
             }
 
-            if (TANK_PRESS_CONTROLLER_ID_OFFSET <= id && id > TANK_PRESS_CONTROLLER_ID_OFFSET + 10)
+            if (TANK_PRESS_CONTROLLER_ID_OFFSET <= id && id < TANK_PRESS_CONTROLLER_ID_OFFSET + 10)
             {
                 emit tankPressControllerReceivedFD(data);
                 return;
             }
 
-            if(ENGINE_CONTROLLER_ID_OFFSET <= id && id > ENGINE_CONTROLLER_ID_OFFSET + 10)
+            if (ENGINE_CONTROLLER_ID_OFFSET <= id && id < ENGINE_CONTROLLER_ID_OFFSET + 10)
             {
                 emit engineControllerReceivedFD(data);
                 return;
@@ -907,6 +907,7 @@ void FrameHandler::run()
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP9"))->setOutputValue(1200 - num*num);
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP10"))->setTimestamp(timeStamp);
             qvariant_cast<HPSensor*>(_HPSensors.value("RenegadePropHP10"))->setOutputValue(1100 - num*num);
+
 
             //_logger.outputLogMessage(QString::number(rawValue));
             timeStamp = timeStamp + 10'000;

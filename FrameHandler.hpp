@@ -1,6 +1,5 @@
 #ifndef FRAMEHANDLER_HPP
 #define FRAMEHANDLER_HPP
-
 #include <QObject>
 #include <QDebug>
 

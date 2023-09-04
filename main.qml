@@ -43,6 +43,7 @@ Window {
     property int main_defaultGraphQMLSensor5: 11
     property int main_defaultGraphQMLSensor6: 12
 
+    property bool musicOnce: true // lol this has to come from the back end
     Shortcut {
         sequence: "1"
         onActivated: {
@@ -53,6 +54,7 @@ Window {
             logFlushButton.visible = true
         }
     }
+
     Shortcut {
         sequence: "2"
         onActivated: {
@@ -94,7 +96,21 @@ Window {
         }
     }
 
-
+    MediaPlayer {
+        id: songPlayer
+        audioOutput: AudioOutput {}
+        source: fileAppDir + "/resources/music/songs/Kou Shi Xin Fei.mp3"
+        Component.onCompleted: {
+            //frameHandler.logger.outputLogMessage(fileAppDir + "/1.mp3")
+            //frameHandler.logger.outputLogMessage("PLAY THE GODDAMN MUSIC")
+            //frameHandler.logger.outputLogMessage(songPlayer.duration)
+            if (musicOnce)
+            {
+                play();
+                //musicOnce = false;
+            }
+        }
+    }
 
 
     Component.onCompleted: { // Top level setup, and signal & handler connections (maybe)
@@ -121,20 +137,20 @@ Window {
             id: tabBar
             x: 590
             y: 0
-            width: 315
+            width: 345
             height: 50
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
 
             TabButton {
                 id: mainPage1Button
-                x: 581
+                x: 0
                 width: 49
                 text: qsTr("Main")
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: -1
-                anchors.topMargin: 0
+                anchors.bottomMargin: -2
+                anchors.topMargin: -3
                 onClicked:
                 {
                     mainLoader.source = "MainPage1.qml"
@@ -146,7 +162,7 @@ Window {
 
             TabButton {
                 id: mainPage2Button
-                x: 629
+                x: 49
                 width: 55
                 text: qsTr("Tanks")
                 anchors.top: parent.top
@@ -165,8 +181,8 @@ Window {
             TabButton {
                 id: mainPage3Button
                 x: 102
-                width: 69
-                text: qsTr("Sensors")
+                width: 99
+                text: "Ext. Sensor View"
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 0
@@ -203,8 +219,9 @@ Window {
 
             TabButton {
                 id: mainPage5Button
-                x: 261
+                x: 290
                 y: -3
+                width: 54
                 text: "Cameras"
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
@@ -220,7 +237,7 @@ Window {
         ToolBar {
             id: toolBar
             y: 26
-            width: 360
+            width: 400
             height: 20
             anchors.left: parent.left
             anchors.bottom: parent.bottom
@@ -373,7 +390,7 @@ Window {
     MenuBar{
         id: mainMenuBar
         y: 0
-        width: 360
+        width: 400
         height: 30
         anchors.left: parent.left
         anchors.leftMargin: 0
@@ -494,6 +511,35 @@ Window {
             }
             Action {
                 text: "Global reset"
+            }
+        }
+
+        Menu {
+            title: "Misc."
+            Action {
+                text: "&New Window"
+                shortcut: "Ctrl+N"
+                onTriggered: {
+                    qmlEngine.load("file:///C:/CodeStuff/Beach Launch Team/BLT-Theseus-GUI/Main.qml")
+                }
+            }
+            Action {
+                text: "play music"
+                onTriggered: {
+                    songPlayer.play()
+                }
+            }
+            Action {
+                text: "pause music"
+                onTriggered: {
+                    songPlayer.pause()
+                }
+            }
+            Action {
+                text: "stop music"
+                onTriggered: {
+                    songPlayer.stop()
+                }
             }
         }
 
