@@ -1444,7 +1444,7 @@ Item {
         id: renPropHP1
         ChartView {
             id: renPropHP1_ChartView
-            title: "Prop High Power 10 (Pressure (psi) vs. Time (s))"
+            title: "Prop High Power 1 (Pressure (psi) vs. Time (s))"
             visible: true
             legend.visible: false
             antialiasing: true
