@@ -26,7 +26,7 @@ Window {
     //ApplicationWindow{
     id: window
     width: 1550//640 // If there is a need to use a bigger monitor, then adjust width and height and position of
-    height: 785 //480 // everything in accordance to that monitor's size
+    height: 790 //480 // everything in accordance to that monitor's size
     visible: true
     title: appDir + " --- Theseus GUI"
 
@@ -126,7 +126,7 @@ Window {
             //GradientStop { position: 1; color: "grey"}
         }
     }
-/*
+    /*
     Material.theme: Material.Dark
     Material.accent: Material.Purple
 */
@@ -229,7 +229,10 @@ Window {
                 anchors.topMargin: -3
                 onClicked:
                 {
-
+                    mainLoader.source = "MainPage5.qml"
+                    logScrollView.visible = false
+                    en_dis_logging_button.visible = false
+                    logFlushButton.visible = false
                 }
             }
         }
@@ -338,6 +341,18 @@ Window {
             //}
         }
 
+    }
+
+    Rectangle {
+        id: rectangleBoundary1
+        x: 0
+        width: 2
+        height: 790
+        color: "#f6e90e"
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.topMargin: 0
+        anchors.leftMargin: 0
     }
 
     Connections {
@@ -560,7 +575,7 @@ Window {
             }
         }
     }
-/*
+    /*
     Button {
         id: resetLogViewButton
         x: 180
@@ -681,6 +696,85 @@ Window {
             anchors.leftMargin: 5
         }
     }
+
+    Rectangle {
+        id: rectangleBoundary2
+        x: 9
+        y: 9
+        width: 2
+        height: 790
+        color: "#f6e90e"
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.rightMargin: 0
+        anchors.topMargin: 0
+    }
+
+    Rectangle {
+        id: rectangle3
+        x: 4
+        y: 377
+        width: 308
+        height: 20
+        visible: logScrollView.visible
+        color: "#ffffff"
+        border.color: "#914040"
+        border.width: 2
+        anchors.left: logScrollView.left
+        anchors.right: logScrollView.right
+        anchors.bottom: logScrollView.top
+        anchors.bottomMargin: 0
+        anchors.leftMargin: 0
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop {
+                position: 0.9
+                color: "#000000"
+            }
+
+            GradientStop {
+                position: 0.5
+                color: "#0000ff"
+            }
+        }
+        Label {
+            y: -16
+            width: 81
+            height: 16
+            visible: true
+            color: "#ff0000"
+            text: qsTr("Log Messages")
+            anchors.fill: parent
+            anchors.leftMargin: 5
+            z: 1
+        }
+    }
+
+    Rectangle {
+        id: rectangleBoundary3
+        y: 7
+        width: 1550
+        height: 2
+        color: "#f6e90e"
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.leftMargin: 0
+        anchors.topMargin: 0
+    }
+
+    Rectangle {
+        id: rectangleBoundary4
+        x: 2
+        y: 9
+        width: 1550
+        height: 2
+        color: "#f6e90e"
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 0
+        anchors.leftMargin: 0
+    }
+
 
 
 
